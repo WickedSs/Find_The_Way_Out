@@ -42,10 +42,10 @@ class Level:
         self.grid, self.queue = [], []
         self.sprites = {}
 
-    def get_sprite(self, position):
+    def get_sprite(self, Position):
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
-        sprite.blit(self.sprite_sheet, (0, 0), (position[0], position[1], TILE_SIZE, TILE_SIZE))
+        sprite.blit(self.sprite_sheet, (0, 0), (Position[0], Position[1], TILE_SIZE, TILE_SIZE))
         return sprite
     
     def process_sides(self, pxarray):
@@ -69,7 +69,7 @@ class Level:
             self.grid.append([])
             for x in range(0, self.sprite_sheet.get_rect().w, TILE_SIZE):
                 self.grid[int(y/TILE_SIZE)].append(Sprite(self.level_sprites, int(x/TILE_SIZE), int(y/TILE_SIZE)))
-                image = self.get_sprite(x, y)
+                image = self.get_sprite((x, y))
                 pxarray = self.convert_pixelarray(pygame.PixelArray(image))
                 if numpy.count_nonzero(pxarray) > 1:
                     self.sprites[sprite_name + str(index)] = {}
@@ -82,13 +82,13 @@ class Level:
                     self.sprites[sprite_name + str(index)]["Sides"][3] = [array[31] for array in pxarray]
                     index += 1
     
-    def get_accurate_sprite(self):
-        neighbors_found = [[] for i in range(4)] # 4 directions ( identified in Settings )
+    def get_accurate_sprite(self, current_sprite):
+        matching_sides = [[] for i in range(4)] # 4 directions ( identified in Settings )
         for direction in DIRECTIONS:
-            x, y = tuple(map(operator.add, (self.x, self.y), direction))
+            x, y = tuple(map(operator.add, (current_sprite.x, current_sprite.y), direction))
             if self.grid[x][y].visited:
-                neighbors_found[DIRECTIONS.index(direction)] = self.sprites[self.grid[x][y].name]["Sides"][ENTROPY_DICT[DIRECTIONS.index(direction)]]
-        return neighbors_found
+                matching_sides[DIRECTIONS.index(direction)] = self.sprites[self.grid[x][y].name]["Sides"][ENTROPY_DICT[DIRECTIONS.index(direction)]]
+        return matching_sides
         
     def generate_level(self):
         # initialize grid and sprites into json array
@@ -100,22 +100,34 @@ class Level:
         # pick a random sprite as the start
         random_sprite = random.choice(list(self.sprites.keys()))
         start_sprite = self.grid[0][0]
-        start_sprite.setImage(self.get_sprite(self.sprites[random_sprite]["Position"]), random_sprite)
+        start_sprite.updateSprite(self.get_sprite(self.sprites[random_sprite]["Position"]), random_sprite)
         start_sprite.visited = True
-        self.queue.append(start_sprite)
+        self.queue.extend(start_sprite.neighbours)
         while len(self.queue) > 0:
-            current_sprite = self.queue.pop(0)
+            x, y = self.queue.pop(0)
+            current_sprite = self.grid[x][y]
             current_sprite.visited = True
             self.queue.extend(current_sprite.neighbours)
             if current_sprite.x == len(self.grid) - 1 and current_sprite.y == len(self.grid[0]) - 1:
                 break
             else:
-                break
+                matching_sides = self.get_accurate_sprite(current_sprite)
+                possible_sprites = []
+                for key in self.sprites.keys():
+                    sides = self.sprites[key]["Sides"]
+                    for i, j in zip(matching_sides, sides):
+                        if matching_sides == sides[ENTROPY_DICT[j]]:
+                            possible_sprites.extend(self.sprites[key]["Position"])
+                
+                print(possible_sprites)
+            
+            sys.exit(1)
+
         
         self.level_ready = True
     
     def run(self, dt):
-        self.generate_map()
+        self.generate_level()
         self.display_surface.fill("black")
         if (self.map_ready):
             self.level_sprites.draw(self.display_surface)
