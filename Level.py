@@ -8,13 +8,11 @@ from Settings import *
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, group, image, x, y, pxarray):
+    def __init__(self, group, image, x, y):
         super().__init__(group)
         self.x, self.y = x, y
         self.image = image
         self.rect = pygame.Rect((x, y), (TILE_SIZE, TILE_SIZE))
-        self.pxarray = pxarray
-        # self.sides = { 0: [], 1: [], 2: [], 3: [] } # top right bottom left
     
 
 
@@ -24,9 +22,16 @@ class Level:
         self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
         self.display_surface = pygame.display.get_surface()
         self.level_sprites = pygame.sprite.Group()
+        self.grid = []
         self.sprites = {}
+        self.BLANK, self.UP, self.RIGHT, self.DOWN, self.LEFT = 0, 1, 2, 3, 4
         
     
+    def setup_grid(self):
+        for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
+            self.grid.append([])
+            self.grid[int(y/TILE_SIZE)].extend(-1 for i in range(int(SCREEN_WIDTH/TILE_SIZE)))                
+
     def get_sprite(self, x, y):
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
@@ -64,15 +69,19 @@ class Level:
                     self.sprites[sprite_name + str(index)]["sides"][2] = pxarray[31]
                     self.sprites[sprite_name + str(index)]["sides"][3] = [array[31] for array in pxarray]
                     index += 1
-        
-        print(self.sprites)           
-        
-        
+                
+    def generate_map(self):
+        self.setup_grid()
+        self.setup_sprites()
+        for y in range(len(self.grid)):
+            for x in range(len(self.grid[y])):
+                if self.grid[y][x] == -1:
+                    return
+        return
     
     def run(self, dt):
+        self.generate_map()
         self.display_surface.fill("black")
-        self.setup_sprites()
-        print(self.level_sprites.sprites()[0].image)
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
         self.level_sprites.empty()
