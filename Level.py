@@ -178,7 +178,7 @@ class Level:
                         # print(matching_sides[i], sides[ENTROPY_DICT[i]], key)
                         possible_sprites.append(key)
             
-            # print(possible_sprites)
+            print(possible_sprites)
             random_pick = random.choice(possible_sprites)
             current_sprite.updateSprite(self.get_sprite(self.sprites[random_pick]["Position"]), random_pick)
             self.level_sprites.add(current_sprite)
@@ -190,7 +190,7 @@ class Level:
                     self.queue.append(neighbour)     
 
             time.sleep(0.5)
-            # self.queue = []
+            self.queue = []
         
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
