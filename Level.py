@@ -166,6 +166,7 @@ class Level:
     def run(self, dt):
         self.display_surface.fill("black")
         if len(self.queue) > 0:
+            identical = 0
             possible_sprites = []
             current_sprite = self.queue.pop(0)
             current_sprite.visited = True
@@ -174,9 +175,10 @@ class Level:
             for key in self.sprites.keys():
                 sides = self.sprites[key]["Sides"]
                 for i in range(len(matching_sides)):
-                    if matching_sides[i] == sides[ENTROPY_DICT[i]] and key != current_sprite.prior.name:
+                    if matching_sides[i] == sides[ENTROPY_DICT[i]] and key not in [current_sprite.prior.name, "Sprite_12"]:
                         # print(matching_sides[i], sides[ENTROPY_DICT[i]], key)
-                        possible_sprites.append(key)
+                        identical += 1
+                        if identical >= 1: possible_sprites.append(key)
             
             print(possible_sprites)
             random_pick = random.choice(possible_sprites)
@@ -190,7 +192,7 @@ class Level:
                     self.queue.append(neighbour)     
 
             time.sleep(0.5)
-            self.queue = []
+            # self.queue = []
         
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
