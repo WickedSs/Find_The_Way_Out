@@ -3,7 +3,7 @@ import queue
 from tracemalloc import start
 from typing import NewType
 from pygame.math import Vector2
-import sys, os, pygame, numpy, random
+import sys, os, pygame, numpy, random, time
 from Settings import *
 import operator
 
@@ -86,8 +86,7 @@ class Level:
         matching_sides = [[] for i in range(4)] # 4 directions ( identified in Settings )
         for direction in DIRECTIONS:
             x, y = tuple(map(operator.add, (current_sprite.x, current_sprite.y), direction))
-            if self.grid[x][y].visited:
-                matching_sides[DIRECTIONS.index(direction)] = self.sprites[self.grid[x][y].name]["Sides"][ENTROPY_DICT[DIRECTIONS.index(direction)]]
+            matching_sides[DIRECTIONS.index(direction)].extend(self.sprites[self.grid[x][y].name]["Sides"][ENTROPY_DICT[DIRECTIONS.index(direction)]])
         return matching_sides
         
     def generate_level(self):
@@ -104,10 +103,12 @@ class Level:
         start_sprite.visited = True
         self.queue.extend(start_sprite.neighbours)
         while len(self.queue) > 0:
-            x, y = self.queue.pop(0)
+            x, y = self.queue[0]
+            del self.queue[0]
             current_sprite = self.grid[x][y]
             current_sprite.visited = True
-            self.queue.extend(current_sprite.neighbours)
+            self.queue.extend(neighbour for neighbour in current_sprite.neighbours if self.grid[neighbour[0]][neighbour[1]].visited == False)
+            print(current_sprite.x, current_sprite.y, len(self.queue))
             if current_sprite.x == len(self.grid) - 1 and current_sprite.y == len(self.grid[0]) - 1:
                 break
             else:
@@ -115,13 +116,15 @@ class Level:
                 possible_sprites = []
                 for key in self.sprites.keys():
                     sides = self.sprites[key]["Sides"]
-                    for i, j in zip(matching_sides, sides):
-                        if matching_sides == sides[ENTROPY_DICT[j]]:
-                            possible_sprites.extend(self.sprites[key]["Position"])
+                    for i in range(len(matching_sides)):
+                        if matching_sides[i] == sides[ENTROPY_DICT[i]]:
+                            possible_sprites.append(key)
                 
-                print(possible_sprites)
+                random_pick = random.choice(possible_sprites)
+                current_sprite.updateSprite(self.get_sprite(self.sprites[random_pick]["Position"]), random_pick)
             
-            sys.exit(1)
+            print(len(self.queue))
+            
 
         
         self.level_ready = True
