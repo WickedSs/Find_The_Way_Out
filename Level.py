@@ -10,29 +10,34 @@ import operator
 
 
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
+GRID = []
 
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         self.x, self.y = x, y
         self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill("green")
-        self.rect = pygame.Rect((self.x, self.y), (TILE_SIZE, TILE_SIZE))
+        self.image.fill(random.choice(["green", "red", "blue"]))
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.x, self.y
         self.queued = False
         self.visited = False
         self.neighbours = []
-        self.setNeighbours()
 
-    def setNeighbours(self):
-        for direction in DIRECTIONS:
-            new_tuple = tuple(map(operator.add, (self.x, self.y), direction))
-            if new_tuple[0] >= 0 and new_tuple[0] < SCREEN_WIDTH and new_tuple[1] >= 0 and new_tuple[1] < SCREEN_HEIGHT:
-                self.neighbours.append(new_tuple)
-            
+    def set_neighbours(self):
+        x, y = int(self.x / TILE_SIZE), int(self.y / TILE_SIZE)
+        if x > 0:
+            self.neighbours.append(GRID[y][x - 1])
+        if x < (SCREEN_WIDTH / TILE_SIZE) - 1:
+            self.neighbours.append(GRID[y][x + 1])
+        if y > 0:
+            self.neighbours.append(GRID[y - 1][x])
+        if y < (SCREEN_HEIGHT  / TILE_SIZE) - 1:
+            self.neighbours.append(GRID[y + 1][x])
+                
     def updateSprite(self, image, name):
         self.name = name
         self.image = image
-        self.rect = pygame.Rect((self.x, self.y), (TILE_SIZE, TILE_SIZE))
     
 
 
@@ -42,8 +47,9 @@ class Level:
         self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
         self.display_surface = pygame.display.get_surface()
         self.level_sprites = pygame.sprite.Group()
-        self.grid, self.queue = [], []
-        self.sprites = {}
+        self.queue, self.sprites = [], {}
+        self.initialize_generation()
+        
 
     def get_sprite(self, Position):
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
@@ -68,11 +74,16 @@ class Level:
     
     def initialize_grid(self):
         for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
-            self.grid.append([])
+            GRID.append([])
             for x in range(0, SCREEN_WIDTH, TILE_SIZE):
-                sprite = Sprite(int(x/TILE_SIZE), int(y/TILE_SIZE))
+                sprite = Sprite(x, y)
                 self.level_sprites.add(sprite)
-                self.grid[int(y/TILE_SIZE)].append(sprite)
+                GRID[int(y/TILE_SIZE)].append(sprite)
+        
+        for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
+            for x in range(0, SCREEN_WIDTH, TILE_SIZE):
+                GRID[int(y/TILE_SIZE)][int(x/TILE_SIZE)].set_neighbours()
+                print([int(y/TILE_SIZE)], [int(x/TILE_SIZE)], GRID[int(y/TILE_SIZE)][int(x/TILE_SIZE)].neighbours)
 
         
     def initialize_sprites(self):
@@ -94,16 +105,17 @@ class Level:
     
     def get_accurate_sprite(self, current_sprite):
         matching_sides = [[] for i in range(4)] # 4 directions ( identified in Settings )
+        current_x, current_y = int(current_sprite.x / TILE_SIZE), int(current_sprite.y / TILE_SIZE)
         for direction in DIRECTIONS:
-            x, y = tuple(map(operator.add, (current_sprite.x, current_sprite.y), direction))
+            x, y = tuple(map(operator.add, (current_x, current_y), direction))
             try:
-                if self.grid[y][x].visited:
-                    matching_sides[DIRECTIONS.index(direction)] = self.sprites[self.grid[x][y].name]["Sides"][ENTROPY_DICT[DIRECTIONS.index(direction)]]
+                if GRID[y][x].visited:
+                    matching_sides[DIRECTIONS.index(direction)] = self.sprites[GRID[x][y].name]["Sides"][ENTROPY_DICT[DIRECTIONS.index(direction)]]
             except Exception as e:
                 pass
         return matching_sides
         
-    def generate_level(self):
+    def initialize_generation(self):
         # initialize grid and sprites into json array
         self.initialize_grid()
         self.initialize_sprites()
@@ -111,18 +123,19 @@ class Level:
         # set drawing of the level to False until its ready and all sprites are generated
         self.level_ready = False
         
-        # pick a random sprite as the start
+        # pick a random sprite as a start
         random_sprite = random.choice(list(self.sprites.keys()))
-        start_sprite = self.grid[0][0]
+        start_sprite = GRID[0][0]
         start_sprite.updateSprite(self.get_sprite(self.sprites[random_sprite]["Position"]), random_sprite)
         self.level_sprites.add(start_sprite)
         start_sprite.visited = True
         self.queue.extend(start_sprite.neighbours)
+    
+    def run(self, dt):
+        self.display_surface.fill("black")
         if len(self.queue) > 0:
             possible_sprites = []
-            x, y = self.queue[0]
-            del self.queue[0]
-            current_sprite = self.grid[y][x]
+            current_sprite = self.queue.pop(0)
             current_sprite.visited = True
             matching_sides = self.get_accurate_sprite(current_sprite)
             for key in self.sprites.keys():
@@ -131,23 +144,19 @@ class Level:
                     if matching_sides[i] == sides[ENTROPY_DICT[i]]:
                         possible_sprites.append(key)
             
-            random_pick = random.choice(possible_sprites)
-            current_sprite.updateSprite(self.get_sprite(self.sprites[random_pick]["Position"]), random_pick)
-            self.level_sprites.add(current_sprite)
-            
-            if len(current_sprite.neighbours) > 0:
-                self.queue.extend(neighbour for neighbour in current_sprite.neighbours if self.grid[neighbour[1]][neighbour[0]].visited == False)
+            if len(possible_sprites) > 0:
+                random_pick = random.choice(possible_sprites)
+                current_sprite.updateSprite(self.get_sprite(self.sprites[random_pick]["Position"]), random_pick)
+                self.level_sprites.add(current_sprite)
 
-            print(current_sprite.x, current_sprite.y, len(self.queue))
-            time.sleep(1)         
+                for neighbour in current_sprite.neighbours:
+                    if not neighbour.queued:
+                        neighbour.queued = True
+                        self.queue.append(neighbour)
+                    
+                    
 
         
-        self.level_ready = True
-    
-    def run(self, dt):
-        self.generate_level()
-        self.display_surface.fill("black")
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
-        self.level_sprites.empty()
     
