@@ -132,16 +132,16 @@ class Level:
                     self.sprites[sprite_name + str(index)]["Info"]["Name"] = sprite_name + str(index)
                     self.sprites[sprite_name + str(index)]["Sides"] = {}
                     already_added.append(pxarray)
-                index += 1
+                    index += 1
         
-        print(len(list(self.sprites.keys())))
 
-        sprite_name, index = "Sprite_", 0
+        sprite_name, index, array = "Sprite_", 0, list(self.sprites.keys())
         for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
             for x in range(0, self.sprite_sheet_rect.width, TILE_SIZE):
-                self.sprites[sprite_name + str(index)]["Sides"] = self.get_sprite_neighbours(x, y)
-                # print(sprite_name + str(index), self.sprites[sprite_name + str(index)]["Sides"])
-                index += 1
+                if sprite_name in array:
+                    self.sprites[sprite_name + str(index)]["Sides"] = self.get_sprite_neighbours(x, y)
+                    # print(sprite_name + str(index), self.sprites[sprite_name + str(index)]["Sides"])
+                    index += 1
     
     def get_accurate_sprite(self, current_sprite):
         neighbours_found = [None for i in range(4)] # 4 directions ( identified in Settings )
@@ -191,6 +191,7 @@ class Level:
             neighbours_found = self.get_accurate_sprite(current_sprite)
             for neighbour_exist in neighbours_found:
                 if neighbour_exist and neighbour_exist.name:
+                    print(self.sprites[neighbour_exist.name]["Sides"], self.sprites[neighbour_exist.name]["Sides"])
                     possible_sprites.extend(self.sprites[neighbour_exist.name]["Sides"][ENTROPY_DICT[neighbours_found.index(neighbour_exist)]])
             
             if possible_sprites:
