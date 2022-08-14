@@ -1,6 +1,7 @@
 from itertools import count
 import queue
 from tracemalloc import start
+from turtle import pos
 from typing import NewType
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string
@@ -14,18 +15,16 @@ GRID = []
 VISITED = []
 
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, x, y, name, image, sprites):
+    def __init__(self, x, y):
         super().__init__()
-        self.sprites = sprites
         self.x, self.y = x, y
-        self.name = name
-        self.image = image
+        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
+        self.image.fill(random.choice(["green", "black", "red"]))
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x, self.y
         self.queued = False
         self.visited = False
-        self.neighbours, self.next_sprites = {0 : [], 1 : [], 2 : [], 3 : []}
-        self.sides = self.sprites[self.name]["Sides"]
+        self.neighbours, self.next_sprites = [], {0 : [], 1 : [], 2 : [], 3 : []}
         self.color_labels = {}
 
     def set_neighbours(self):
@@ -41,13 +40,6 @@ class Sprite(pygame.sprite.Sprite):
 
         if y < (SCREEN_HEIGHT  / TILE_SIZE) - 1:
             self.neighbours.append(GRID[y + 1][x])
-
-    def setPossibleNeighbours(self):
-        for key in self.sprites.keys():
-            sides = self.sprites[key]["Sides"]
-            for i in range(len(sides)):
-                if self.sides[i] == sides[i]:
-                    self.next_sprites[i].append(key)
     
     def updateSprite(self, image, name):
         self.name = name
@@ -60,8 +52,11 @@ class Sprite(pygame.sprite.Sprite):
 
 class Level:
     spritesheet_filename = os.path.join(ROOT, "Assets/Spritesheet.png")
+    example_file_01 = os.path.join(ROOT, "Assets\Example-01.png")
     def __init__(self):
-        self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
+        # self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
+        self.sprite_sheet = pygame.image.load(self.example_file_01).convert_alpha()
+        self.sprite_sheet_rect = self.sprite_sheet.get_rect()
         self.display_surface = pygame.display.get_surface()
         self.level_sprites = pygame.sprite.Group()
         self.queue, self.sprites = [], {}
@@ -69,10 +64,10 @@ class Level:
         self.initialize_generation()
         
 
-    def get_sprite(self, Position):
+    def get_sprite(self, x, y):
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
-        sprite.blit(self.sprite_sheet, (0, 0), (Position[0], Position[1], TILE_SIZE, TILE_SIZE))
+        sprite.blit(self.sprite_sheet, (0, 0), (x, y, TILE_SIZE, TILE_SIZE))
         return sprite
     
     def process_sides(self, pxarray):
@@ -101,49 +96,65 @@ class Level:
         for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
             for x in range(0, SCREEN_WIDTH, TILE_SIZE):
                 GRID[int(y/TILE_SIZE)][int(x/TILE_SIZE)].set_neighbours()
-                GRID[int(y/TILE_SIZE)][int(x/TILE_SIZE)].setPossibleNeighbours
-                # print([int(y/TILE_SIZE)], [int(x/TILE_SIZE)], GRID[int(y/TILE_SIZE)][int(x/TILE_SIZE)].neighbours)
 
+    def get_sprite_neighbours(self, x, y):
+        x, y, neighbours = int(x / TILE_SIZE), int(y / TILE_SIZE), {0 : [], 1 : [], 2 : [], 3 : []}
+        sprites_list = list(self.sprites.keys())
+        if x > 0:
+            working_x, working_y = x - 1, int(y * self.sprite_sheet_rect.width / TILE_SIZE)
+            neighbours[3].append(sprites_list[working_x + working_y])
         
+        if x < (self.sprite_sheet_rect.width / TILE_SIZE) - 1:
+            working_x, working_y = x + 1, int(y * self.sprite_sheet_rect.width / TILE_SIZE)
+            neighbours[1].append(sprites_list[working_x + working_y])
+        
+        if y > 0:
+            working_x, working_y = x, int((y - 1) * self.sprite_sheet_rect.width / TILE_SIZE)
+            neighbours[0].append(sprites_list[working_x + working_y])
+
+        if y < (self.sprite_sheet_rect.height  / TILE_SIZE) - 1:
+            working_x, working_y = x, int((y + 1) * self.sprite_sheet_rect.width / TILE_SIZE)
+            neighbours[2].append(sprites_list[working_x + working_y])
+        
+        return neighbours
+    
     def initialize_sprites(self):
-        sprite_name, index, constraints = "Sprite_", 0, SPRITESHEET_LAYOUT[self.layout_in_use]["Constraints"]
-        for y in range(0, constraints["Height"], TILE_SIZE):
-            for x in range(0, constraints["Width"], TILE_SIZE):
-                image = self.get_sprite((x, y))
-                pxarray = self.convert_pixelarray(pygame.PixelArray(image))
-                if numpy.count_nonzero(pxarray) > 1:
-                    self.sprites[sprite_name + str(index)] = {}
-                    self.sprites[sprite_name + str(index)]["Position"] = None
-                    self.sprites[sprite_name + str(index)]["Sides"] = []
-                    self.sprites[sprite_name + str(index)]["Position"] = (x, y)
-                    self.sprites[sprite_name + str(index)]["Sides"].append(pxarray[0])
-                    self.sprites[sprite_name + str(index)]["Sides"].append([array[31] for array in pxarray])
-                    self.sprites[sprite_name + str(index)]["Sides"].append(pxarray[31])
-                    self.sprites[sprite_name + str(index)]["Sides"].append([array[0] for array in pxarray])
-                    index += 1
+        sprite_name, index = "Sprite_", 0
+        # 15 * 9
+        for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
+            for x in range(0, self.sprite_sheet_rect.width, TILE_SIZE):
+                image = self.get_sprite(x, y)
+                self.sprites[sprite_name + str(index)] = {}
+                self.sprites[sprite_name + str(index)]["Info"] = {"Sprite" : None, "Name" : None}
+                self.sprites[sprite_name + str(index)]["Info"]["Sprite"] = image
+                self.sprites[sprite_name + str(index)]["Info"]["Name"] = sprite_name + str(index)
+                self.sprites[sprite_name + str(index)]["Sides"] = {}
+                index += 1
+
+        sprite_name, index = "Sprite_", 0
+        for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
+            for x in range(0, self.sprite_sheet_rect.width, TILE_SIZE):
+                self.sprites[sprite_name + str(index)]["Sides"] = self.get_sprite_neighbours(x, y)
+                # print(sprite_name + str(index), self.sprites[sprite_name + str(index)]["Sides"])
+                index += 1
     
     def get_accurate_sprite(self, current_sprite):
-        matching_sides = [[] for i in range(4)] # 4 directions ( identified in Settings )
+        neighbours_found = [None for i in range(4)] # 4 directions ( identified in Settings )
         x, y = int(current_sprite.x / TILE_SIZE), int(current_sprite.y / TILE_SIZE)
-        # xSprite, ySprite = int(current_sprite.x / TILE_SIZE), int(current_sprite.y / TILE_SIZE)
-        # xPrior, yPrior = int(current_sprite.prior.x / TILE_SIZE), int(current_sprite.prior.y / TILE_SIZE)
-        # direction = tuple(map(operator.sub, (xSprite, ySprite), (xPrior, yPrior)))
-        # direction_index = DIRECTIONS.index(direction)
-        # matching_sides[direction_index] = self.sprites[current_sprite.prior.name]["Sides"][ENTROPY_DICT[direction_index]]
 
         if x > 0 and GRID[y][x - 1].visited:
-            matching_sides[3] = self.sprites[GRID[y][x - 1].name]["Sides"][ENTROPY_DICT[3]]
+            neighbours_found[3] = GRID[y][x - 1]
 
         if x < (SCREEN_WIDTH / TILE_SIZE) - 1 and GRID[y][x + 1].visited:
-            matching_sides[1] = self.sprites[GRID[y][x + 1].name]["Sides"][ENTROPY_DICT[1]]
+            neighbours_found[1] = GRID[y][x + 1]
 
         if y > 0 and GRID[y - 1][x].visited:
-            matching_sides[0] = self.sprites[GRID[y - 1][x].name]["Sides"][ENTROPY_DICT[0]]
+            neighbours_found[0] = GRID[y - 1][x]
 
         if y < (SCREEN_HEIGHT  / TILE_SIZE) - 1 and GRID[y + 1][x].visited:
-            matching_sides[2] = self.sprites[GRID[y + 1][x].name]["Sides"][ENTROPY_DICT[2]]
+            neighbours_found[2] = GRID[y + 1][x]
             
-        return matching_sides
+        return neighbours_found
         
     def initialize_generation(self):
         # initialize grid and sprites into json array
@@ -154,55 +165,41 @@ class Level:
         self.level_ready = False
         
         # # pick a random sprite as a start
-        # random_sprite = "Sprite_4"
-        # start_sprite = GRID[0][0]
-        # start_sprite.updateSprite(self.get_sprite(self.sprites[random_sprite]["Position"]), random_sprite)
-        # self.level_sprites.add(start_sprite)
-        # start_sprite.visited = True
-        # start_sprite.queued = True
-        # # print("x: ", int(start_sprite.x / TILE_SIZE), "y: ", int(start_sprite.y / TILE_SIZE), "Queue: ", [queue.getPosition() for queue in self.queue])
-        # for neighbour in start_sprite.neighbours:
-        #     # print("Neighbours: ", int(neighbour.x / TILE_SIZE), int(neighbour.y / TILE_SIZE), neighbour.queued)
-        #     neighbour.queued = True
-        #     neighbour.prior = start_sprite
-        #     self.queue.append(neighbour)
+        random_sprite = random.choice(list(self.sprites.keys()))
+        start_sprite = GRID[random.randrange(0, (SCREEN_HEIGHT / TILE_SIZE))][random.randrange(0, (SCREEN_WIDTH / TILE_SIZE))]
+        start_sprite.updateSprite(self.sprites[random_sprite]["Info"]["Sprite"], random_sprite)
+        self.level_sprites.add(start_sprite)
+        start_sprite.visited = True
+        start_sprite.queued = True
+        for neighbour in start_sprite.neighbours:
+            neighbour.queued = True
+            self.queue.append(neighbour)
         
-        # print(GRID[0][1].prior.x, GRID[1][0].prior.x)
     
     
     def run(self, dt):
         self.display_surface.fill("black")
         if len(self.queue) > 0:
-            identical = True
             possible_sprites = []
             current_sprite = self.queue.pop(0)
             current_sprite.visited = True
-            # print("x: ", int(current_sprite.x / TILE_SIZE), "y: ", int(current_sprite.y / TILE_SIZE), "Queue: ", [queue.getPosition() for queue in self.queue])
-            matching_sides = self.get_accurate_sprite(current_sprite)
-            for key in self.sprites.keys():
-                identical = True
-                sides = self.sprites[key]["Sides"]
-                for i in range(len(matching_sides)):
-                    if len(matching_sides[i]) != 0:
-                        if matching_sides[i] != sides[ENTROPY_DICT[i]]:
-                            # print(matching_sides[i], sides[ENTROPY_DICT[i]], key)
-                            identical = False
-                                        
-                if identical and key not in [current_sprite.prior.name, "Sprite_12"]: 
-                    possible_sprites.append(key)
+            neighbours_found = self.get_accurate_sprite(current_sprite)
+            for neighbour_exist in neighbours_found:
+                if neighbour_exist and neighbour_exist.visited:
+                    possible_sprites.extend(self.sprites[neighbour_exist.name]["Sides"][ENTROPY_DICT[neighbours_found.index(neighbour_exist)]])
             
-            print(possible_sprites)
-            random_pick = random.choice(possible_sprites)
-            current_sprite.updateSprite(self.get_sprite(self.sprites[random_pick]["Position"]), random_pick)
-            self.level_sprites.add(current_sprite)
+            if possible_sprites:
+                print([neighbour.name for neighbour in neighbours_found if neighbour] ,possible_sprites, current_sprite.x, current_sprite.y)
+                random_pick = random.choice(possible_sprites)
+                current_sprite.updateSprite(self.sprites[random_pick]["Info"]["Sprite"], self.sprites[random_pick]["Info"]["Name"])
+                self.level_sprites.add(current_sprite)
 
-            for neighbour in current_sprite.neighbours:
-                if not neighbour.queued:
-                    neighbour.queued = True
-                    neighbour.prior = current_sprite
-                    self.queue.append(neighbour)     
+                for neighbour in current_sprite.neighbours:
+                    if not neighbour.queued:
+                        neighbour.queued = True
+                        self.queue.append(neighbour)     
 
-            time.sleep(0.5)
+            # time.sleep(0.5)
             # self.queue = []
         
         self.level_sprites.draw(self.display_surface)
