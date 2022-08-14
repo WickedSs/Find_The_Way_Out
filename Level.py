@@ -17,7 +17,7 @@ VISITED = []
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.x, self.y = x, y
+        self.x, self.y, self.name = x, y, None
         self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
         self.image.fill(random.choice(["green", "black", "red"]))
         self.rect = self.image.get_rect()
@@ -119,17 +119,22 @@ class Level:
         return neighbours
     
     def initialize_sprites(self):
-        sprite_name, index = "Sprite_", 0
+        sprite_name, index, already_added = "Sprite_", 0, []
         # 15 * 9
         for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
             for x in range(0, self.sprite_sheet_rect.width, TILE_SIZE):
                 image = self.get_sprite(x, y)
-                self.sprites[sprite_name + str(index)] = {}
-                self.sprites[sprite_name + str(index)]["Info"] = {"Sprite" : None, "Name" : None}
-                self.sprites[sprite_name + str(index)]["Info"]["Sprite"] = image
-                self.sprites[sprite_name + str(index)]["Info"]["Name"] = sprite_name + str(index)
-                self.sprites[sprite_name + str(index)]["Sides"] = {}
+                pxarray = self.convert_pixelarray(pygame.PixelArray(image))
+                if pxarray not in already_added:
+                    self.sprites[sprite_name + str(index)] = {}
+                    self.sprites[sprite_name + str(index)]["Info"] = {"Sprite" : None, "Name" : None}
+                    self.sprites[sprite_name + str(index)]["Info"]["Sprite"] = image
+                    self.sprites[sprite_name + str(index)]["Info"]["Name"] = sprite_name + str(index)
+                    self.sprites[sprite_name + str(index)]["Sides"] = {}
+                    already_added.append(pxarray)
                 index += 1
+        
+        print(len(list(self.sprites.keys())))
 
         sprite_name, index = "Sprite_", 0
         for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
@@ -185,13 +190,14 @@ class Level:
             current_sprite.visited = True
             neighbours_found = self.get_accurate_sprite(current_sprite)
             for neighbour_exist in neighbours_found:
-                if neighbour_exist and neighbour_exist.visited:
+                if neighbour_exist and neighbour_exist.name:
                     possible_sprites.extend(self.sprites[neighbour_exist.name]["Sides"][ENTROPY_DICT[neighbours_found.index(neighbour_exist)]])
             
             if possible_sprites:
                 print([neighbour.name for neighbour in neighbours_found if neighbour] ,possible_sprites, current_sprite.x, current_sprite.y)
                 random_pick = random.choice(possible_sprites)
                 current_sprite.updateSprite(self.sprites[random_pick]["Info"]["Sprite"], self.sprites[random_pick]["Info"]["Name"])
+                print(random_pick, current_sprite.name)
                 self.level_sprites.add(current_sprite)
 
                 for neighbour in current_sprite.neighbours:
