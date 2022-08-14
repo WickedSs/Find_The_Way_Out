@@ -17,7 +17,7 @@ VISITED = []
 class Sprite(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.x, self.y, self.name = x, y, None
+        self.x, self.y, index = x, y, None
         self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
         self.image.fill(random.choice(["green", "black", "red"]))
         self.rect = self.image.get_rect()
@@ -25,7 +25,6 @@ class Sprite(pygame.sprite.Sprite):
         self.queued = False
         self.visited = False
         self.neighbours, self.next_sprites = [], {0 : [], 1 : [], 2 : [], 3 : []}
-        self.color_labels = {}
 
     def set_neighbours(self):
         x, y = int(self.x / TILE_SIZE), int(self.y / TILE_SIZE)
@@ -41,9 +40,9 @@ class Sprite(pygame.sprite.Sprite):
         if y < (SCREEN_HEIGHT  / TILE_SIZE) - 1:
             self.neighbours.append(GRID[y + 1][x])
     
-    def updateSprite(self, image, name):
-        self.name = name
+    def updateSprite(self, image, index):
         self.image = image
+        self.index = index
 
     def getPosition(self):
         return (int(self.x/TILE_SIZE), int(self.y/TILE_SIZE))
@@ -64,7 +63,8 @@ class Level:
         self.initialize_generation()
         
 
-    def get_sprite(self, x, y):
+    def get_sprite(self, position):
+        x, y = position
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
         sprite.blit(self.sprite_sheet, (0, 0), (x, y, TILE_SIZE, TILE_SIZE))
@@ -99,49 +99,41 @@ class Level:
 
     def get_sprite_neighbours(self, x, y):
         x, y, neighbours = int(x / TILE_SIZE), int(y / TILE_SIZE), {0 : [], 1 : [], 2 : [], 3 : []}
-        sprites_list = list(self.sprites.keys())
         if x > 0:
             working_x, working_y = x - 1, int(y * self.sprite_sheet_rect.width / TILE_SIZE)
-            neighbours[3].append(sprites_list[working_x + working_y])
+            neighbours[3].append((working_x, working_y))
         
         if x < (self.sprite_sheet_rect.width / TILE_SIZE) - 1:
             working_x, working_y = x + 1, int(y * self.sprite_sheet_rect.width / TILE_SIZE)
-            neighbours[1].append(sprites_list[working_x + working_y])
+            neighbours[1].append((working_x, working_y))
         
         if y > 0:
             working_x, working_y = x, int((y - 1) * self.sprite_sheet_rect.width / TILE_SIZE)
-            neighbours[0].append(sprites_list[working_x + working_y])
+            neighbours[0].append((working_x, working_y))
 
         if y < (self.sprite_sheet_rect.height  / TILE_SIZE) - 1:
             working_x, working_y = x, int((y + 1) * self.sprite_sheet_rect.width / TILE_SIZE)
-            neighbours[2].append(sprites_list[working_x + working_y])
+            neighbours[2].append((working_x, working_y))
         
         return neighbours
     
     def initialize_sprites(self):
         sprite_name, index, already_added = "Sprite_", 0, []
-        # 15 * 9
         for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
             for x in range(0, self.sprite_sheet_rect.width, TILE_SIZE):
-                image = self.get_sprite(x, y)
+                image = self.get_sprite((x, y))
                 pxarray = self.convert_pixelarray(pygame.PixelArray(image))
                 if pxarray not in already_added:
                     self.sprites[sprite_name + str(index)] = {}
-                    self.sprites[sprite_name + str(index)]["Info"] = {"Sprite" : None, "Name" : None}
-                    self.sprites[sprite_name + str(index)]["Info"]["Sprite"] = image
+                    self.sprites[sprite_name + str(index)]["Info"] = { "Name" : None, "Coords" : () }
                     self.sprites[sprite_name + str(index)]["Info"]["Name"] = sprite_name + str(index)
+                    self.sprites[sprite_name + str(index)]["Info"]["Coords"] = (x, y) 
                     self.sprites[sprite_name + str(index)]["Sides"] = {}
+                    self.sprites[sprite_name + str(index)]["Sides"] = self.get_sprite_neighbours(x, y)
                     already_added.append(pxarray)
                     index += 1
         
-
-        sprite_name, index, array = "Sprite_", 0, list(self.sprites.keys())
-        for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
-            for x in range(0, self.sprite_sheet_rect.width, TILE_SIZE):
-                if sprite_name in array:
-                    self.sprites[sprite_name + str(index)]["Sides"] = self.get_sprite_neighbours(x, y)
-                    # print(sprite_name + str(index), self.sprites[sprite_name + str(index)]["Sides"])
-                    index += 1
+        print(len(self.sprites))
     
     def get_accurate_sprite(self, current_sprite):
         neighbours_found = [None for i in range(4)] # 4 directions ( identified in Settings )
@@ -171,8 +163,9 @@ class Level:
         
         # # pick a random sprite as a start
         random_sprite = random.choice(list(self.sprites.keys()))
+        index = list(self.sprites.keys()).index(random_sprite)
         start_sprite = GRID[random.randrange(0, (SCREEN_HEIGHT / TILE_SIZE))][random.randrange(0, (SCREEN_WIDTH / TILE_SIZE))]
-        start_sprite.updateSprite(self.sprites[random_sprite]["Info"]["Sprite"], random_sprite)
+        start_sprite.updateSprite(self.get_sprite(self.sprites[random_sprite]["Info"]["Coords"]), index)
         self.level_sprites.add(start_sprite)
         start_sprite.visited = True
         start_sprite.queued = True
@@ -190,8 +183,8 @@ class Level:
             current_sprite.visited = True
             neighbours_found = self.get_accurate_sprite(current_sprite)
             for neighbour_exist in neighbours_found:
-                if neighbour_exist and neighbour_exist.name:
-                    print(self.sprites[neighbour_exist.name]["Sides"], self.sprites[neighbour_exist.name]["Sides"])
+                if neighbour_exist:
+                    print(self.sprites["Sprite_" + str(neighbour_exist.index)]["Sides"], self.sprites[neighbour_exist.name]["Sides"])
                     possible_sprites.extend(self.sprites[neighbour_exist.name]["Sides"][ENTROPY_DICT[neighbours_found.index(neighbour_exist)]])
             
             if possible_sprites:
