@@ -57,7 +57,14 @@ class Level:
         self.queue, self.sprites = [], [[None for j in range(15)] for i in range(9)]
         self.layout_in_use = "First_Layout"
         self.initialize_generation()
-        
+    
+    def index_2d(self, data, search):
+        print("Search: ", search)
+        for y in range(len(data)):
+            for x in range(len(data[y])):
+                if data[y][x] and data[y][x][3].index(search):
+                    return x, y
+        return -1, -1
 
     def get_sprite(self, position):
         x, y = position
@@ -120,7 +127,7 @@ class Level:
                 image = self.get_sprite((x, y))
                 pxarray = self.convert_pixelarray(pygame.PixelArray(image))
                 if pxarray not in chain(*already_added):
-                    self.sprites[int(y/TILE_SIZE)][int(x/TILE_SIZE)] = [sprite_name + str(index), (x, y) , { 0 : [], 1 : [], 2 : [], 3 : [] } ]
+                    self.sprites[int(y/TILE_SIZE)][int(x/TILE_SIZE)] = [sprite_name + str(index), (x, y) , { 0 : [], 1 : [], 2 : [], 3 : [] }, [(x, y)]]
                     neighbours = self.get_sprite_neighbours(x, y, self.sprites[int(y/TILE_SIZE)][int(x/TILE_SIZE)][2])
                     self.sprites[int(y/TILE_SIZE)][int(x/TILE_SIZE)][2] = neighbours
                     already_added[int(y/TILE_SIZE)][int(x/TILE_SIZE)] = pxarray
@@ -130,6 +137,7 @@ class Level:
                     index_row = [already_added.index(row) for row in already_added if pxarray in row][0]
                     index_column = [row.index(pxarray) for row in already_added if pxarray in row][0]
                     self.sprites[index_row][index_column][2] = self.get_sprite_neighbours(x, y, self.sprites[index_row][index_column][2])
+                    self.sprites[index_row][index_column][3].append((x, y))
         
         
     
@@ -185,21 +193,23 @@ class Level:
             for neighbour_exist in neighbours_found:
                 if neighbour_exist:
                     y, x = neighbour_exist.index
-                    possible_sprites.extend(self.sprites[y][x][3][ENTROPY_DICT[neighbours_found.index(neighbour_exist)]])
+                    possible_sprites.extend(self.sprites[y][x][2][ENTROPY_DICT[neighbours_found.index(neighbour_exist)]])
             
-            print("Queue: ", len(self.queue))
+            print("Queue: ", len(self.queue), possible_sprites)
             if len(possible_sprites) > 0:
                 random_pick = random.choice(possible_sprites)
-                random_pick = tuple(map(operator.mul, random_pick, (TILE_SIZE, TILE_SIZE)))
-                selected_sprite = [sprite for sprite in list(self.sprites.keys()) if self.sprites[sprite]["Info"]["Coords"] == random_pick]
-                picked = random.choice(selected_sprite) if len(selected_sprite) > 1 else selected_sprite[0] if len(selected_sprite) == 1 else None
-                current_sprite.updateSprite(self.get_sprite(self.sprites[picked]["Info"]["Coords"]), list(self.sprites.keys()).index(picked))
-                self.level_sprites.add(current_sprite)
+                index = self.index_2d(self.sprites, random_pick)
+                print(index)
+                # random_pick = tuple(map(operator.mul, random_pick, (TILE_SIZE, TILE_SIZE)))
+                # selected_sprite = [sprite for sprite in self.sprites if self.sprites[sprite]["Info"]["Coords"] == random_pick]
+                # picked = random.choice(selected_sprite) if len(selected_sprite) > 1 else selected_sprite[0] if len(selected_sprite) == 1 else None
+                # current_sprite.updateSprite(self.get_sprite(self.sprites[picked]["Info"]["Coords"]), list(self.sprites.keys()).index(picked))
+                # self.level_sprites.add(current_sprite)
 
-                for neighbour in current_sprite.neighbours:
-                    if not neighbour.queued:
-                        neighbour.queued = True
-                        self.queue.append(neighbour)     
+                # for neighbour in current_sprite.neighbours:
+                #     if not neighbour.queued:
+                #         neighbour.queued = True
+                #         self.queue.append(neighbour)     
 
             time.sleep(0.5)
             # self.queue = []
