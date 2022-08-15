@@ -60,14 +60,11 @@ class Level:
     
     def index_2d(self, data, search):
         search = tuple(map(operator.mul, search, (TILE_SIZE, TILE_SIZE)))
-        for i, e in enumerate(data):
-            try:
-                print(e)
-                if e:
-                    return i, e[i][3].index(search)
-            except ValueError:
-                pass
-        raise ValueError("{!r} is not in list".format(search))
+        for y in range(len(self.sprites)):
+            for x in range(len(self.sprites[y])):
+                if self.sprites[y][x]:
+                    return
+
 
     def get_sprite(self, position):
         x, y = position
@@ -143,8 +140,6 @@ class Level:
                     self.sprites[index_row][index_column][3].append((x, y))
         
         
-        print(self.sprites)
-        sys.exit(1)
     
     def get_accurate_sprite(self, current_sprite):
         neighbours_found = [None for i in range(4)] # 4 directions ( identified in Settings )
@@ -187,6 +182,8 @@ class Level:
                 
                 break
         
+        print(self.queue)
+        
 
     def run(self, dt):
         self.display_surface.fill("black")
@@ -204,7 +201,6 @@ class Level:
             if len(possible_sprites) > 0:
                 random_pick = random.choice(possible_sprites)
                 index = self.index_2d(self.sprites, random_pick)
-                print(index)
                 # random_pick = tuple(map(operator.mul, random_pick, (TILE_SIZE, TILE_SIZE)))
                 # selected_sprite = [sprite for sprite in self.sprites if self.sprites[sprite]["Info"]["Coords"] == random_pick]
                 # picked = random.choice(selected_sprite) if len(selected_sprite) > 1 else selected_sprite[0] if len(selected_sprite) == 1 else None
@@ -217,7 +213,7 @@ class Level:
                 #         self.queue.append(neighbour)     
 
             time.sleep(0.5)
-            # self.queue = []
+            self.queue = []
         
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
