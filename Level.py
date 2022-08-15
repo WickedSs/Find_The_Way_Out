@@ -160,18 +160,20 @@ class Level:
         self.level_ready = False
         
         # pick a random sprite as a start
-        random_sprite = random.choice(list(self.sprites.keys()))
-        index = list(self.sprites.keys()).index(random_sprite)
-        start_sprite = GRID[random.randrange(0, (SCREEN_HEIGHT / TILE_SIZE))][random.randrange(0, (SCREEN_WIDTH / TILE_SIZE))]
-        start_sprite.updateSprite(self.get_sprite(self.sprites[random_sprite]["Info"]["Coords"]), index)
-        self.level_sprites.add(start_sprite)
-        start_sprite.visited = True
-        start_sprite.queued = True
-        for neighbour in start_sprite.neighbours:
-            neighbour.queued = True
-            self.queue.append(neighbour)
+        while True:
+            random_row, random_column = random.randrange(0, len(self.sprites)), random.randrange(0, len(self.sprites[0]))
+            random_sprite, start_sprite = self.sprites[random_row][random_column], GRID[random_row][random_column]
+            if random_sprite:
+                start_sprite.updateSprite(self.get_sprite(random_sprite[1]), (random_row, random_column))
+                self.level_sprites.add(start_sprite)
+                start_sprite.visited = True
+                start_sprite.queued = True
+                for neighbour in start_sprite.neighbours:
+                    neighbour.queued = True
+                    self.queue.append(neighbour)
+                
+                break
         
-        print("Queue: ", len(self.queue))
 
     def run(self, dt):
         self.display_surface.fill("black")
@@ -182,7 +184,8 @@ class Level:
             neighbours_found = self.get_accurate_sprite(current_sprite)
             for neighbour_exist in neighbours_found:
                 if neighbour_exist:
-                    possible_sprites.extend(self.sprites["Sprite_" + str(neighbour_exist.index)]["Sides"][ENTROPY_DICT[neighbours_found.index(neighbour_exist)]])
+                    y, x = neighbour_exist.index
+                    possible_sprites.extend(self.sprites[y][x][3][ENTROPY_DICT[neighbours_found.index(neighbour_exist)]])
             
             print("Queue: ", len(self.queue))
             if len(possible_sprites) > 0:
