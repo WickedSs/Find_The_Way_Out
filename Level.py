@@ -182,8 +182,7 @@ class Level:
                 
                 break
         
-        print(self.queue)
-        
+        print(self.queue, "What?")
 
     def run(self, dt):
         self.display_surface.fill("black")
