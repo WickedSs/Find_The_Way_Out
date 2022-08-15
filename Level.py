@@ -59,12 +59,15 @@ class Level:
         self.initialize_generation()
     
     def index_2d(self, data, search):
-        print("Search: ", search)
-        for y in range(len(data)):
-            for x in range(len(data[y])):
-                if data[y][x] and data[y][x][3].index(search):
-                    return x, y
-        return -1, -1
+        search = tuple(map(operator.mul, search, (TILE_SIZE, TILE_SIZE)))
+        for i, e in enumerate(data):
+            try:
+                print(e)
+                if e:
+                    return i, e[i][3].index(search)
+            except ValueError:
+                pass
+        raise ValueError("{!r} is not in list".format(search))
 
     def get_sprite(self, position):
         x, y = position
@@ -140,6 +143,8 @@ class Level:
                     self.sprites[index_row][index_column][3].append((x, y))
         
         
+        print(self.sprites)
+        sys.exit(1)
     
     def get_accurate_sprite(self, current_sprite):
         neighbours_found = [None for i in range(4)] # 4 directions ( identified in Settings )
