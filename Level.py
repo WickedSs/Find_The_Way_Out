@@ -1,6 +1,8 @@
 from math import ceil
 from pickle import TRUE
 from textwrap import indent
+from tkinter import Grid
+from tkinter.tix import IMAGE
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string
 from Settings import *
@@ -13,10 +15,7 @@ ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 SPRITES = []
 GRID = []
 VISITED = []
-DIM = 4
-
-
-
+DIM = 10
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -34,6 +33,9 @@ class Cell:
         self.collapsed = False
         self.options = [sprite for sprite in SPRITES]
     
+    def set_options(self, options):
+        self.options = options
+    
 
 
 class Level:
@@ -41,7 +43,6 @@ class Level:
     example_file_01 = os.path.join(ROOT, "Assets\Example-01.png")
     def __init__(self):
         self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
-        # self.sprite_sheet = pygame.image.load(self.example_file_01).convert_alpha()
         self.sprite_sheet_rect = self.sprite_sheet.get_rect()
         self.display_surface = pygame.display.get_surface()
         self.level_sprites = pygame.sprite.Group()
@@ -97,6 +98,20 @@ class Level:
         
         return neighbours
     
+    def stupid_check(self, sprite):
+        Entropy = sprite["Entropy"]
+        Image = sprite["Image"]
+        self.display_surface.blit(Image, (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
+        x, y = 32, SCREEN_HEIGHT / 2
+        for i in range(4):
+            for spr in Entropy[i]:
+                self.display_surface.blit(SPRITES[spr]["Image"], (x, y))
+                x += 32
+                if x >= SCREEN_HEIGHT:
+                    x = 32
+                    y += 32
+
+
     def initialize_sprites(self):
         constraints= SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
         for y in range(0, constraints["Height"], TILE_SIZE):
@@ -119,121 +134,107 @@ class Level:
         for sprite in SPRITES:
             pxarray_sprite = sprite["Pixels"]
             entropy_sprite = sprite["Entropy"]
+            top_sprite, right_sprite, down_sprite, left_sprite = pxarray_sprite[0], [pxsprite[31] for pxsprite in pxarray_sprite], pxarray_sprite[31], [pxsprite[0] for pxsprite in pxarray_sprite]
+            index = 0
             for y in range(0, constraints["Height"], TILE_SIZE):
                 for x in range(0, constraints["Width"], TILE_SIZE):
                     image = self.get_sprite((x, y))
                     pxarray = self.convert_pixelarray(pygame.PixelArray(image))
                     if numpy.count_nonzero(pxarray) > 1:
                         top, right, down, left = pxarray[0], [array[31] for array in pxarray], pxarray[31], [array[0] for array in pxarray]
-                        top_sprite, right_sprite, down_sprite, left_sprite = pxarray_sprite[0], [pxsprite[31] for pxsprite in pxarray_sprite], pxarray_sprite[31], [pxsprite[0] for pxsprite in pxarray_sprite]
                         if top == down_sprite:
-                            # looking for 12
-                            # 1 + 2 * 4 = 8
-                            x, y = int(y / TILE_SIZE), int(x / TILE_SIZE)
-                            entropy_sprite[0].append((x, y))
+                            entropy_sprite[ENTROPY_DICT[0]].append(index)
                         if right == left_sprite:
-                            entropy_sprite[1].append((x, y))
+                            entropy_sprite[ENTROPY_DICT[1]].append(index)
                         if down == top_sprite:
-                            entropy_sprite[2].append((x, y))
+                            entropy_sprite[ENTROPY_DICT[2]].append(index)
                         if left == right_sprite:
-                            entropy_sprite[3].append((x, y))
+                            entropy_sprite[ENTROPY_DICT[3]].append(index)
                         
+                        index += 1
             
         
         
-        print(len(SPRITES))
-        for sprite in SPRITES: del sprite["Pixels"]
-                        
-        
-        
-    
-    def get_accurate_sprite(self, current_sprite):
-        neighbours_found = [None for i in range(4)] # 4 directions ( identified in Settings )
-        x, y = int(current_sprite.x / TILE_SIZE), int(current_sprite.y / TILE_SIZE)
+        for sprite in SPRITES:
+            del sprite["Pixels"]
+            # print(SPRITES.index(sprite), sprite)
 
-        if x > 0 and GRID[y][x - 1].visited:
-            neighbours_found[3] = GRID[y][x - 1]
 
-        if x < (SCREEN_WIDTH / TILE_SIZE) - 1 and GRID[y][x + 1].visited:
-            neighbours_found[1] = GRID[y][x + 1]
-
-        if y > 0 and GRID[y - 1][x].visited:
-            neighbours_found[0] = GRID[y - 1][x]
-
-        if y < (SCREEN_HEIGHT  / TILE_SIZE) - 1 and GRID[y + 1][x].visited:
-            neighbours_found[2] = GRID[y + 1][x]
-            
-        return neighbours_found
         
     def initialize_generation(self):
         # initialize grid and sprites into json array
         self.initialize_sprites()
         self.initialize_grid()
         
-        # GRID[2].collapsed = True
-        # GRID[0].collapsed = True
-        # GRID[0].options = [SPRITES[4], SPRITES[12]]
-        # GRID[2].options = [SPRITES[4], SPRITES[12]]
-                
-        # # set drawing of the level to False until its ready and all sprites are generated
-        # self.level_ready = False
-        
-        # # pick a random sprite as a start
-        # while True:
-        #     random_row, random_column = random.randrange(0, len(self.sprites)), random.randrange(0, len(self.sprites[0]))
-        #     random_sprite, start_sprite = self.sprites[random_row][random_column], GRID[random_row][random_column]
-        #     if random_sprite:
-        #         start_sprite.updateSprite(self.get_sprite(random_sprite[1]), (random_row, random_column))
-        #         self.level_sprites.add(start_sprite)
-        #         start_sprite.visited = True
-        #         start_sprite.queued = True
-        #         for neighbour in start_sprite.neighbours:
-        #             neighbour.queued = True
-        #             self.queue.append(neighbour)
-                
-        #         break
-        
-        # print(self.queue, "What?")
 
     def run(self, dt):
+        global SPRITES, GRID, VISITED, DIM
         self.display_surface.fill("black")
         
         #  pick cell with the least entropy
         GRIDCOPY = GRID.copy();
-        # GRIDCOPY = list(filter(lambda x: x.collapsed == False, GRIDCOPY))
+        GRIDCOPY = list(filter(lambda x: x.collapsed == False, GRIDCOPY))
+        GRIDCOPY.sort(key = lambda x : len(x.options))
+        
+        GRIDCOPY = []
+        if len(GRIDCOPY) > 0:
+            length, stopIndex = len(GRIDCOPY[0].options), 0
+            for i in range(1, len(GRIDCOPY), 1):
+                if len(GRIDCOPY[i].options) > length:
+                    stopIndex = i;
+                    break
+            
+            if stopIndex > 0: 
+                GRIDCOPY = GRIDCOPY[0:stopIndex]
+            picked_cell = random.choice(GRIDCOPY)
+            picked_cell.collapsed = True
+            pick = random.choice(picked_cell.options)
+            picked_cell.options = [pick]
 
-        GRIDCOPY.sort(key= lambda x : len(x.options))
-        length, stopIndex = len(GRIDCOPY[0].options), 0
-        for i in range(1, len(GRIDCOPY), 1):
-            if len(GRIDCOPY[i].options) > length:
-                stopIndex = i;
-                break
-        
-        if stopIndex > 0: 
-            GRIDCOPY = GRIDCOPY[0:stopIndex]
-        picked_cell = random.choice(GRIDCOPY)
-        picked_cell.collapsed = True
-        pick = random.choice(picked_cell.options)
-        picked_cell.options = [pick]
-        # print([len(copy.options) for copy in GRIDCOPY])
-        
-        
-        
+            nextGrid = [None for i in GRID]
+            for y in range(DIM):
+                for x in range(DIM):
+                    index = x + y * DIM
+                    if GRID[index].collapsed:
+                        nextGrid[index] = GRID[index]
+                    else:
+                        validSprites = []
+                        if y > 0:
+                            lookup = GRID[x + (y - 1) * DIM]
+                            for sprite in lookup.options:
+                                validSprites.extend(sprite["Entropy"][2])
+                        
+                        if x < (DIM - 1):
+                            lookright = GRID[( x + 1 ) + y  * DIM]
+                            for sprite in lookright.options:
+                                validSprites.extend(sprite["Entropy"][3])
+                        
+                        if y < (DIM - 1):
+                            lookdown = GRID[x + (y + 1) * DIM]
+                            for sprite in lookdown.options:
+                                validSprites.extend(sprite["Entropy"][0])
+
+                        if x > 0:
+                            lookleft = GRID[( x - 1 ) + y * DIM]
+                            for sprite in lookleft.options:
+                                validSprites.extend(sprite["Entropy"][1])
+                        
+                        validSprites = list(set([i for i in validSprites]))
+                        nextGrid[index] = Cell(index)
+                        nextGrid[index].collapsed = False
+                        nextGrid[index].options = [SPRITES[valid] for valid in validSprites]
+            
+            GRID = nextGrid
+
         for y in range(DIM):
             for x in range(DIM):
                 working_cell = GRID[x + y * DIM]
                 if working_cell.collapsed:
                     sprite = working_cell.options[0]
-                    self.display_surface.blit(sprite["Image"], (x, y))
-                else:
-                    SPRITESCOPY = SPRITES.copy()
-                    if y > 0:
-                        lookup = GRID[i + (y - 1) * DIM]
-                        for sprite in lookup.options:
-                            validSprites = SPRITES[sprite.index]["ENTROPY"][2]
-                            self.checkValid(validSprites)
+                    self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
 
-        
+        print(SPRITES[0]["Entropy"])
+        self.stupid_check(SPRITES[0])
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
     
