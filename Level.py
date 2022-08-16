@@ -1,3 +1,4 @@
+from math import ceil
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string
 from Settings import *
@@ -7,38 +8,29 @@ from itertools import chain
 
 alphabet = string.ascii_letters
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
+SPRITES = []
 GRID = []
 VISITED = []
+DIM = 20
+
+
+
+
 
 class Sprite(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.x, self.y, index = x, y, None
-        self.image = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill(random.choice(["green", "black", "red"]))
+    def __init__(self, group, x, y, image):
+        super().__init__(group)
+        self.x, self.y = x, y
+        self.image = image
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x, self.y
-        self.queued = False
-        self.visited = False
-        self.neighbours, self.next_sprites = [], {0 : [], 1 : [], 2 : [], 3 : []}
 
-    def set_neighbours(self):
-        x, y = int(self.x / TILE_SIZE), int(self.y / TILE_SIZE)
-        if x > 0:
-            self.neighbours.append(GRID[y][x - 1])
-        
-        if x < (SCREEN_WIDTH / TILE_SIZE) - 1:
-            self.neighbours.append(GRID[y][x + 1])
-        
-        if y > 0:
-            self.neighbours.append(GRID[y - 1][x])
 
-        if y < (SCREEN_HEIGHT  / TILE_SIZE) - 1:
-            self.neighbours.append(GRID[y + 1][x])
-    
-    def updateSprite(self, image, index):
-        self.image = image
+class Cell:
+    def __init__(self, index):
         self.index = index
+        self.collapsed = False
+        self.options = []
 
     def getPosition(self):
         return (int(self.x/TILE_SIZE), int(self.y/TILE_SIZE))
@@ -89,16 +81,9 @@ class Level:
         return array
     
     def initialize_grid(self):
-        for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
-            GRID.append([])
-            for x in range(0, SCREEN_WIDTH, TILE_SIZE):
-                sprite = Sprite(x, y)
-                self.level_sprites.add(sprite)
-                GRID[int(y/TILE_SIZE)].append(sprite)
-        
-        for y in range(0, SCREEN_HEIGHT, TILE_SIZE):
-            for x in range(0, SCREEN_WIDTH, TILE_SIZE):
-                GRID[int(y/TILE_SIZE)][int(x/TILE_SIZE)].set_neighbours()
+        for i in range(DIM * DIM):
+            cell = Cell(index=i)
+            GRID[i].append(cell)
 
     def get_sprite_neighbours(self, x, y, array):
         x, y, neighbours = int(x / TILE_SIZE), int(y / TILE_SIZE), array
