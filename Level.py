@@ -73,6 +73,19 @@ class Level:
         
         return array
     
+    def common_sides(self, list1, list2):
+        return [element for element in list1 if element in list2]
+    
+    def common_elements(self, list1, list2):
+        max_identical = TILE_SIZE * TILE_SIZE
+        identical = 0
+        for y in range(len(list1)):
+            for x in range(len(list1[y])):
+                if list1[y][x] == list2[y][x]:
+                    identical += 1
+
+        return (identical * 100) / max_identical
+    
     def initialize_grid(self):
         for i in range(DIM * DIM):
             cell = Cell(index=i)
@@ -135,32 +148,34 @@ class Level:
             pxarray_sprite = sprite["Pixels"]
             entropy_sprite = sprite["Entropy"]
             top_sprite, right_sprite, down_sprite, left_sprite = pxarray_sprite[0], [pxsprite[31] for pxsprite in pxarray_sprite], pxarray_sprite[31], [pxsprite[0] for pxsprite in pxarray_sprite]
-            index = 0
+            index, least_identical = 0, 24
             for y in range(0, constraints["Height"], TILE_SIZE):
                 for x in range(0, constraints["Width"], TILE_SIZE):
                     image = self.get_sprite((x, y))
                     pxarray = self.convert_pixelarray(pygame.PixelArray(image))
                     if numpy.count_nonzero(pxarray) > 1:
                         top, right, down, left = pxarray[0], [array[31] for array in pxarray], pxarray[31], [array[0] for array in pxarray]
-                        if top == down_sprite:
+                        # print(self.common_elements(pxarray_sprite, pxarray))
+                        print(len(self.common_sides(right_sprite, left)))
+                        if len(self.common_sides(top, down_sprite)) >= least_identical:
                             entropy_sprite[ENTROPY_DICT[0]].append(index)
-                        if right == left_sprite:
+                        if len(self.common_sides(right, left_sprite)) >= least_identical:
                             entropy_sprite[ENTROPY_DICT[1]].append(index)
-                        if down == top_sprite:
+                        if len(self.common_sides(down, top_sprite)) >= least_identical:
                             entropy_sprite[ENTROPY_DICT[2]].append(index)
-                        if left == right_sprite:
+                        if len(self.common_sides(left, right_sprite)) >= least_identical:
                             entropy_sprite[ENTROPY_DICT[3]].append(index)
                         
+                        if x == 32 * 6:
+                            sys.exit(1)
                         index += 1
             
-        
+
         
         for sprite in SPRITES:
             del sprite["Pixels"]
             # print(SPRITES.index(sprite), sprite)
 
-
-        
     def initialize_generation(self):
         # initialize grid and sprites into json array
         self.initialize_sprites()
@@ -185,7 +200,7 @@ class Level:
                     break
             
             if stopIndex > 0: 
-                GRIDCOPY = GRIDCOPY[0:stopIndex]
+                GRIDCOPY = GRIDCOPY[0:46]
             picked_cell = random.choice(GRIDCOPY)
             picked_cell.collapsed = True
             pick = random.choice(picked_cell.options)
