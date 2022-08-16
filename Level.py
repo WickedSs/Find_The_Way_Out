@@ -1,5 +1,6 @@
 from math import ceil
 from pickle import TRUE
+from textwrap import indent
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string
 from Settings import *
@@ -97,7 +98,7 @@ class Level:
         return neighbours
     
     def initialize_sprites(self):
-        constraints = SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
+        constraints= SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
         for y in range(0, constraints["Height"], TILE_SIZE):
             for x in range(0, constraints["Width"], TILE_SIZE):
                 image = self.get_sprite((x, y))
@@ -113,7 +114,8 @@ class Level:
                             3 : []  # left
                         }
                     })
-        
+
+
         for sprite in SPRITES:
             pxarray_sprite = sprite["Pixels"]
             entropy_sprite = sprite["Entropy"]
@@ -125,6 +127,9 @@ class Level:
                         top, right, down, left = pxarray[0], [array[31] for array in pxarray], pxarray[31], [array[0] for array in pxarray]
                         top_sprite, right_sprite, down_sprite, left_sprite = pxarray_sprite[0], [pxsprite[31] for pxsprite in pxarray_sprite], pxarray_sprite[31], [pxsprite[0] for pxsprite in pxarray_sprite]
                         if top == down_sprite:
+                            # looking for 12
+                            # 1 + 2 * 4 = 8
+                            x, y = int(y / TILE_SIZE), int(x / TILE_SIZE)
                             entropy_sprite[0].append((x, y))
                         if right == left_sprite:
                             entropy_sprite[1].append((x, y))
@@ -136,6 +141,7 @@ class Level:
             
         
         
+        print(len(SPRITES))
         for sprite in SPRITES: del sprite["Pixels"]
                         
         
@@ -164,10 +170,10 @@ class Level:
         self.initialize_sprites()
         self.initialize_grid()
         
-        GRID[2].collapsed = True
-        GRID[0].collapsed = True
-        GRID[0].options = [SPRITES[4], SPRITES[12]]
-        GRID[2].options = [SPRITES[4], SPRITES[12]]
+        # GRID[2].collapsed = True
+        # GRID[0].collapsed = True
+        # GRID[0].options = [SPRITES[4], SPRITES[12]]
+        # GRID[2].options = [SPRITES[4], SPRITES[12]]
                 
         # # set drawing of the level to False until its ready and all sprites are generated
         # self.level_ready = False
@@ -194,6 +200,8 @@ class Level:
         
         #  pick cell with the least entropy
         GRIDCOPY = GRID.copy();
+        # GRIDCOPY = list(filter(lambda x: x.collapsed == False, GRIDCOPY))
+
         GRIDCOPY.sort(key= lambda x : len(x.options))
         length, stopIndex = len(GRIDCOPY[0].options), 0
         for i in range(1, len(GRIDCOPY), 1):
@@ -201,12 +209,15 @@ class Level:
                 stopIndex = i;
                 break
         
-        GRIDCOPY = GRIDCOPY[0:stopIndex]
-        pick_copy = random.choice(GRIDCOPY)
+        if stopIndex > 0: 
+            GRIDCOPY = GRIDCOPY[0:stopIndex]
+        picked_cell = random.choice(GRIDCOPY)
+        picked_cell.collapsed = True
+        pick = random.choice(picked_cell.options)
+        picked_cell.options = [pick]
         # print([len(copy.options) for copy in GRIDCOPY])
         
         
-        sys.exit(1)
         
         for y in range(DIM):
             for x in range(DIM):
@@ -214,6 +225,14 @@ class Level:
                 if working_cell.collapsed:
                     sprite = working_cell.options[0]
                     self.display_surface.blit(sprite["Image"], (x, y))
+                else:
+                    SPRITESCOPY = SPRITES.copy()
+                    if y > 0:
+                        lookup = GRID[i + (y - 1) * DIM]
+                        for sprite in lookup.options:
+                            validSprites = SPRITES[sprite.index]["ENTROPY"][2]
+                            self.checkValid(validSprites)
+
         
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
