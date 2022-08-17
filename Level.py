@@ -59,7 +59,7 @@ class Level:
             { "Index" : 8, "Image" : self.get_sprite((12 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [29], 2 : [27], 3 : [36] } },
             { "Index" : 9, "Image" : self.get_sprite((13 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
             { "Index" : 10, "Image" : self.get_sprite((15 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [36], 2 : [14], 3 : [36] } },
-            { "Index" : 11, "Image" : self.get_sprite((0 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 11, "Image" : self.get_sprite((0 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [11, 5], 1 : [12], 2 : [11, 16], 3 : [] } },
             { "Index" : 12, "Image" : self.get_sprite((1 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
             { "Index" : 13, "Image" : self.get_sprite((2 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
             { "Index" : 14, "Image" : self.get_sprite((4 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [26], 3 : [] } },
@@ -215,8 +215,14 @@ class Level:
         # self.initialize_sprites()
         self.initialize_grid()
 
-        # GRID[0].collapsed = True
-        # GRID[0].options = [SPRITES[4]]
+        # Initial state
+        arr = numpy.arange(15*15).reshape(15,15)
+        alist = [arr[0,:-1], arr[:-1,-1], arr[-1,::-1], arr[-2:0:-1,0]]
+        numpy.concatenate(alist)
+        for array in alist:
+            for index in array:
+                GRID[index].collapsed = True
+                GRID[index].options = [SPRITES[12]]
         
 
     def run(self, dt):
@@ -227,10 +233,9 @@ class Level:
             for x in range(DIM):
                 working_cell = GRID[x + y * DIM]
                 if working_cell.collapsed:
-                    sprite = SPRITES[12]
                     if working_cell.options:
                         sprite = working_cell.options[0]
-                    self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
+                        self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
         
         #  pick cell with the least entropy
         GRIDCOPY = GRID.copy();
@@ -248,47 +253,45 @@ class Level:
                 GRIDCOPY = GRIDCOPY[0:stopIndex]
             picked_cell = random.choice(GRIDCOPY)
             picked_cell.collapsed = True
-            pick = None
-            if picked_cell.options:
-                pick = random.choice(picked_cell.options)
-                picked_cell.options = [pick]
+            pick = random.choice(picked_cell.options)
+            picked_cell.options = [pick]
 
-                nextGrid = [None for i in GRID]
-                for y in range(DIM):
-                    for x in range(DIM):
-                        index = x + y * DIM
-                        if GRID[index].collapsed:
-                            nextGrid[index] = GRID[index]
-                        else:
-                            if y > 0:
-                                validSprites = []
-                                lookup = GRID[x + (y - 1) * DIM]
-                                for sprite in lookup.options:
-                                    validSprites.extend(sprite["Entropy"][2])
-                            
-                            if x < (DIM - 1):
-                                validSprites = []
-                                lookright = GRID[( x + 1 ) + y  * DIM]
-                                for sprite in lookright.options:
-                                    validSprites.extend(sprite["Entropy"][3])
-                            
-                            if y < (DIM - 1):
-                                validSprites = []
-                                lookdown = GRID[x + (y + 1) * DIM]
-                                for sprite in lookdown.options:
-                                    validSprites.extend(sprite["Entropy"][0])
+            nextGrid = [None for i in GRID]
+            for y in range(DIM):
+                for x in range(DIM):
+                    index = x + y * DIM
+                    if GRID[index].collapsed:
+                        nextGrid[index] = GRID[index]
+                    else:
+                        if y > 0:
+                            validSprites = []
+                            lookup = GRID[x + (y - 1) * DIM]
+                            for sprite in lookup.options:
+                                validSprites.extend(sprite["Entropy"][2])
+                        
+                        if x < (DIM - 1):
+                            validSprites = []
+                            lookright = GRID[( x + 1 ) + y  * DIM]
+                            for sprite in lookright.options:
+                                validSprites.extend(sprite["Entropy"][3])
+                        
+                        if y < (DIM - 1):
+                            validSprites = []
+                            lookdown = GRID[x + (y + 1) * DIM]
+                            for sprite in lookdown.options:
+                                validSprites.extend(sprite["Entropy"][0])
 
-                            if x > 0:
-                                validSprites = []
-                                lookleft = GRID[( x - 1 ) + y * DIM]
-                                for sprite in lookleft.options:
-                                    validSprites.extend(sprite["Entropy"][1])
-                            
-                            nextGrid[index] = Cell(index)
-                            nextGrid[index].collapsed = False
-                            nextGrid[index].options = [SPRITES[valid] for valid in validSprites]
-                
-                GRID = nextGrid
+                        if x > 0:
+                            validSprites = []
+                            lookleft = GRID[( x - 1 ) + y * DIM]
+                            for sprite in lookleft.options:
+                                validSprites.extend(sprite["Entropy"][1])
+                        
+                        nextGrid[index] = Cell(index)
+                        nextGrid[index].collapsed = False
+                        nextGrid[index].options = [SPRITES[valid] for valid in validSprites]
+            
+            GRID = nextGrid
 
         # print(SPRITES[0]["Entropy"])
         # self.stupid_check(SPRITES[0])
