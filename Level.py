@@ -4,6 +4,7 @@ from pickle import TRUE
 from textwrap import indent
 from tkinter import Grid
 from tkinter.tix import IMAGE
+from turtle import onclick
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string, operator
 from Settings import *
@@ -227,13 +228,20 @@ class Level:
         # self.initialize_sprites()
         self.initialize_grid()
 
-        GRID[0].collapsed = True
-        GRID[0].options = [SPRITES[4]]
+        # GRID[0].collapsed = True
+        # GRID[0].options = [SPRITES[4]]
         
 
     def run(self, dt):
         global SPRITES, GRID, VISITED, DIM
         self.display_surface.fill("black")
+
+        for y in range(DIM):
+            for x in range(DIM):
+                working_cell = GRID[x + y * DIM]
+                if working_cell.collapsed:
+                    sprite = working_cell.options[0]
+                    self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
         
         #  pick cell with the least entropy
         GRIDCOPY = GRID.copy();
@@ -248,12 +256,13 @@ class Level:
                     break
             
             if stopIndex > 0: 
-                GRIDCOPY = GRIDCOPY[0:stopIndex]
+                GRIDCOPY = GRIDCOPY[0:46]
             picked_cell = random.choice(GRIDCOPY)
-            print("GRIDCOPY: ", GRIDCOPY)
-            print("Picked Cell: ", picked_cell.index)
             picked_cell.collapsed = True
-            pick = random.choice(picked_cell.options)
+            if (picked_cell.options):
+                pick = random.choice(picked_cell.options)
+            else:
+                print(picked_cell.index, picked_cell.options)
             picked_cell.options = [pick]
 
             nextGrid = [None for i in GRID]
@@ -263,41 +272,35 @@ class Level:
                     if GRID[index].collapsed:
                         nextGrid[index] = GRID[index]
                     else:
-                        validSprites = []
                         if y > 0:
+                            validSprites = []
                             lookup = GRID[x + (y - 1) * DIM]
                             for sprite in lookup.options:
                                 validSprites.extend(sprite["Entropy"][2])
                         
                         if x < (DIM - 1):
+                            validSprites = []
                             lookright = GRID[( x + 1 ) + y  * DIM]
                             for sprite in lookright.options:
                                 validSprites.extend(sprite["Entropy"][3])
                         
                         if y < (DIM - 1):
+                            validSprites = []
                             lookdown = GRID[x + (y + 1) * DIM]
                             for sprite in lookdown.options:
                                 validSprites.extend(sprite["Entropy"][0])
 
                         if x > 0:
+                            validSprites = []
                             lookleft = GRID[( x - 1 ) + y * DIM]
                             for sprite in lookleft.options:
                                 validSprites.extend(sprite["Entropy"][1])
                         
-                        validSprites = list(set([i for i in validSprites]))
                         nextGrid[index] = Cell(index)
                         nextGrid[index].collapsed = False
                         nextGrid[index].options = [SPRITES[valid] for valid in validSprites]
             
             GRID = nextGrid
-            time.sleep(5)
-
-        for y in range(DIM):
-            for x in range(DIM):
-                working_cell = GRID[x + y * DIM]
-                if working_cell.collapsed:
-                    sprite = working_cell.options[0]
-                    self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
 
         # print(SPRITES[0]["Entropy"])
         # self.stupid_check(SPRITES[0])
