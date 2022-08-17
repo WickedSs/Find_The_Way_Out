@@ -60,38 +60,38 @@ class Level:
             { "Index" : 10, "Image" : self.get_sprite((15 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [36], 2 : [14], 3 : [36] } },
             { "Index" : 11, "Image" : self.get_sprite((0 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
             { "Index" : 12, "Image" : self.get_sprite((1 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
-            { "Index" : 13, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 13, "Image" : self.get_sprite((2 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
             { "Index" : 14, "Image" : self.get_sprite((4 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [26], 3 : [] } },
-            { "Index" : 15, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
-            { "Index" : 16, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 15, "Image" : self.get_sprite((6 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 16, "Image" : self.get_sprite((7 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
             { "Index" : 17, "Image" : self.get_sprite((9 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [11], 1 : [12], 2 : [11], 3 : [36] } },
             { "Index" : 18, "Image" : self.get_sprite((10 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [12], 1 : [24], 2 : [26], 3 : [24] } },
-            { "Index" : 19, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 20, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 21, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 22, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 23, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 19, "Image" : self.get_sprite((12 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 20, "Image" : self.get_sprite((13 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 21, "Image" : self.get_sprite((15 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 22, "Image" : self.get_sprite((16 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 23, "Image" : self.get_sprite((0 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
             { "Index" : 24, "Image" : self.get_sprite((1 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [12], 1 : [25, 18], 2 : [], 3 : [23, 18] } },
             { "Index" : 25, "Image" : self.get_sprite((2 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [13, 29], 1 : [], 2 : [], 3 : [24, 42] } },
             { "Index" : 26, "Image" : self.get_sprite((4 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [14], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 27, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 28, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 27, "Image" : self.get_sprite((6 * TILE_SIZE, 3 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 28, "Image" : self.get_sprite((7 * TILE_SIZE, 3 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
             { "Index" : 29, "Image" : self.get_sprite((9 * TILE_SIZE, 3 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [37, 32], 2 : [], 3 : [30, 39] } },
-            { "Index" : 30, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 31, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 30, "Image" : self.get_sprite((10 * TILE_SIZE, 3 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 31, "Image" : self.get_sprite((11 * TILE_SIZE, 3 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
             { "Index" : 32, "Image" : self.get_sprite((13 * TILE_SIZE, 3 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [36, 17], 2 : [26], 3 : [36, 7, 15] } },
             { "Index" : 33, "Image" : self.get_sprite((15 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [36, 43, 37, 10], 2 : [26], 3 : [] } },
             { "Index" : 34, "Image" : self.get_sprite((16 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [26], 3 : [36, 32, 35, 10] } },
             { "Index" : 35, "Image" : self.get_sprite((0 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [36, 45, 43, 32], 2 : [], 3 : [] } },
             { "Index" : 36, "Image" : self.get_sprite((1 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [37, 43, 46, 34], 2 : [], 3 : [35, 32, 45, 33] } },
             { "Index" : 37, "Image" : self.get_sprite((2 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [36, 32, 43, 45] } },
-            { "Index" : 38, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 39, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 40, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 41, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 42, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
-            { "Index" : 43, "Image" : self.get_sprite((13 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [36, 37], 2 : [], 3 : [36, 32] } },
-            { "Index" : 44, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 38, "Image" : self.get_sprite((4 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 39, "Image" : self.get_sprite((6 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 40, "Image" : self.get_sprite((7 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 41, "Image" : self.get_sprite((9 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 42, "Image" : self.get_sprite((10 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 43, "Image" : self.get_sprite((12 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [36, 37], 2 : [], 3 : [36, 32] } },
+            { "Index" : 44, "Image" : self.get_sprite((13 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
             { "Index" : 45, "Image" : self.get_sprite((15 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [3, 33], 1 : [43, 36, 32], 2 : [], 3 : [] } },
             { "Index" : 46, "Image" : self.get_sprite((16 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [3, 34], 1 : [], 2 : [], 3 : [45, 36, 32] } },
         ]
@@ -267,22 +267,22 @@ class Level:
                         if y > 0:
                             lookup = GRID[x + (y - 1) * DIM]
                             for sprite in lookup.options:
-                                validSprites.extend(sprite["Entropy"][0])
+                                validSprites.extend(sprite["Entropy"][2])
                         
                         if x < (DIM - 1):
                             lookright = GRID[( x + 1 ) + y  * DIM]
                             for sprite in lookright.options:
-                                validSprites.extend(sprite["Entropy"][1])
+                                validSprites.extend(sprite["Entropy"][3])
                         
                         if y < (DIM - 1):
                             lookdown = GRID[x + (y + 1) * DIM]
                             for sprite in lookdown.options:
-                                validSprites.extend(sprite["Entropy"][2])
+                                validSprites.extend(sprite["Entropy"][0])
 
                         if x > 0:
                             lookleft = GRID[( x - 1 ) + y * DIM]
                             for sprite in lookleft.options:
-                                validSprites.extend(sprite["Entropy"][3])
+                                validSprites.extend(sprite["Entropy"][1])
                         
                         validSprites = list(set([i for i in validSprites]))
                         nextGrid[index] = Cell(index)
