@@ -14,7 +14,7 @@ ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 SPRITES = []
 GRID = []
 VISITED = []
-DIM = 2
+DIM = 15
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -157,19 +157,6 @@ class Level:
             neighbours[2].append((working_x, working_y))
         
         return neighbours
-    
-    def stupid_check(self, sprite):
-        Entropy = sprite["Entropy"]
-        Image = sprite["Image"]
-        self.display_surface.blit(Image, (SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2))
-        x, y = 32, SCREEN_HEIGHT / 2
-        for i in range(4):
-            for spr in Entropy[i]:
-                self.display_surface.blit(SPRITES[spr]["Image"], (x, y))
-                x += 32
-                if x >= SCREEN_HEIGHT:
-                    x = 32
-                    y += 32
 
 
     def initialize_sprites(self):
@@ -240,7 +227,9 @@ class Level:
             for x in range(DIM):
                 working_cell = GRID[x + y * DIM]
                 if working_cell.collapsed:
-                    sprite = working_cell.options[0]
+                    sprite = SPRITES[12]
+                    if working_cell.options:
+                        sprite = working_cell.options[0]
                     self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
         
         #  pick cell with the least entropy
@@ -256,51 +245,50 @@ class Level:
                     break
             
             if stopIndex > 0: 
-                GRIDCOPY = GRIDCOPY[0:46]
+                GRIDCOPY = GRIDCOPY[0:stopIndex]
             picked_cell = random.choice(GRIDCOPY)
             picked_cell.collapsed = True
-            if (picked_cell.options):
+            pick = None
+            if picked_cell.options:
                 pick = random.choice(picked_cell.options)
-            else:
-                print(picked_cell.index, picked_cell.options)
-            picked_cell.options = [pick]
+                picked_cell.options = [pick]
 
-            nextGrid = [None for i in GRID]
-            for y in range(DIM):
-                for x in range(DIM):
-                    index = x + y * DIM
-                    if GRID[index].collapsed:
-                        nextGrid[index] = GRID[index]
-                    else:
-                        if y > 0:
-                            validSprites = []
-                            lookup = GRID[x + (y - 1) * DIM]
-                            for sprite in lookup.options:
-                                validSprites.extend(sprite["Entropy"][2])
-                        
-                        if x < (DIM - 1):
-                            validSprites = []
-                            lookright = GRID[( x + 1 ) + y  * DIM]
-                            for sprite in lookright.options:
-                                validSprites.extend(sprite["Entropy"][3])
-                        
-                        if y < (DIM - 1):
-                            validSprites = []
-                            lookdown = GRID[x + (y + 1) * DIM]
-                            for sprite in lookdown.options:
-                                validSprites.extend(sprite["Entropy"][0])
+                nextGrid = [None for i in GRID]
+                for y in range(DIM):
+                    for x in range(DIM):
+                        index = x + y * DIM
+                        if GRID[index].collapsed:
+                            nextGrid[index] = GRID[index]
+                        else:
+                            if y > 0:
+                                validSprites = []
+                                lookup = GRID[x + (y - 1) * DIM]
+                                for sprite in lookup.options:
+                                    validSprites.extend(sprite["Entropy"][2])
+                            
+                            if x < (DIM - 1):
+                                validSprites = []
+                                lookright = GRID[( x + 1 ) + y  * DIM]
+                                for sprite in lookright.options:
+                                    validSprites.extend(sprite["Entropy"][3])
+                            
+                            if y < (DIM - 1):
+                                validSprites = []
+                                lookdown = GRID[x + (y + 1) * DIM]
+                                for sprite in lookdown.options:
+                                    validSprites.extend(sprite["Entropy"][0])
 
-                        if x > 0:
-                            validSprites = []
-                            lookleft = GRID[( x - 1 ) + y * DIM]
-                            for sprite in lookleft.options:
-                                validSprites.extend(sprite["Entropy"][1])
-                        
-                        nextGrid[index] = Cell(index)
-                        nextGrid[index].collapsed = False
-                        nextGrid[index].options = [SPRITES[valid] for valid in validSprites]
-            
-            GRID = nextGrid
+                            if x > 0:
+                                validSprites = []
+                                lookleft = GRID[( x - 1 ) + y * DIM]
+                                for sprite in lookleft.options:
+                                    validSprites.extend(sprite["Entropy"][1])
+                            
+                            nextGrid[index] = Cell(index)
+                            nextGrid[index].collapsed = False
+                            nextGrid[index].options = [SPRITES[valid] for valid in validSprites]
+                
+                GRID = nextGrid
 
         # print(SPRITES[0]["Entropy"])
         # self.stupid_check(SPRITES[0])
