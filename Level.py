@@ -1,21 +1,19 @@
 from math import ceil
+from multiprocessing.resource_sharer import stop
 from pickle import TRUE
 from textwrap import indent
 from tkinter import Grid
 from tkinter.tix import IMAGE
 from pygame.math import Vector2
-import sys, os, pygame, numpy, random, time, string
+import sys, os, pygame, numpy, random, time, string, operator
 from Settings import *
-import operator
-from itertools import chain
 
 
-alphabet = string.ascii_letters
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 SPRITES = []
 GRID = []
 VISITED = []
-DIM = 10
+DIM = 2
 
 
 class Sprite(pygame.sprite.Sprite):
@@ -42,22 +40,70 @@ class Level:
     spritesheet_filename = os.path.join(ROOT, "Assets/Spritesheet.png")
     example_file_01 = os.path.join(ROOT, "Assets\Example-01.png")
     def __init__(self):
+        global SPRITES
+        self.display_surface = pygame.display.get_surface()
         self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
         self.sprite_sheet_rect = self.sprite_sheet.get_rect()
-        self.display_surface = pygame.display.get_surface()
         self.level_sprites = pygame.sprite.Group()
-        self.queue, self.sprites = [], [[None for j in range(15)] for i in range(9)]
         self.layout_in_use = "First_Layout"
+        SPRITES = [                                                                         #TOP     RIGHT       DOWN      LEFT 
+            { "Index" : 0, "Image" : self.get_sprite((0 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [1, 2], 2 : [11], 3 : [] } },
+            { "Index" : 1, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [1, 2, 6], 2 : [0, 1, 6], 3 : [12] } },
+            { "Index" : 2, "Image" : self.get_sprite((2 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [13], 3 : [0, 1] } },
+            { "Index" : 3, "Image" : self.get_sprite((4 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [14], 3 : [] } },
+            { "Index" : 4, "Image" : self.get_sprite((6 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [12], 1 : [24], 2 : [13, 46], 3 : [12] } },
+            { "Index" : 5, "Image" : self.get_sprite((7 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [12], 1 : [12], 2 : [11, 45], 3 : [24] } },
+            { "Index" : 6, "Image" : self.get_sprite((9 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [1], 2 : [12], 3 : [1] } },
+            { "Index" : 7, "Image" : self.get_sprite((10 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [13], 1 : [36, 32], 2 : [13], 3 : [12] } },
+            { "Index" : 8, "Image" : self.get_sprite((12 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [29], 2 : [27], 3 : [36] } },
+            { "Index" : 9, "Image" : self.get_sprite((13 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 10, "Image" : self.get_sprite((15 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [36], 2 : [14], 3 : [36] } },
+            { "Index" : 11, "Image" : self.get_sprite((0 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 12, "Image" : self.get_sprite((1 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 13, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 14, "Image" : self.get_sprite((4 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [26], 3 : [] } },
+            { "Index" : 15, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 16, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [11], 3 : [] } },
+            { "Index" : 17, "Image" : self.get_sprite((9 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [11], 1 : [12], 2 : [11], 3 : [36] } },
+            { "Index" : 18, "Image" : self.get_sprite((10 * TILE_SIZE, 1 * TILE_SIZE)), "Entropy" : { 0 : [12], 1 : [24], 2 : [26], 3 : [24] } },
+            { "Index" : 19, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 20, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 21, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 22, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 23, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 24, "Image" : self.get_sprite((1 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [12], 1 : [25, 18], 2 : [], 3 : [23, 18] } },
+            { "Index" : 25, "Image" : self.get_sprite((2 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [13, 29], 1 : [], 2 : [], 3 : [24, 42] } },
+            { "Index" : 26, "Image" : self.get_sprite((4 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [14], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 27, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 28, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 29, "Image" : self.get_sprite((9 * TILE_SIZE, 3 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [37, 32], 2 : [], 3 : [30, 39] } },
+            { "Index" : 30, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 31, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 32, "Image" : self.get_sprite((13 * TILE_SIZE, 3 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [36, 17], 2 : [26], 3 : [36, 7, 15] } },
+            { "Index" : 33, "Image" : self.get_sprite((15 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [36, 43, 37, 10], 2 : [26], 3 : [] } },
+            { "Index" : 34, "Image" : self.get_sprite((16 * TILE_SIZE, 2 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [26], 3 : [36, 32, 35, 10] } },
+            { "Index" : 35, "Image" : self.get_sprite((0 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [36, 45, 43, 32], 2 : [], 3 : [] } },
+            { "Index" : 36, "Image" : self.get_sprite((1 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [37, 43, 46, 34], 2 : [], 3 : [35, 32, 45, 33] } },
+            { "Index" : 37, "Image" : self.get_sprite((2 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [36, 32, 43, 45] } },
+            { "Index" : 38, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 39, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 40, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 41, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 42, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 43, "Image" : self.get_sprite((13 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [3], 1 : [36, 37], 2 : [], 3 : [36, 32] } },
+            { "Index" : 44, "Image" : self.get_sprite((1 * TILE_SIZE, 0 * TILE_SIZE)), "Entropy" : { 0 : [], 1 : [], 2 : [], 3 : [] } },
+            { "Index" : 45, "Image" : self.get_sprite((15 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [3, 33], 1 : [43, 36, 32], 2 : [], 3 : [] } },
+            { "Index" : 46, "Image" : self.get_sprite((16 * TILE_SIZE, 4 * TILE_SIZE)), "Entropy" : { 0 : [3, 34], 1 : [], 2 : [], 3 : [45, 36, 32] } },
+        ]
         self.initialize_generation()
-
-
+    
     def get_sprite(self, position):
         x, y = position
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
         sprite.blit(self.sprite_sheet, (0, 0), (x, y, TILE_SIZE, TILE_SIZE))
         return sprite
-    
+
     def process_sides(self, pxarray):
         self.sides[0].extend(pxarray[0])
         self.sides[2].extend(pxarray[31])
@@ -178,8 +224,11 @@ class Level:
 
     def initialize_generation(self):
         # initialize grid and sprites into json array
-        self.initialize_sprites()
+        # self.initialize_sprites()
         self.initialize_grid()
+
+        GRID[0].collapsed = True
+        GRID[0].options = [SPRITES[4]]
         
 
     def run(self, dt):
@@ -191,7 +240,6 @@ class Level:
         GRIDCOPY = list(filter(lambda x: x.collapsed == False, GRIDCOPY))
         GRIDCOPY.sort(key = lambda x : len(x.options))
         
-        GRIDCOPY = []
         if len(GRIDCOPY) > 0:
             length, stopIndex = len(GRIDCOPY[0].options), 0
             for i in range(1, len(GRIDCOPY), 1):
@@ -200,8 +248,10 @@ class Level:
                     break
             
             if stopIndex > 0: 
-                GRIDCOPY = GRIDCOPY[0:46]
+                GRIDCOPY = GRIDCOPY[0:stopIndex]
             picked_cell = random.choice(GRIDCOPY)
+            print("GRIDCOPY: ", GRIDCOPY)
+            print("Picked Cell: ", picked_cell.index)
             picked_cell.collapsed = True
             pick = random.choice(picked_cell.options)
             picked_cell.options = [pick]
@@ -217,22 +267,22 @@ class Level:
                         if y > 0:
                             lookup = GRID[x + (y - 1) * DIM]
                             for sprite in lookup.options:
-                                validSprites.extend(sprite["Entropy"][2])
+                                validSprites.extend(sprite["Entropy"][0])
                         
                         if x < (DIM - 1):
                             lookright = GRID[( x + 1 ) + y  * DIM]
                             for sprite in lookright.options:
-                                validSprites.extend(sprite["Entropy"][3])
+                                validSprites.extend(sprite["Entropy"][1])
                         
                         if y < (DIM - 1):
                             lookdown = GRID[x + (y + 1) * DIM]
                             for sprite in lookdown.options:
-                                validSprites.extend(sprite["Entropy"][0])
+                                validSprites.extend(sprite["Entropy"][2])
 
                         if x > 0:
                             lookleft = GRID[( x - 1 ) + y * DIM]
                             for sprite in lookleft.options:
-                                validSprites.extend(sprite["Entropy"][1])
+                                validSprites.extend(sprite["Entropy"][3])
                         
                         validSprites = list(set([i for i in validSprites]))
                         nextGrid[index] = Cell(index)
@@ -240,6 +290,7 @@ class Level:
                         nextGrid[index].options = [SPRITES[valid] for valid in validSprites]
             
             GRID = nextGrid
+            time.sleep(5)
 
         for y in range(DIM):
             for x in range(DIM):
@@ -248,8 +299,8 @@ class Level:
                     sprite = working_cell.options[0]
                     self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
 
-        print(SPRITES[0]["Entropy"])
-        self.stupid_check(SPRITES[0])
+        # print(SPRITES[0]["Entropy"])
+        # self.stupid_check(SPRITES[0])
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
     
