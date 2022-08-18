@@ -24,11 +24,38 @@ class Tile:
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x * TILE_SIZE, self.y * TILE_SIZE
         self.edges = edges
-        
+        self.up, self.right, self.down, self.left = [], [], [], []
+    
+    def reverseString(self, s):
+        arr = s.split('');
+        arr = arr.reverse();
+        return arr.join('');
+
+    def compareEdge(self, a, b):
+        return a == self.reverseString(b);
+
+    def analyze(self):
+        for i in range(SPRITES):
+            tile = SPRITES[i];
+
+            # UP
+            if (self.compareEdge(tile.edges[2], self.edges[0])):
+                self.up.push(i);
+            # RIGHT
+            if (self.compareEdge(tile.edges[3], self.edges[1])):
+                self.right.push(i);
+            # DOWN
+            if (self.compareEdge(tile.edges[0], self.edges[2])):
+                self.down.push(i);
+            # LEFT
+            if (self.compareEdge(tile.edges[1], self.edges[3])):
+                self.left.push(i);
+    
+
     def rotate(self, angle):
         new_image = pygame.transform.rotate(self.image, 90 * angle)
-        new_edges = []
-        length = self.edges.length;
+        new_edges = [None for i in self.edges]
+        length = len(self.edges);
         for i in range(length):
             new_edges[i] = self.edges[(i - angle + length) % length];
         return Tile(self.x, self.y, new_image, new_edges)
@@ -37,9 +64,11 @@ class Tile:
         new_image = pygame.transform.flip(self.image, x_axis, y_axis)
         new_edges = self.edges
         if x_axis:
-            new_edges[3], new_edges[1] = new_edges[1], new_edges[3]
+            new_edges[3], new_edges[1] = new_edges[1][::-1], new_edges[3][::-1]
+            new_edges[0], new_edges[2] = new_edges[0][::-1], new_edges[2][::-1]
         if y_axis:
-            new_edges[0], new_edges[2] = new_edges[2], new_edges[0]
+            new_edges[0], new_edges[2] = new_edges[2][::-1], new_edges[0][::-1]
+            new_edges[3], new_edges[1] = new_edges[3][::-1], new_edges[1][::-1]
             
         return Tile(self.x, self.y, new_image, new_edges)
 
@@ -68,13 +97,56 @@ class Level:
         self.sprite_sheet_rect = self.sprite_sheet.get_rect()
         self.level_sprites = pygame.sprite.Group()
         self.layout_in_use = "First_Layout"
+        self.index = 0
         SPRITES = [
-            Tile(0, 0, self.get_sprite(0, 0), ["AAA", "BBB", "CCC", "DDD"]),
-            Tile(1, 0, self.get_sprite(0, 0), ["AAA", "BBB", "CCC", "DDD"]).flip(True, False),
-            Tile(0, 1, self.get_sprite(0, 0), ["AAA", "BBB", "CCC", "DDD"]).flip(False, True),
-            Tile(1, 1, self.get_sprite(0, 0), ["AAA", "BBB", "CCC", "DDD"]).flip(True, True),
+
+            # Tile(0, 0, self.get_sprite(1, 1), ["000", "000", "000", "000"]),
+            # 0 0
+            Tile(0, 0, self.get_sprite(0, 0), ["ABB", "BCD", "EFF", "FFA"]),
+            Tile(1, 0, self.get_sprite(0, 0), ["ABB", "BCD", "EFF", "FFA"]).flip(True, False),
+            Tile(0, 1, self.get_sprite(0, 0), ["ABB", "BCD", "EFF", "FFA"]).flip(False, True),
+            Tile(1, 1, self.get_sprite(0, 0), ["ABB", "BCD", "EFF", "FFA"]).flip(True, True),
             
-            # Tile(1, 0, self.get_sprite(1, 0), [], )
+            # # 1 0
+            # Tile(3, 0, self.get_sprite(1, 0), ["EEE", "BBB", "FFF", "DDD"]),
+            # Tile(3, 1, self.get_sprite(1, 2), ["FFF", "BBB", "EEE", "DDD"]),
+
+            # # 0 1
+            # Tile(5, 0, self.get_sprite(0, 1), ["CCC", "GGG", "CCC", "HHH"]),
+            # Tile(5, 1, self.get_sprite(2, 1), ["CCC", "HHH", "CCC", "GGG"]),
+
+            # # 4 0
+            # Tile(7, 0, self.get_sprite(4, 0), ["III", "DDD", "JJJ", "DDD"]),
+            # Tile(7, 1, self.get_sprite(4, 0), ["III", "DDD", "JJJ", "DDD"]).flip(False, True),
+            
+            # # 4 1
+            # Tile(9, 0, self.get_sprite(4, 1), ["KKK", "KKK", "KKK", "KKK"]),
+
+            # # 4 2
+            # Tile(11, 0, self.get_sprite(4, 2), ["KKK", "EEE", "KKK", "KKK"]),
+            # Tile(11, 1, self.get_sprite(4, 2), ["KKK", "EEE", "KKK", "KKK"]).flip(False, True),
+
+            # # 6 0
+            # Tile(13, 0, self.get_sprite(6, 0), ["LLL", "DDD", "DDD", "000"]),
+            # Tile(13, 1, self.get_sprite(6, 0), ["LLL", "DDD", "DDD", "000"]).flip(True, False),
+
+            # # 6 1
+            # Tile(15, 0, self.get_sprite(6, 1), ["CCC", "DDD", "LLL", "000"]),
+            # Tile(15, 1, self.get_sprite(6, 1), ["CCC", "DDD", "LLL", "000"]).flip(True, False),
+
+
+            # Tile(17, 0, self.get_sprite(9, 0), ["MMM", "NNN", "CCC", "DDD"]),
+            # Tile(17, 1, self.get_sprite(10, 1), ["EEE", "DDD", "KKK", "DDD"]),
+            # Tile(18, 0, self.get_sprite(10, 0), ["CCC", "QQQ", "CCC", "000"]),
+            # Tile(18, 1, self.get_sprite(9, 1), ["CCC", "000", "CCC", "RRR"]),
+            
+            # Tile(20, 0, self.get_sprite(12, 0), ["MMM", "VVV", "YYY", "RRR"]),
+            # Tile(21, 0, self.get_sprite(13, 0), ["MMM", "QQQ", "YYY", "RRR"]),
+
+            # Tile(20, 1, self.get_sprite(12, 1), ["WWW", "XXX", "KKK", "RRR"]),
+            # Tile(21, 1, self.get_sprite(13, 1), ["WWW", "XXX", "KKK", "RRR"]),
+
+            # Tile(22, 0, self.get_sprite(15, 0), ["MMM", "RRR", "WWW", ""]),
         ]
         self.initialize_generation()
     
@@ -142,26 +214,26 @@ class Level:
         self.initialize_grid()
 
         # Initial state
-        # arr = numpy.arange(15*15).reshape(15, 15)
-        # alist = [arr[0,:-1], arr[:-1,-1], arr[-1,::-1], arr[-2:0:-1,0]]
-        # numpy.concatenate(alist)
-        # for array in alist:
-        #     for index in array:
-        #         GRID[index].collapsed = True
-        #         GRID[index].options = [SPRITES[12]]
+        arr = numpy.arange(15*15).reshape(15, 15)
+        alist = [arr[0,:-1], arr[:-1,-1], arr[-1,::-1], arr[-2:0:-1,0]]
+        numpy.concatenate(alist)
+        for array in alist:
+            for index in array:
+                GRID[index].collapsed = True
+                GRID[index].options = [SPRITES[0]]
         
 
     def run(self, dt):
         global SPRITES, GRID, VISITED, DIM
         self.display_surface.fill("black")
 
-        for y in range(DIM):
-            for x in range(DIM):
-                working_cell = GRID[x + y * DIM]
-                if working_cell.collapsed:
-                    if working_cell.options:
-                        sprite = working_cell.options[0]
-                        self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
+        # for y in range(DIM):
+        #     for x in range(DIM):
+        #         working_cell = GRID[x + y * DIM]
+        #         if working_cell.collapsed:
+        #             if working_cell.options:
+        #                 sprite = working_cell.options[0]
+        #                 self.display_surface.blit(sprite["Image"], (x * TILE_SIZE, y * TILE_SIZE))
         
         #  pick cell with the least entropy
         GRIDCOPY = GRID.copy();
@@ -194,7 +266,7 @@ class Level:
                             validSprites = []
                             lookup = GRID[x + (y - 1) * DIM]
                             for sprite in lookup.options:
-                                validSprites.extend(sprite["Entropy"][2])
+                                validSprites.extend(sprite["Entropy"][ENTROPY_DICT[2]])
                         
                         if x < (DIM - 1):
                             validSprites = []
@@ -221,9 +293,11 @@ class Level:
             GRID = nextGrid
 
         for sprite in SPRITES:
-            print(sprite.edges)
+            if self.index == 0:
+                print(sprite.edges)
             self.display_surface.blit(sprite.image, sprite.rect)
-        sys.exit(1)
+        
+        self.index += 1
         # print(SPRITES[0]["Entropy"])
         # self.stupid_check(SPRITES[0])
         self.level_sprites.draw(self.display_surface)
