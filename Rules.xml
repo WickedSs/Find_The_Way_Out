@@ -1,24 +1,8 @@
 <?xml version="1.0"?>
-
-<!-- flip -->
-<!-- H > horizontal, vertical, horizontal and vertical -->
-<!--  -->
-<!-- end flip -->
 <Tiles>
-    <Flip>
-        <Tile index="0" flip="H" weight="5"/>
-        <!-- 1 --> 
-        <!-- 2 -->
-        <!-- 3 -->
-        <Tile index="4" flip="X" weight="60"/>
-        <Tile index="5" flip="X" weight="60"/>
-
-        <Tile index="6" flip="X" weight="45"/>
-        <Tile index="7" flip="X" weight="45"/>
-
-    </Flip>
     <Rules>
-        <Rule index="0" right="2"/>
-        <Rule index="0" right="2"/>
+        <Rule index="0" top="71" />
+        <Rule index="0" right="1, 2, 7, 29"/>
+        <Rule index="0" left="72" />
     </Rules>
 </Tiles>
