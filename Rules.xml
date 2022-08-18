@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<!-- flip -->
+<!-- H > horizontal, vertical, horizontal and vertical -->
+<!--  -->
+<!-- end flip -->
+<Tiles>
+    <Flip>
+        <Tile index="0" flip="H"/>
+    </Flip>
+    <Rules>
+        
+    </Rules>
+</Tiles>
