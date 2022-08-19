@@ -12,17 +12,17 @@
         <Rule index="7" top="13" right="36, 30" down="13" left="12" />
         <Rule index="8" top="3" right="29, 2" down="11, 27" left="36, 29, 32, 35, 33" />
         <Rule index="9" top="3"  right="36, 30, 32, 37, 34"  down="13, 28"  left="30, 0"/>
-        <Rule index="10" top="3" right="34, 37, 32, 43, 46, 36" down="26" left="33, 45, 32, 43, 35, 36"/>
+        <Rule index="10" top="3" right="34, 37, 32, 43, 46, 36" down="26, 14" left="33, 45, 32, 43, 35, 36"/>
         <Rule index="11" top="0, 5, 17" right="12" down="11, 23, 17, 16" left="60"/>
         <Rule index="12" top="1" right="4, 7" down="24" left="5, 17"/>
         <Rule index="13" top="2, 13, 4, 7" right="58" down="25, 13, 15, 7" left="12"/>
-        <Rule index="14" top="" right="" down="" left=""/>
-        <Rule index="15" top="" right="" down="" left=""/>
-        <Rule index="16" top="" right="" down="" left=""/>
-        <Rule index="17" top="" right="" down="" left=""/>
-        <Rule index="18" top="" right="" down="" left=""/>
-        <Rule index="19" top="" right="" down="" left=""/>
-        <Rule index="20" top="" right="" down="" left=""/>
+        <Rule index="14" top="3" right="58, 61" down="26, 14" left="60, 61"/>
+        <Rule index="15" top="13, 7" right="1, 29, 6" down="12" left="12"/>
+        <Rule index="16" top="11, 17" right="12" down="12" left="1, 30, 6"/>
+        <Rule index="17" top="11" right="12" down="11" left="36"/>
+        <Rule index="18" top="12" right="24, 41" down="26, 14" left="24, 42"/>
+        <Rule index="19" top="39" right="41, 24" down="26, 14" left="36, 33, 45, 32, 35"/>
+        <Rule index="20" top="40" right="36, 33, 45, 32, 35" down="14, 26" left="24"/>
         <Rule index="21" top="" right="" down="" left=""/>
         <Rule index="22" top="" right="" down="" left=""/>
         <Rule index="23" top="" right="" down="" left=""/>
