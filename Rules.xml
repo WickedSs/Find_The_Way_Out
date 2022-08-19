@@ -1,8 +1,99 @@
 <?xml version="1.0"?>
 <Tiles>
     <Rules>
-        <Rule index="0" top="71" />
-        <Rule index="0" right="1, 2, 7, 29"/>
-        <Rule index="0" left="72" />
+        <!-- top, right, down and left numbers are indexes of tiles in SPRITES (Level.py) -->
+        <Rule index="0" top="70" right="1, 2, 9, 29" down="11, 23, 27, 42" left="72, 61"/>
+        <Rule index="1" top="71" right="1, 2, 6, 29" down="12"  left="1, 0, 6, 30" />
+        <Rule index="2" top="72" right="70, 61" down="13, 25, 28, 29, 41" left="0, 1, 8, 30" />
+        <Rule index="3" top="71" right="70" down="14, 6, 10, 43" left="72" />
+        <Rule index="4" top="12" right="24, 25, 41" down="13" left="12" />
+        <Rule index="5" top="12" right="12" down="11" left="24, 23, 42" />
+        <Rule index="6" top="3" right="1, 2" down="12" left="1, 0" />
+        <Rule index="7" top="13" right="36, 30" down="13" left="12" />
+        <Rule index="8" top="3" right="29, 2" down="11, 27" left="36, 29, 32, 35, 33" />
+        <Rule index="9" top="3"  right="36, 30, 32, 37, 34"  down="13, 28"  left="30, 0"/>
+        <Rule index="10" top="3" right="34, 37, 32, 43, 46, 36" down="26" left="33, 45, 32, 43, 35, 36"/>
+        <Rule index="11" top="0, 5, 17" right="12" down="11, 23, 17, 16" left="60"/>
+        <Rule index="12" top="1" right="4, 7" down="24" left="5, 17"/>
+        <Rule index="13" top="2, 13, 4, 7" right="58" down="25, 13, 15, 7" left="12"/>
+        <Rule index="14" top="" right="" down="" left=""/>
+        <Rule index="15" top="" right="" down="" left=""/>
+        <Rule index="16" top="" right="" down="" left=""/>
+        <Rule index="17" top="" right="" down="" left=""/>
+        <Rule index="18" top="" right="" down="" left=""/>
+        <Rule index="19" top="" right="" down="" left=""/>
+        <Rule index="20" top="" right="" down="" left=""/>
+        <Rule index="21" top="" right="" down="" left=""/>
+        <Rule index="22" top="" right="" down="" left=""/>
+        <Rule index="23" top="" right="" down="" left=""/>
+        <Rule index="24" top="" right="" down="" left=""/>
+        <Rule index="25" top="" right="" down="" left=""/>
+        <Rule index="26" top="" right="" down="" left=""/>
+        <Rule index="27" top="" right="" down="" left=""/>
+        <Rule index="28" top="" right="" down="" left=""/>
+        <Rule index="29" top="" right="" down="" left=""/>
+        <Rule index="30" top="" right="" down="" left=""/>
+        <Rule index="31" top="" right="" down="" left=""/>
+        <Rule index="32" top="" right="" down="" left=""/>
+        <Rule index="33" top="" right="" down="" left=""/>
+        <Rule index="34" top="" right="" down="" left=""/>
+        <Rule index="35" top="" right="" down="" left=""/>
+        <Rule index="36" top="71" right="32, 43, 34, 36, 46" down="48" left="32, 43, 33, 36, 45"/>
+        <Rule index="37" top="" right="" down="" left=""/>
+        <Rule index="38" top="" right="" down="" left=""/>
+        <Rule index="39" top="" right="" down="" left=""/>
+        <Rule index="40" top="" right="" down="" left=""/>
+        <Rule index="41" top="" right="" down="" left=""/>
+        <Rule index="42" top="" right="" down="" left=""/>
+        <Rule index="43" top="" right="" down="" left=""/>
+        <Rule index="45" top="" right="" down="" left=""/>
+        <Rule index="46" top="" right="" down="" left=""/>
+        <Rule index="47" top="" right="" down="" left=""/>
+        <Rule index="48" top="" right="" down="" left=""/>
+        <Rule index="49" top="" right="" down="" left=""/>
+        <Rule index="50" top="" right="" down="" left=""/>
+        <Rule index="51" top="" right="" down="" left=""/>
+        <Rule index="52" top="" right="" down="" left=""/>
+        <Rule index="53" top="" right="" down="" left=""/>
+        <Rule index="54" top="" right="" down="" left=""/>
+        <Rule index="55" top="" right="" down="" left=""/>
+        <Rule index="56" top="" right="" down="" left=""/>
+        <Rule index="57" top="" right="" down="" left=""/>
+        <Rule index="58" top="" right="" down="" left=""/>
+        <Rule index="59" top="" right="" down="" left=""/>
+        <Rule index="60" top="" right="" down="" left=""/>
+        <Rule index="61" top="" right="" down="" left=""/>
+        <Rule index="62" top="" right="" down="" left=""/>
+        <Rule index="63" top="" right="" down="" left=""/>
+        <Rule index="64" top="" right="" down="" left=""/>
+        <Rule index="65" top="" right="" down="" left=""/>
+        <Rule index="66" top="" right="" down="" left=""/>
+        <Rule index="67" top="" right="" down="" left=""/>
+        <Rule index="68" top="" right="" down="" left=""/>
+        <Rule index="69" top="" right="" down="" left=""/>
+        <Rule index="70" top="" right="" down="" left=""/>
+        <Rule index="71" top="" right="" down="" left=""/>
+        <Rule index="72" top="" right="" down="" left=""/>
+        <Rule index="73" top="" right="" down="" left=""/>
+        <Rule index="74" top="" right="" down="" left=""/>
+        <Rule index="75" top="" right="" down="" left=""/>
+        <Rule index="76" top="" right="" down="" left=""/>
+        <Rule index="77" top="" right="" down="" left=""/>
+        <Rule index="78" top="" right="" down="" left=""/>
+        <Rule index="79" top="" right="" down="" left=""/>
+        <Rule index="80" top="" right="" down="" left=""/>
+        <Rule index="81" top="" right="" down="" left=""/>
+        <Rule index="82" top="" right="" down="" left=""/>
+        <Rule index="83" top="" right="" down="" left=""/>
+        <Rule index="84" top="" right="" down="" left=""/>
+        <Rule index="85" top="" right="" down="" left=""/>
+        <Rule index="86" top="" right="" down="" left=""/>
+        <Rule index="87" top="" right="" down="" left=""/>
+        <Rule index="88" top="" right="" down="" left=""/>
+        <Rule index="89" top="" right="" down="" left=""/>
+        <Rule index="90" top="" right="" down="" left=""/>
+        <Rule index="91" top="" right="" down="" left=""/>
+        <Rule index="92" top="" right="" down="" left=""/>
+        <Rule index="93" top="" right="" down="" left=""/>
     </Rules>
 </Tiles>

@@ -13,12 +13,11 @@ DIM = 2
 
 
 class Tile:
-    def __init__(self, x, y, image, edges):
+    def __init__(self, x, y, image):
         self.image = image
         self.x, self.y = x, y
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x * TILE_SIZE, self.y * TILE_SIZE
-        self.edges = edges
         self.up, self.right, self.down, self.left = [], [], [], []
     
     def reverseString(self, s):
@@ -51,11 +50,7 @@ class Tile:
             # LEFT
             horizontal_tile, horizontal_local = tile.edges[1].split(","), self.edges[3].split(",")
             if (self.compareEdge(horizontal_tile, horizontal_local) > 0):
-                self.left.append(i);
-
-        
-        print(self.up, self.right, self.down, self.left)
-    
+                self.left.append(i);    
 
     def rotate(self, angle):
         new_image = pygame.transform.rotate(self.image, 90 * angle)
@@ -107,8 +102,6 @@ class Tile:
             
         return Tile(self.x, self.y, new_image, new_edges)
 
-# E4$yP4$$c0d3
-
 class Cell:
     def __init__(self, index):
         self.index = index
@@ -121,11 +114,8 @@ class Cell:
     def set_options(self, options):
         self.options = options
     
-
-
 class Level:
     spritesheet_filename = os.path.join(ROOT, "Assets/Spritesheet.png")
-    example_file_01 = os.path.join(ROOT, "Assets/Example-01.png")
     rules_file = os.path.join(ROOT, "Rules.xml")
     def __init__(self):
         global SPRITES
@@ -136,59 +126,6 @@ class Level:
         self.level_sprites = pygame.sprite.Group()
         self.layout_in_use = "First_Layout"
         self.index = 0
-        SPRITES = [
-
-            Tile(44, 0, self.get_sprite(1, 1), ["000, LLM", "000", "000", "000"]),
-            # 0 0
-            Tile(0, 0, self.get_sprite(0, 0), ["ABB, IHG", "JCD", "EFF", "FFA"]),
-            Tile(1, 0, self.get_sprite(0, 0), ["ABB, IHG", "JCD", "EFF", "FFA"]).flip(True, False),
-            Tile(0, 1, self.get_sprite(0, 0), ["ABB, IHG", "JCD", "EFF", "FFA"]).flip(False, True),
-            Tile(1, 1, self.get_sprite(0, 0), ["ABB, IHG", "JCD", "EFF", "FFA"]).flip(True, True),
-            
-            # # 1 0
-            Tile(3, 0, self.get_sprite(1, 0), ["BBB, IHG", "JCK, NCB, DCJ", "LLM, 000", "NCB, KCJ, JCD"]),
-            Tile(3, 1, self.get_sprite(1, 2), ["NON, 000", "KCJ", "BBB", "JCK"]),
-            
-            # Tile(3, 0, self.get_sprite(1, 6), ["GHI", "IJJ", "JJJ", "JJK"]),
-            # Tile(3, 1, self.get_sprite(1, 6), ["GHI", "IJJ", "JJJ", "JJK"]).flip(False, True),
-
-            # # 0 1
-            # Tile(5, 0, self.get_sprite(0, 1), ["CCC", "GGG", "CCC", "HHH"]),
-            # Tile(5, 1, self.get_sprite(2, 1), ["CCC", "HHH", "CCC", "GGG"]),
-
-            # # 4 0
-            # Tile(7, 0, self.get_sprite(4, 0), ["III", "DDD", "JJJ", "DDD"]),
-            # Tile(7, 1, self.get_sprite(4, 0), ["III", "DDD", "JJJ", "DDD"]).flip(False, True),
-            
-            # # 4 1
-            # Tile(9, 0, self.get_sprite(4, 1), ["KKK", "KKK", "KKK", "KKK"]),
-
-            # # 4 2
-            # Tile(11, 0, self.get_sprite(4, 2), ["KKK", "EEE", "KKK", "KKK"]),
-            # Tile(11, 1, self.get_sprite(4, 2), ["KKK", "EEE", "KKK", "KKK"]).flip(False, True),
-
-            # # 6 0
-            # Tile(13, 0, self.get_sprite(6, 0), ["LLL", "DDD", "DDD", "000"]),
-            # Tile(13, 1, self.get_sprite(6, 0), ["LLL", "DDD", "DDD", "000"]).flip(True, False),
-
-            # # 6 1
-            # Tile(15, 0, self.get_sprite(6, 1), ["CCC", "DDD", "LLL", "000"]),
-            # Tile(15, 1, self.get_sprite(6, 1), ["CCC", "DDD", "LLL", "000"]).flip(True, False),
-
-
-            # Tile(17, 0, self.get_sprite(9, 0), ["MMM", "NNN", "CCC", "DDD"]),
-            # Tile(17, 1, self.get_sprite(10, 1), ["EEE", "DDD", "KKK", "DDD"]),
-            # Tile(18, 0, self.get_sprite(10, 0), ["CCC", "QQQ", "CCC", "000"]),
-            # Tile(18, 1, self.get_sprite(9, 1), ["CCC", "000", "CCC", "RRR"]),
-            
-            # Tile(20, 0, self.get_sprite(12, 0), ["MMM", "VVV", "YYY", "RRR"]),
-            # Tile(21, 0, self.get_sprite(13, 0), ["MMM", "QQQ", "YYY", "RRR"]),
-
-            # Tile(20, 1, self.get_sprite(12, 1), ["WWW", "XXX", "KKK", "RRR"]),
-            # Tile(21, 1, self.get_sprite(13, 1), ["WWW", "XXX", "KKK", "RRR"]),
-
-            # Tile(22, 0, self.get_sprite(15, 0), ["MMM", "RRR", "WWW", ""]),
-        ]
         self.initialize_generation()
     
     def get_sprite(self, x, y):
@@ -214,8 +151,21 @@ class Level:
     
     def parse_rules(self):
         root = self.rules.getroot()
-        for tile in root:
-            print(tile.tag, tile.attrib)
+        for Rules in root:
+            for rule in Rules.findall("Rule"):
+                indexAttrib = list(rule.attrib.keys())[0]
+                agencencyAttribs = list(rule.attrib.keys())[1:5]
+                tileIndex = int(rule.get(indexAttrib))
+                for agencency in agencencyAttribs:
+                    agenciesList = rule.get(agencency).split(",")
+                    if agencency == "top":
+                        SPRITES[tileIndex].up.extend([int(agency) for agency in agenciesList])
+                    if agencency == "left":
+                        SPRITES[tileIndex].left.extend([int(agency) for agency in agenciesList])
+                    if agencency == "down":
+                        SPRITES[tileIndex].down.extend([int(agency) for agency in agenciesList])
+                    if agencency == "right":
+                        SPRITES[tileIndex].left.extend([int(agency) for agency in agenciesList])
 
     def checkValid(self, array, valid):
         for i in range(len(array)):
@@ -228,25 +178,37 @@ class Level:
         
         return array
 
-    def setup_adjacency(self):
-        for sprite in SPRITES:
-            sprite.analyze()
-
     def initialize_grid(self):
         for i in range(DIM * DIM):
             cell = Cell(index=i)
             GRID.append(cell)
 
+    def initialize_sprite(self):
+        constraints = SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
+        for y in range(0, constraints["Height"], TILE_SIZE):
+            for x in range(0, constraints["Width"], TILE_SIZE):
+                image = self.get_sprite(x, y)
+                pxarray = pygame.PixelArray(image)
+                print(pxarray)
+                if numpy.count_nonzero(pxarray) > 1:
+                    print(x, y, "Not null")
+                    tile = Tile(x, y, image)
+                    SPRITES.append(tile)
+                else:
+                    print(x, y, "Null")
+            sys.exit(1)
+        
     def initialize_generation(self):
 
         # initialize grid and sprites into json array
+        self.initialize_sprite()
+        print(len(SPRITES))
+        self.initialize_grid()
+        print(len(GRID))
         self.parse_rules()
-        # self.initialize_grid()
-        # self.setup_adjacency()
-        sys.exit(1)
 
-        GRID[0].collapsed = True
-        GRID[0].options = [0]
+        # GRID[0].collapsed = True
+        # GRID[0].options = [0]
 
         # Initial state
         # arr = numpy.arange(15*15).reshape(15, 15)
@@ -267,7 +229,6 @@ class Level:
                 working_cell = GRID[x + y * DIM]
                 if working_cell.collapsed:
                     if working_cell.options:
-                        print(len(working_cell.options))
                         sprite = working_cell.options[0]
                         self.display_surface.blit(SPRITES[sprite].image, (x * TILE_SIZE, y * TILE_SIZE))
         
