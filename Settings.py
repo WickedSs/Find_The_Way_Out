@@ -11,8 +11,8 @@ GAME_LAYERS = ["LEVEL", "DECORATION"]
 SPRITESHEET_LAYOUT = {
     "First_Layout": {
         "Constraints" : {
-            "Width" : 512,
-            "Height" : 320
+            "Width" : 544,
+            "Height" : 352
         },
         "Collide" : {
             "From" : (0, 0),

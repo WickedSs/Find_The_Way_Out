@@ -152,8 +152,38 @@ class Level:
                 array[i].append(pxarray[i][j])
         
         return array
-    
-    def parse_rules(self):
+        
+    def checkValid(self, array, valid):
+        return list(set(array).intersection(valid))
+
+    def initialize_grid(self):
+        for i in range(DIM * DIM):
+            cell = Cell(index=i, not_included=self.not_included)
+            GRID.append(cell)
+        
+        # GRID[0].collapsed = True
+        # GRID[0].options = [12]
+        
+        # Initial state of GRID
+        # arr = numpy.arange(15*15).reshape(15, 15)
+        # alist = [arr[0,:-1], arr[:-1,-1], arr[-1,::-1], arr[-2:0:-1,0]]
+        # numpy.concatenate(alist)
+        # for array in alist:
+        #     for index in array:
+        #         GRID[index].collapsed = True
+        #         GRID[index].options = [SPRITES[0]]
+
+    def initialize_sprite(self):
+        constraints = SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
+        for y in range(0, constraints["Height"], TILE_SIZE):
+            for x in range(0, constraints["Width"], TILE_SIZE):
+                image = self.get_sprite(x, y)
+                pxarray = self.convert_pixelarray(pygame.PixelArray(image))
+                if numpy.count_nonzero(pxarray) > 1:
+                    tile = Tile(x, y, image)
+                    SPRITES.append(tile)
+        
+        print(len(SPRITES))
         index = 0
         root = self.rules.getroot()
         for Rules in root:
@@ -163,7 +193,7 @@ class Level:
                 tileIndex = int(rule.get(indexAttrib))
                 for agencency in agencencyAttribs:
                     agenciesList = rule.get(agencency).split(",")
-                    if len(agenciesList[0]) > 0:
+                    if len(agenciesList) > 0:
                         if agencency == "top":
                             SPRITES[tileIndex].up.extend([int(agency) for agency in agenciesList])
                         if agencency == "left":
@@ -176,46 +206,11 @@ class Level:
                         self.not_included.append(index)
                 
                 index += 1
-        
-    def checkValid(self, array, valid):
-        return list(set(array) & set(valid))
-
-    def initialize_grid(self):
-        for i in range(DIM * DIM):
-            cell = Cell(index=i, not_included=self.not_included)
-            GRID.append(cell)
-
-    def initialize_sprite(self):
-        constraints = SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
-        for y in range(0, constraints["Height"], TILE_SIZE):
-            for x in range(0, constraints["Width"], TILE_SIZE):
-                image = self.get_sprite(x, y)
-                pxarray = self.convert_pixelarray(pygame.PixelArray(image))
-                if numpy.count_nonzero(pxarray) > 1:
-                    tile = Tile(x, y, image)
-                    SPRITES.append(tile)
-                
 
     def initialize_generation(self):
-
-        # initialize grid and sprites into json array
         self.initialize_sprite()
-        self.parse_rules()
         self.initialize_grid()
-        # print(len(SPRITES), len(GRID))
-
-        GRID[0].collapsed = True
-        GRID[0].options = [12]
-
-        # Initial state
-        # arr = numpy.arange(15*15).reshape(15, 15)
-        # alist = [arr[0,:-1], arr[:-1,-1], arr[-1,::-1], arr[-2:0:-1,0]]
-        # numpy.concatenate(alist)
-        # for array in alist:
-        #     for index in array:
-        #         GRID[index].collapsed = True
-        #         GRID[index].options = [SPRITES[0]]
-        
+    
 
     def run(self, dt):
         global SPRITES, GRID, VISITED, DIM
@@ -223,17 +218,19 @@ class Level:
 
         for y in range(DIM):
             for x in range(DIM):
-                working_cell = GRID[x + y * DIM]
-                if working_cell.collapsed:
-                    if working_cell.options:
-                        sprite = working_cell.options[0]
-                        self.display_surface.blit(SPRITES[sprite].image, (x * TILE_SIZE, y * TILE_SIZE))
+                cell = GRID[x + y * DIM]
+                if cell.collapsed:
+                    sprite = random.choice(cell.options)
+                    self.display_surface.blit(SPRITES[sprite].image, (x * TILE_SIZE, y * TILE_SIZE))
         
 
         #  pick cell with the least entropy
         GRIDCOPY = GRID.copy();
+        print("GRIDCOPY: ", [copy.index for copy in GRIDCOPY], [copy.collapsed for copy in GRIDCOPY])
         GRIDCOPY = list(filter(lambda x: x.collapsed == False, GRIDCOPY))
+        print("GRIDCOPY[FILTERED]: ", [filtered.index for filtered in GRIDCOPY], [filtered.collapsed for filtered in GRIDCOPY])
         GRIDCOPY.sort(key = lambda x : len(x.options))
+        print("GRIDCOPY[SORTED]: ", [sort.index for sort in GRIDCOPY], [sort.collapsed for sort in GRIDCOPY])
         
         # GRIDCOPY = []
         if len(GRIDCOPY) > 0:
@@ -243,16 +240,17 @@ class Level:
                     stopIndex = i;
                     break
             
-            if stopIndex > 0: 
-                GRIDCOPY = GRIDCOPY[0:stopIndex]
+            print("STOPINDEX: ", stopIndex)
+            if stopIndex > 0: GRIDCOPY = GRIDCOPY[0:stopIndex]
             picked_cell = random.choice(GRIDCOPY)
             picked_cell.collapsed = True
             if len(picked_cell.options) > 0:
                 pick = random.choice(picked_cell.options)
                 picked_cell.options = [pick]
             else:
+                GRID.clear()
                 self.initialize_grid()
-
+            
             nextGrid = [None for i in GRID]
             for y in range(DIM):
                 for x in range(DIM):
@@ -268,42 +266,38 @@ class Level:
                         if y > 0:
                             validOptions = []
                             lookup = GRID[x + (y - 1) * DIM]
-                            if lookup.collapsed:
-                                valid = SPRITES[lookup.options[0]].down
+                            for option in lookup.options:
+                                valid = SPRITES[option].down
                                 validOptions.extend(valid)
-                                print("DOWN: ", validOptions)
-                                options = self.checkValid(options, validOptions);
-                                print("Final Options: ", options)
+                            options = self.checkValid(options, validOptions);
+                            print("Final Options: ", options)
                         
                         if x < (DIM - 1):
                             validOptions = []
                             lookright = GRID[( x + 1 ) + y  * DIM]
-                            if lookright.collapsed:
-                                valid = SPRITES[lookright.options[0]].left
+                            for option in lookright.options:
+                                valid = SPRITES[option].left
                                 validOptions.extend(valid)
-                                print("LEFT: ", validOptions)
-                                options = self.checkValid(options, validOptions);
-                                print("Final Options: ", options)
+                            options = self.checkValid(options, validOptions);
+                            print("Final Options: ", options)
                         
                         if y < (DIM - 1):
                             validOptions = []
                             lookdown = GRID[x + (y + 1) * DIM]
-                            if lookdown.collapsed:
-                                valid = SPRITES[lookdown.options[0]].up
+                            for option in lookdown.options:
+                                valid = SPRITES[option].up
                                 validOptions.extend(valid)
-                                print("UP: ", validOptions)
-                                options = self.checkValid(options, validOptions);
-                                print("Final Options: ", options)
+                            options = self.checkValid(options, validOptions);
+                            print("Final Options: ", options)
                         
                         if x > 0:
                             validOptions = []
                             lookleft = GRID[( x - 1 ) + y * DIM]
-                            if lookleft.collapsed:
-                                valid = SPRITES[lookleft.options[0]].right
+                            for option in lookleft.options:   
+                                valid = SPRITES[option].right
                                 validOptions.extend(valid)
-                                print("RIGHT: ", validOptions)
-                                options = self.checkValid(options, validOptions);
-                                print("Final Options: ", options)
+                            options = self.checkValid(options, validOptions);
+                            print("Final Options: ", options)
                         
                         print("Remaining: ", x, y, options)
                         nextGrid[index] = Cell(index, self.not_included)
