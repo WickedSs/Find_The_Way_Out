@@ -10,7 +10,7 @@ ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 SPRITES = []
 GRID = []
 VISITED = []
-DIM = 2
+DIM = 8
 
 
 class Tile:
@@ -119,6 +119,7 @@ class Level:
         return array
         
     def checkValid(self, array, valid):
+        valid = list(set(valid))
         for i in range(len(array) - 1, -1, -1):
             element = array[i]
             if element not in valid:
@@ -126,19 +127,22 @@ class Level:
         
         return array
 
+    def most_frequent(self, array):
+        return max(set(array), key = array.count)
+
     def initialize_grid(self):
         for i in range(DIM * DIM):
             cell = Cell(index=i)
             GRID.append(cell)
         
         # Initial state of GRID
-        # arr = numpy.arange(15*15).reshape(15, 15)
-        # alist = [arr[0,:-1], arr[:-1,-1], arr[-1,::-1], arr[-2:0:-1,0]]
-        # numpy.concatenate(alist)
-        # for array in alist:
-        #     for index in array:
-        #         GRID[index].collapsed = True
-        #         GRID[index].options = [SPRITES[0]]
+        arr = numpy.arange(DIM*DIM).reshape(DIM, DIM)
+        alist = [arr[0,:-1], arr[:-1,-1], arr[-1,::-1], arr[-2:0:-1,0]]
+        numpy.concatenate(alist)
+        for array in alist:
+            for index in array:
+                GRID[index].collapsed = True
+                GRID[index].options = [12]
 
     def initialize_sprite(self):
         constraints = SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
@@ -199,16 +203,12 @@ class Level:
         if len(GRIDCOPY) > 0:
             length, stopIndex = len(GRIDCOPY[0].options), 0
             for i in range(1, len(GRIDCOPY), 1):
-                if len(GRIDCOPY[i].options) < length:
+                if len(GRIDCOPY[i].options) > length:
                     stopIndex = i;
                     break
             
-            randIndex = stopIndex
-            if stopIndex > 0: 
-                GRIDCOPY = [GRIDCOPY[stopIndex]]
-            else:
-                randIndex = random.randrange(0, len(GRIDCOPY))
-            cell = GRIDCOPY[randIndex]
+            if stopIndex > 0: GRIDCOPY = [GRIDCOPY[stopIndex]]
+            cell = random.choice(GRIDCOPY)
             cell.collapsed = True
             pick = random.choice(cell.options)
             cell.options = [pick]
@@ -220,45 +220,38 @@ class Level:
                     if GRID[index].collapsed:
                         nextGrid[index] = GRID[index]
                     else:
-                        options = [i for i in range(len(SPRITES))]
+                        validOptions = []
                         if y > 0:
                             lookup = GRID[x + (y - 1) * DIM]
-                            validOptions = []
                             for option in lookup.options:
                                 valid = SPRITES[option].down
                                 validOptions.extend(valid)
-                            options = self.checkValid(options, validOptions);
                         
                         if x < (DIM - 1):
-                            validOptions = []
                             lookright = GRID[( x + 1 ) + y  * DIM]
                             for option in lookright.options:
                                 valid = SPRITES[option].left
                                 validOptions.extend(valid)
-                            options = self.checkValid(options, validOptions);
                         
                         if y < (DIM - 1):
-                            validOptions = []
                             lookdown = GRID[x + (y + 1) * DIM]
                             for option in lookdown.options:
                                 valid = SPRITES[option].up
                                 validOptions.extend(valid)
-                            options = self.checkValid(options, validOptions);
 
                         if x > 0:
-                            validOptions = []
                             lookleft = GRID[( x - 1 ) + y * DIM]
                             for option in lookleft.options:   
                                 valid = SPRITES[option].right
                                 validOptions.extend(valid)
-                            options = self.checkValid(options, validOptions);
-                            print(x, y, "FINAL: ", options)
-
+                        
+                        validOptions = [self.most_frequent(validOptions)]
+                        # print(x, y, "FINAL: ", validOptions)
                         nextGrid[index] = Cell(index)
-                        nextGrid[index].set_options(options)
+                        nextGrid[index].set_options(validOptions)
 
             GRID = nextGrid
-            print("NEXTGRID: ", [len(grid.options) for grid in nextGrid if not grid.collapsed], self.index)
+            # print("NEXTGRID: ", [len(grid.options) for grid in nextGrid if not grid.collapsed], self.index)
             self.index += 1
         # for sprite in SPRITES:
         #     if self.index == 0:
