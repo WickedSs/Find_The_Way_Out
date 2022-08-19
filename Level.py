@@ -1,3 +1,4 @@
+from multiprocessing.resource_sharer import stop
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string, operator
 from Settings import *
@@ -18,39 +19,7 @@ class Tile:
         self.x, self.y = x, y
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x * TILE_SIZE, self.y * TILE_SIZE
-        self.up, self.right, self.down, self.left = [], [], [], []
-    
-    def reverseString(self, s):
-        arr = s.split('');
-        arr = arr.reverse();
-        return arr.join('');
-
-    def compareEdge(self, a, b):
-        return len(list(set(a).intersection(b)));
-
-    def analyze(self):
-        for i in range(len(SPRITES)):
-            tile = SPRITES[i];
-
-            # UP
-            vertical_tile, vertical_local = tile.edges[2].split(","), self.edges[0].split(",")
-            if (self.compareEdge(vertical_tile, vertical_local) > 0):
-                self.up.append(i);
-            
-            # RIGHT
-            horizontal_tile, horizontal_local = tile.edges[3].split(","), self.edges[1].split(",")
-            if (self.compareEdge(horizontal_tile, horizontal_local) > 0):
-                self.right.append(i);
-            
-            # DOWN
-            vertical_tile, vertical_local = tile.edges[0].split(","), self.edges[2].split(",") 
-            if (self.compareEdge(vertical_tile, vertical_local) > 0):
-                self.down.append(i);
-            
-            # LEFT
-            horizontal_tile, horizontal_local = tile.edges[1].split(","), self.edges[3].split(",")
-            if (self.compareEdge(horizontal_tile, horizontal_local) > 0):
-                self.left.append(i);    
+        self.up, self.right, self.down, self.left = [], [], [], [] 
 
     def rotate(self, angle):
         new_image = pygame.transform.rotate(self.image, 90 * angle)
@@ -103,14 +72,10 @@ class Tile:
         return Tile(self.x, self.y, new_image, new_edges)
 
 class Cell:
-    def __init__(self, index, not_included):
+    def __init__(self, index):
         self.index = index
         self.collapsed = False
-        self.not_included = not_included
-        if self.not_included:
-            self.options = [i for i in range(len(SPRITES)) if i not in self.not_included]
-        else:
-            self.options = [i for i in range(len(SPRITES))]
+        self.options = [i for i in range(len(SPRITES))]
             
     def rotate(self):
         return
@@ -154,15 +119,17 @@ class Level:
         return array
         
     def checkValid(self, array, valid):
-        return list(set(array).intersection(valid))
+        for i in range(len(array) - 1, -1, -1):
+            element = array[i]
+            if element not in valid:
+                array.remove(element)
+        
+        return array
 
     def initialize_grid(self):
         for i in range(DIM * DIM):
-            cell = Cell(index=i, not_included=self.not_included)
+            cell = Cell(index=i)
             GRID.append(cell)
-        
-        # GRID[0].collapsed = True
-        # GRID[0].options = [12]
         
         # Initial state of GRID
         # arr = numpy.arange(15*15).reshape(15, 15)
@@ -183,7 +150,6 @@ class Level:
                     tile = Tile(x, y, image)
                     SPRITES.append(tile)
         
-        print(len(SPRITES))
         index = 0
         root = self.rules.getroot()
         for Rules in root:
@@ -211,7 +177,6 @@ class Level:
         self.initialize_sprite()
         self.initialize_grid()
     
-
     def run(self, dt):
         global SPRITES, GRID, VISITED, DIM
         self.display_surface.fill("White")
@@ -222,35 +187,32 @@ class Level:
                 if cell.collapsed:
                     sprite = random.choice(cell.options)
                     self.display_surface.blit(SPRITES[sprite].image, (x * TILE_SIZE, y * TILE_SIZE))
-        
+                else:
+                    self.display_surface.blit(SPRITES[12].image, (x * TILE_SIZE, y * TILE_SIZE))
 
         #  pick cell with the least entropy
-        GRIDCOPY = GRID.copy();
-        print("GRIDCOPY: ", [copy.index for copy in GRIDCOPY], [copy.collapsed for copy in GRIDCOPY])
+        GRIDCOPY = GRID
         GRIDCOPY = list(filter(lambda x: x.collapsed == False, GRIDCOPY))
-        print("GRIDCOPY[FILTERED]: ", [filtered.index for filtered in GRIDCOPY], [filtered.collapsed for filtered in GRIDCOPY])
         GRIDCOPY.sort(key = lambda x : len(x.options))
-        print("GRIDCOPY[SORTED]: ", [sort.index for sort in GRIDCOPY], [sort.collapsed for sort in GRIDCOPY])
-        
+
         # GRIDCOPY = []
         if len(GRIDCOPY) > 0:
             length, stopIndex = len(GRIDCOPY[0].options), 0
             for i in range(1, len(GRIDCOPY), 1):
-                if len(GRIDCOPY[i].options) > length:
+                if len(GRIDCOPY[i].options) < length:
                     stopIndex = i;
                     break
             
-            print("STOPINDEX: ", stopIndex)
-            if stopIndex > 0: GRIDCOPY = GRIDCOPY[0:stopIndex]
-            picked_cell = random.choice(GRIDCOPY)
-            picked_cell.collapsed = True
-            if len(picked_cell.options) > 0:
-                pick = random.choice(picked_cell.options)
-                picked_cell.options = [pick]
+            randIndex = stopIndex
+            if stopIndex > 0: 
+                GRIDCOPY = [GRIDCOPY[stopIndex]]
             else:
-                GRID.clear()
-                self.initialize_grid()
-            
+                randIndex = random.randrange(0, len(GRIDCOPY))
+            cell = GRIDCOPY[randIndex]
+            cell.collapsed = True
+            pick = random.choice(cell.options)
+            cell.options = [pick]
+        
             nextGrid = [None for i in GRID]
             for y in range(DIM):
                 for x in range(DIM):
@@ -258,19 +220,14 @@ class Level:
                     if GRID[index].collapsed:
                         nextGrid[index] = GRID[index]
                     else:
-                        options = [i for i in range(len(SPRITES)) if i not in self.not_included]
-                        print("--------------", x, y, "--------------")
-                        print("Options: ", options)
-                        print("GRID: ", [grid.collapsed for grid in GRID])
-                        
+                        options = [i for i in range(len(SPRITES))]
                         if y > 0:
-                            validOptions = []
                             lookup = GRID[x + (y - 1) * DIM]
+                            validOptions = []
                             for option in lookup.options:
                                 valid = SPRITES[option].down
                                 validOptions.extend(valid)
                             options = self.checkValid(options, validOptions);
-                            print("Final Options: ", options)
                         
                         if x < (DIM - 1):
                             validOptions = []
@@ -279,7 +236,6 @@ class Level:
                                 valid = SPRITES[option].left
                                 validOptions.extend(valid)
                             options = self.checkValid(options, validOptions);
-                            print("Final Options: ", options)
                         
                         if y < (DIM - 1):
                             validOptions = []
@@ -288,8 +244,7 @@ class Level:
                                 valid = SPRITES[option].up
                                 validOptions.extend(valid)
                             options = self.checkValid(options, validOptions);
-                            print("Final Options: ", options)
-                        
+
                         if x > 0:
                             validOptions = []
                             lookleft = GRID[( x - 1 ) + y * DIM]
@@ -297,19 +252,14 @@ class Level:
                                 valid = SPRITES[option].right
                                 validOptions.extend(valid)
                             options = self.checkValid(options, validOptions);
-                            print("Final Options: ", options)
-                        
-                        print("Remaining: ", x, y, options)
-                        nextGrid[index] = Cell(index, self.not_included)
+                            print(x, y, "FINAL: ", options)
+
+                        nextGrid[index] = Cell(index)
                         nextGrid[index].set_options(options)
 
-                        print("")
-                        print("-----------------------------------")
-                        print("")
-                        
-            
             GRID = nextGrid
-
+            print("NEXTGRID: ", [len(grid.options) for grid in nextGrid if not grid.collapsed], self.index)
+            self.index += 1
         # for sprite in SPRITES:
         #     if self.index == 0:
         #         print(sprite.edges)
