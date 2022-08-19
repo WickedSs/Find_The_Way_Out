@@ -9,7 +9,7 @@ ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 SPRITES = []
 GRID = []
 VISITED = []
-DIM = 2
+DIM = 8
 
 
 class Tile:
@@ -131,7 +131,7 @@ class Level:
     def get_sprite(self, x, y):
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
-        sprite.blit(self.sprite_sheet, (0, 0), (x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE))
+        sprite.blit(self.sprite_sheet, (0, 0), (x, y, TILE_SIZE, TILE_SIZE))
         return sprite
 
     def process_sides(self, pxarray):
@@ -158,14 +158,15 @@ class Level:
                 tileIndex = int(rule.get(indexAttrib))
                 for agencency in agencencyAttribs:
                     agenciesList = rule.get(agencency).split(",")
-                    if agencency == "top":
-                        SPRITES[tileIndex].up.extend([int(agency) for agency in agenciesList])
-                    if agencency == "left":
-                        SPRITES[tileIndex].left.extend([int(agency) for agency in agenciesList])
-                    if agencency == "down":
-                        SPRITES[tileIndex].down.extend([int(agency) for agency in agenciesList])
-                    if agencency == "right":
-                        SPRITES[tileIndex].left.extend([int(agency) for agency in agenciesList])
+                    if agenciesList[0] != "":
+                        if agencency == "top":
+                            SPRITES[tileIndex].up.extend([int(agency) for agency in agenciesList])
+                        if agencency == "left":
+                            SPRITES[tileIndex].left.extend([int(agency) for agency in agenciesList])
+                        if agencency == "down":
+                            SPRITES[tileIndex].down.extend([int(agency) for agency in agenciesList])
+                        if agencency == "right":
+                            SPRITES[tileIndex].left.extend([int(agency) for agency in agenciesList])
 
     def checkValid(self, array, valid):
         for i in range(len(array)):
@@ -188,15 +189,10 @@ class Level:
         for y in range(0, constraints["Height"], TILE_SIZE):
             for x in range(0, constraints["Width"], TILE_SIZE):
                 image = self.get_sprite(x, y)
-                pxarray = pygame.PixelArray(image)
-                print(pxarray)
+                pxarray = self.convert_pixelarray(pygame.PixelArray(image))
                 if numpy.count_nonzero(pxarray) > 1:
-                    print(x, y, "Not null")
                     tile = Tile(x, y, image)
                     SPRITES.append(tile)
-                else:
-                    print(x, y, "Null")
-            sys.exit(1)
         
     def initialize_generation(self):
 
@@ -207,8 +203,8 @@ class Level:
         print(len(GRID))
         self.parse_rules()
 
-        # GRID[0].collapsed = True
-        # GRID[0].options = [0]
+        GRID[0].collapsed = True
+        GRID[0].options = [12]
 
         # Initial state
         # arr = numpy.arange(15*15).reshape(15, 15)
@@ -265,7 +261,7 @@ class Level:
                             validOptions = []
                             lookup = GRID[x + (y - 1) * DIM]
                             for option in lookup.options:
-                                valid = SPRITES[option].down
+                                valid = SPRITES[option].up
                                 validOptions.extend(valid)
                             options = self.checkValid(options, validOptions);
                         
@@ -273,7 +269,7 @@ class Level:
                             validOptions = []
                             lookright = GRID[( x + 1 ) + y  * DIM]
                             for option in lookright.options:
-                                valid = SPRITES[option].left
+                                valid = SPRITES[option].right
                                 validOptions.extend(valid)
                             options = self.checkValid(options, validOptions);
                         
@@ -281,7 +277,7 @@ class Level:
                             validOptions = []
                             lookdown = GRID[x + (y + 1) * DIM]
                             for option in lookdown.options:
-                                valid = SPRITES[option].up
+                                valid = SPRITES[option].down
                                 validOptions.extend(valid)
                             options = self.checkValid(options, validOptions);
 
@@ -289,7 +285,7 @@ class Level:
                             validOptions = []
                             lookleft = GRID[( x - 1 ) + y * DIM]
                             for option in lookleft.options:
-                                valid = SPRITES[option].right
+                                valid = SPRITES[option].left
                                 validOptions.extend(valid)
                             options = self.checkValid(options, validOptions);
                         
