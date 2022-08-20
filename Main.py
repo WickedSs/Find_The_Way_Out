@@ -29,7 +29,7 @@ class Game:
                     pygame.quit()
                     sys.exit()
             
-            dt = self.clock.tick() / 1000
+            dt = self.clock.tick(FPS) / 1000
             self.level.run(dt)
             self.players_group.draw(self.screen)
             self.players_group.update(dt)

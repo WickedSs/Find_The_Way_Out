@@ -39,7 +39,7 @@ class Level:
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
         sprite.blit(sprite_sheet, (0, 0), (x, y, TILE_SIZE, TILE_SIZE))
-        return sprite
+        return pygame.transform.scale(sprite, (SCALE_SIZE, SCALE_SIZE))
 
     def convert_pixelarray(self, pxarray):
         array = []
@@ -69,14 +69,17 @@ class Level:
                 SPRITES.append(tile)
         
     def draw_level(self):
-        for y in range(self.picked_level.room_height):
-            for x in range(self.picked_level.room_width):
-                index = x + y * self.picked_level.room_width
-                tile = self.picked_level.collide_layer[index] - 1
-                currentX, currentY = x * self.picked_level.tile_width, y * self.picked_level.tile_height
-                image = SPRITES[tile].image
-                self.display_surface.blit(image, (currentX, currentY))
-                
+        currentX, currentY = 0, 0
+        for x in range(len(self.picked_level.collide_layer)):
+            tile = self.picked_level.collide_layer[x] - 1
+            image = SPRITES[tile].image
+            x, y = currentX * SCALE_SIZE, currentY * SCALE_SIZE
+            self.display_surface.blit(image, (x, y))
+            currentX += 1
+            if currentX >= self.picked_level.room_width:
+                currentY += 1
+                currentX = 0
+        
     
     def run(self, dt):
         global SPRITES, GRID, VISITED, DIM
