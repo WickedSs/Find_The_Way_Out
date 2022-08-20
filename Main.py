@@ -1,7 +1,7 @@
 import pygame
 import os, sys
 from Settings import *
-from Level import *
+from WFC import *
 
 
 

@@ -2,11 +2,11 @@ from multiprocessing.resource_sharer import stop
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string, operator
 from Settings import *
-import elementpath
 import xml.etree.ElementTree as ET
 
 
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
+LEVELS_FOLDER = "Assets/Levels"
 SPRITES = []
 GRID = []
 VISITED = []
@@ -85,31 +85,26 @@ class Cell:
     
 class Level:
     spritesheet_filename = os.path.join(ROOT, "Assets/Spritesheet.png")
-    rules_file = os.path.join(ROOT, "Rules.xml")
     def __init__(self):
         global SPRITES
         self.display_surface = pygame.display.get_surface()
         self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
+        self.level_sprite_sheet = None
         self.sprite_sheet_rect = self.sprite_sheet.get_rect()
         self.rules = ET.parse(self.rules_file)
         self.level_sprites = pygame.sprite.Group()
         self.layout_in_use = "First_Layout"
-        self.index, self.not_included = 0, []
+        self.index, self.levels, self.picked_level = 0, [], 0
         self.DEFAULT_OPTIONS = []
+        self.load_levels()
         self.initialize_generation()
     
-    def get_sprite(self, x, y):
+    def get_sprite(self, x, y, sprite_sheet):
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
-        sprite.blit(self.sprite_sheet, (0, 0), (x, y, TILE_SIZE, TILE_SIZE))
+        sprite.blit(sprite_sheet, (0, 0), (x, y, TILE_SIZE, TILE_SIZE))
         return sprite
 
-    def process_sides(self, pxarray):
-        self.sides[0].extend(pxarray[0])
-        self.sides[2].extend(pxarray[31])
-        self.sides[1].extend(array[0] for array in pxarray)
-        self.sides[3].extend(array[31] for array in pxarray)
-    
     def convert_pixelarray(self, pxarray):
         array = []
         for i in range(len(pxarray)):
@@ -118,162 +113,40 @@ class Level:
                 array[i].append(pxarray[i][j])
         
         return array
-        
-    def checkValid(self, array, valid):
-        valid = list(set(valid))
-        for i in range(len(array) - 1, -1, -1):
-            element = array[i]
-            if element not in valid:
-                array.remove(element)
-        
-        return array
 
-    def most_frequent(self, array):
-        return max(set(array), key = array.count)
-
-    def initialize_grid(self):
-        for i in range(DIM * DIM):
-            cell = Cell(index=i)
-            GRID.append(cell)
-        
-        # Initial state of GRID
-        alist, value, valueIdx = [0, 7, 56, 63], [4, 5, 15, 16], 0
-        for index in alist:
-            GRID[index].collapsed = True
-            GRID[index].options = [value[valueIdx]]
-            valueIdx += 1
-
+    def load_levels(self):
+        folder = os.path.join(ROOT, LEVELS_FOLDER)
+        for (dirpath, dirnames, filenames) in os.walk(folder):
+            self.levels.extend(filenames)
+    
     def initialize_sprite(self):
         constraints = SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
         for y in range(0, constraints["Height"], TILE_SIZE):
             for x in range(0, constraints["Width"], TILE_SIZE):
-                image = self.get_sprite(x, y)
+                image = self.get_sprite(x, y, self.sprite_sheet)
                 pxarray = self.convert_pixelarray(pygame.PixelArray(image))
                 if numpy.count_nonzero(pxarray) > 1:
                     tile = Tile(x, y, image)
                     SPRITES.append(tile)
-        
-        self.DEFAULT_OPTIONS = [i for i in range(len(SPRITES))]
-        index = 0
-        root = self.rules.getroot()
-        for Rules in root:
-            for rule in Rules.findall("Rule"):
-                indexAttrib = list(rule.attrib.keys())[0]
-                agencencyAttribs = list(rule.attrib.keys())[1:5]
-                tileIndex = int(rule.get(indexAttrib))
-                for agencency in agencencyAttribs:
-                    agenciesList = rule.get(agencency).split(",")
-                    if len(agenciesList) > 0:
-                        if agencency == "top":
-                            SPRITES[tileIndex].up.extend([int(agency) for agency in agenciesList])
-                        if agencency == "left":
-                            SPRITES[tileIndex].left.extend([int(agency) for agency in agenciesList])
-                        if agencency == "down":
-                            SPRITES[tileIndex].down.extend([int(agency) for agency in agenciesList])
-                        if agencency == "right":
-                            SPRITES[tileIndex].left.extend([int(agency) for agency in agenciesList])
-                    else:
-                        self.not_included.append(index)
-                
-                index += 1
 
+    def draw_level(self):
+        for y in range(9):
+            for x in range(15):
+                currentX, currentY = x * TILE_SIZE, y * TILE_SIZE
+                image = self.get_sprite(currentX, currentY, self.level_sprite_sheet)
+                self.display_surface.blit(image, (currentX, currentY))
+                
+    
     def initialize_generation(self):
         self.initialize_sprite()
-        self.initialize_grid()
+        self.picked_level = random.randrange(0, len(self.levels))
+        level_path = os.path.join(ROOT, LEVELS_FOLDER, self.levels[self.picked_level])
+        self.level_sprite_sheet = pygame.image.load(level_path).convert_alpha()
     
     def run(self, dt):
         global SPRITES, GRID, VISITED, DIM
         self.display_surface.fill("White")
-
-        for y in range(DIM):
-            for x in range(DIM):
-                cell = GRID[x + y * DIM]
-                if cell.collapsed:
-                    sprite = random.choice(cell.options)
-                    self.display_surface.blit(SPRITES[sprite].image, (x * TILE_SIZE, y * TILE_SIZE))
-                # else:
-                #     self.display_surface.blit(SPRITES[12].image, (x * TILE_SIZE, y * TILE_SIZE))
-
-        #  pick cell with the least entropy
-        GRIDCOPY = GRID
-        GRIDCOPY = list(filter(lambda x: x.collapsed == False, GRIDCOPY))
-        GRIDCOPY.sort(key = lambda x : len(x.options))
-
-        # GRIDCOPY = []
-        if len(GRIDCOPY) > 0:
-            length, stopIndex = len(GRIDCOPY[0].options), 0
-            for i in range(1, len(GRIDCOPY), 1):
-                if len(GRIDCOPY[i].options) > length:
-                    stopIndex = i;
-                    break
-            
-            if stopIndex > 0: GRIDCOPY = [GRIDCOPY[stopIndex]]
-            cell = random.choice(GRIDCOPY)
-            cell.collapsed = True
-            pick = random.choice(cell.options)
-            cell.options = [pick]
-        
-            nextGrid = [None for i in GRID]
-            for y in range(DIM):
-                for x in range(DIM):
-                    index = x + y * DIM
-                    if GRID[index].collapsed:
-                        nextGrid[index] = GRID[index]
-                    else:
-                        validOptions = []
-                        if y > 0:
-                            lookup = GRID[x + (y - 1) * DIM]
-                            if lookup.collapsed:
-                                for option in lookup.options:
-                                    valid = SPRITES[option].down
-                                    validOptions.extend(valid)
-                        
-                        if x < (DIM - 1):
-                            lookright = GRID[( x + 1 ) + y  * DIM]
-                            if lookright.collapsed:
-                                for option in lookright.options:
-                                    valid = SPRITES[option].left
-                                    validOptions.extend(valid)
-                        
-                        if y < (DIM - 1):
-                            lookdown = GRID[x + (y + 1) * DIM]
-                            if lookdown.collapsed:
-                                for option in lookdown.options:
-                                    valid = SPRITES[option].up
-                                    validOptions.extend(valid)
-
-                        if x > 0:
-                            lookleft = GRID[( x - 1 ) + y * DIM]
-                            if lookleft.collapsed:
-                                for option in lookleft.options:   
-                                    valid = SPRITES[option].right
-                                    validOptions.extend(valid)
-                        
-                        validOptions = list(set(validOptions))
-                        # validOptions = [self.most_frequent(validOptions)]
-                        # print(x, y, "FINAL: ", validOptions)
-                        nextGrid[index] = Cell(index)
-                        nextGrid[index].set_options(validOptions)
-
-            for grid in nextGrid:
-                if len(grid.options) <= 0:
-                    grid.set_options(self.DEFAULT_OPTIONS)
-            GRID = nextGrid
-            time.sleep(0.5)
-            for i in range(DIM):
-                for j in range(DIM):
-                    index = i + j * DIM
-                    print("GRID[", index, "]", nextGrid[index].options)
-            # sys.exit(1)
-            # print("NEXTGRID: ", [len(grid.options) for grid in nextGrid if not grid.collapsed], self.index)
-        # for sprite in SPRITES:
-        #     if self.index == 0:
-        #         print(sprite.edges)
-        #     self.display_surface.blit(sprite.image, sprite.rect)
-        
-        # self.index += 1
-        # print(SPRITES[0]["Entropy"])
-        # self.stupid_check(SPRITES[0])
+        self.draw_level()
         self.level_sprites.draw(self.display_surface)
         self.level_sprites.update(dt)
     
