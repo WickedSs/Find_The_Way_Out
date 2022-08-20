@@ -1,7 +1,9 @@
 import pygame
 import os, sys
+from Characters import Characters
 from Settings import *
-from WFC import *
+from Level import *
+from Objects.Player import *
 
 
 
@@ -11,6 +13,12 @@ class Game:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
         self.level = Level()
+        self.character = Characters()
+        self.player = Player(self.character.characters[0])
+
+    def setup_group_sprites(self):
+        self.players_group = pygame.sprite.Group()
+        self.tiles_group = self.level.level_sprites
     
     def run(self):
         while True:
@@ -21,6 +29,7 @@ class Game:
             
             dt = self.clock.tick() / 1000
             self.level.run(dt)
+            self.players_group.draw(self.screen)
             pygame.display.update()
 
 
