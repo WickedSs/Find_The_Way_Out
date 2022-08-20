@@ -25,7 +25,6 @@ class Level:
         self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
         self.level_sprite_sheet = None
         self.sprite_sheet_rect = self.sprite_sheet.get_rect()
-        # self.rules = ET.parse(self.rules_file)
         self.level_sprites = pygame.sprite.Group()
         self.layout_in_use = "First_Layout"
         self.index, self.levels, self.picked_level = 0, [], 0
@@ -62,7 +61,6 @@ class Level:
                 self.levels.append(level)
     
     def initialize_sprite(self):
-        constraints = SPRITESHEET_LAYOUT["First_Layout"]["Constraints"]
         for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
             for x in range(0, self.sprite_sheet_rect.width, TILE_SIZE):
                 image = self.get_sprite(x, y, self.sprite_sheet)

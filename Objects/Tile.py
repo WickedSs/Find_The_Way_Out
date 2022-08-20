@@ -1,4 +1,3 @@
-
 import pygame
 from Settings import *
 
@@ -6,6 +5,7 @@ from Settings import *
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
+        pygame.sprite.Sprite.__init__(self)
         self.image = image
         self.x, self.y = x, y
         self.rect = self.image.get_rect()
