@@ -49,9 +49,9 @@
         <Rule index="18" top="12" right="24, 41" down="26, 14" left="24, 42"/>
         <Rule index="19" top="39" right="41, 24" down="26, 14" left="36, 33, 45, 32, 35"/>
         <Rule index="20" top="40" right="36, 33, 45, 32, 35" down="14, 26" left="24"/>
-        <Rule index="21" top="12" right="41, 25" down="25" left="30, 0"/>
-        <Rule index="22" top="12" right="12" down="12" left="12"/>
-        <Rule index="23" top="12" right="12" down="12" left="12"/>
+        <Rule index="21" top="0" right="41, 25, 20, 28" down="25, 28" left="30, 0"/>
+        <Rule index="22" top="2" right="29, 2, 9, 40" down="23" left="23, 19"/>
+        <Rule index="23" top="11, 0, 17" right="24, 41, 18" down="47, 70, 76" left="49, 61"/>
         <Rule index="24" top="12" right="12" down="12" left="12"/>
         <Rule index="25" top="12" right="12" down="12" left="12"/>
         <Rule index="26" top="12" right="12" down="12" left="12"/>
