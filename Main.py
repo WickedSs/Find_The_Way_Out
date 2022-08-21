@@ -19,7 +19,7 @@ class Game:
 
     def setup_group_sprites(self):
         self.players_group = pygame.sprite.Group()
-        self.tiles_group = self.level.level_sprites
+        self.tiles_group = self.level.collision_group
     
     def run(self):
         self.players_group.add(self.player)
@@ -32,7 +32,7 @@ class Game:
             dt = self.clock.tick(FPS) / 1000
             self.level.run(dt)
             self.players_group.draw(self.screen)
-            self.players_group.update(dt)
+            self.players_group.update(dt, self.tiles_group)
             pygame.display.update()
 
 

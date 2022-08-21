@@ -4,12 +4,12 @@ from Settings import *
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, x, y, image):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = image
+    def __init__(self, group, x, y, image):
+        pygame.sprite.Sprite.__init__(self, group)
+        self.image = pygame.transform.scale(image, (SCALE_SIZE, SCALE_SIZE))
         self.x, self.y = x, y
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = self.x * TILE_SIZE, self.y * TILE_SIZE
+        self.rect.x, self.rect.y = self.x * SCALE_SIZE, self.y * SCALE_SIZE
     
 
 class Tile_WFC:
