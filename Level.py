@@ -73,7 +73,7 @@ class Level:
         for x in range(len(self.picked_level.collide_layer)):
             tile_index = self.picked_level.collide_layer[x] - 1
             tile = Tile(self.level_sprites, currentX, currentY, SPRITES[tile_index])
-            if tile_index <= 46 and tile_index != 12: self.collision_group.add(tile)
+            if tile_index <= 174 and tile_index != 36: self.collision_group.add(tile)
             currentX += 1
             if currentX >= self.picked_level.room_width:
                 currentY += 1
@@ -81,8 +81,7 @@ class Level:
         
                     
     
-    def run(self, dt):
-        self.display_surface.fill("black")
+    def run(self):
         self.level_sprites.draw(self.display_surface)
-        self.level_sprites.update(dt)
+        self.level_sprites.update()
     

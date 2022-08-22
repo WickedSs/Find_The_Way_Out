@@ -14,7 +14,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.level = Level()
         self.character = Characters()
-        self.player = Player(self.character.characters[0], 1, 4)
+        self.player = Player(self.character.characters[0], 2, 3)
         self.setup_group_sprites()
 
     def setup_group_sprites(self):
@@ -29,11 +29,26 @@ class Game:
                     pygame.quit()
                     sys.exit()
             
-            dt = self.clock.tick(FPS) / 1000
-            self.level.run(dt)
+            # for sprite in self.tiles_group:
+            #     offset_x, offset_y = (self.player.rect.x - sprite.rect.x), (self.player.rect.y - sprite.rect.y)
+            #     if self.player.mask.overlap(sprite.mask, (offset_x, offset_y)):
+            #         print("Grounded")
+            #         self.player.grounded = True
+            #     else:
+            #         print("Not Grounded")
+            #         self.player.grounded = False
+            
+
+            self.screen.fill("black")
+            self.level.run()
             self.players_group.draw(self.screen)
-            self.players_group.update(dt, self.tiles_group)
+            self.players_group.update(self.tiles_group)
+            for sprite in self.tiles_group.sprites():
+                pygame.draw.rect(self.screen, (255, 255, 255), sprite.rect, 1)  # width = 3
+            
+            pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)  # width = 3
             pygame.display.update()
+            self.clock.tick(FPS)
 
 
 if __name__ == '__main__':

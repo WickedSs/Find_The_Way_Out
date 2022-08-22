@@ -7,6 +7,7 @@ class Tile(pygame.sprite.Sprite):
     def __init__(self, group, x, y, image):
         pygame.sprite.Sprite.__init__(self, group)
         self.image = pygame.transform.scale(image, (SCALE_SIZE, SCALE_SIZE))
+        self.mask = pygame.mask.from_surface(image)
         self.x, self.y = x, y
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x * SCALE_SIZE, self.y * SCALE_SIZE
