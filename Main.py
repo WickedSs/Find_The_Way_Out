@@ -43,10 +43,11 @@ class Game:
             self.level.run()
             self.players_group.draw(self.screen)
             self.players_group.update(self.tiles_group)
-            for sprite in self.tiles_group.sprites():
-                pygame.draw.rect(self.screen, (255, 255, 255), sprite.rect, 1)  # width = 3
+            # for sprite in self.tiles_group.sprites():
+            #     pygame.draw.rect(self.screen, (255, 255, 255), sprite.rect, 1)
             
-            pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)  # width = 3
+            # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
+            # pygame.draw.rect(self.screen, (255, 255, 255), self.player.hitbox, 1)
             pygame.display.update()
             self.clock.tick(FPS)
 

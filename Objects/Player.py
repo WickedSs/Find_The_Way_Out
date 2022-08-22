@@ -33,8 +33,11 @@ class Player(pygame.sprite.Sprite):
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
         self.frames_path = os.path.join(ROOT, CHARACTER_FOLDER, self.character.character_name)
         
-        self.image, dimensions = self.scale_frame()
-        self.rect = pygame.Rect(x * SCALE_SIZE, y * SCALE_SIZE, dimensions[1], dimensions[0])
+        self.image, dimensions, croppedBox = self.scale_frame()
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = x * SCALE_SIZE, y * SCALE_SIZE
+        self.hitbox = pygame.Rect((croppedBox[2] * 2) + self.rect.x, (croppedBox[0] * 2) + self.rect.y, dimensions[0] + 2, dimensions[1] + 2)
+        print(self.rect, self.hitbox, croppedBox)
     
     def trim_images(self, image):
         image_name = self.current_animation[int(self.animation_index)].split(".")[0]
@@ -52,16 +55,17 @@ class Player(pygame.sprite.Sprite):
 
     def scale_frame(self):
         image_path = os.path.join(self.frames_path, self.selected_folder)
-        new_rect = self.trim_images(image_path)
-        normal_height, normal_width = new_rect[1] - new_rect[0], new_rect[3] - new_rect[2]
+        croppedBox = self.trim_images(image_path)
+        normal_height, normal_width = croppedBox[1] - croppedBox[0], croppedBox[3] - croppedBox[2]
+        scaled_height, scaled_width = normal_height * 2, normal_width * 2
+        
         self.current_frame = pygame.image.load(os.path.join(image_path, self.current_animation[int(self.animation_index)])).convert_alpha()
         self.current_frame.set_colorkey((0, 0, 0))
         self.frame_rect = self.current_frame.get_rect()
         scaled_surface = pygame.transform.scale(self.current_frame, (self.frame_rect.w * 2, self.frame_rect.h * 2)).convert_alpha()
-        scaled_height, scaled_width = normal_height * 2, normal_width * 2
         self.flipped_image = pygame.transform.flip(scaled_surface, True, False)
         self.normal_image = scaled_surface
-        return scaled_surface, (scaled_height, scaled_width)
+        return scaled_surface, (scaled_width + 2, scaled_height + 2), croppedBox
     
     def input(self, collision_sprites):
         keys_pressed = pygame.key.get_pressed()
@@ -89,8 +93,8 @@ class Player(pygame.sprite.Sprite):
         if self.animation_index >= len(self.character.animations[self.selected_folder]["frames"]):
             self.animation_index = 0
         
-        self.image, dimensions = self.scale_frame()
-        self.rect = pygame.Rect(self.rect.x, self.rect.y, dimensions[1], dimensions[0])
+        self.image, dimensions, croppedBox = self.scale_frame()
+        self.hitbox = pygame.Rect((croppedBox[2] * 2) + self.rect.x, (croppedBox[0] * 2) + self.rect.y, dimensions[0], dimensions[1])
 
         # flip player in which acceleration he is facing
         if self.flipped:
@@ -103,11 +107,12 @@ class Player(pygame.sprite.Sprite):
   
     def move(self, collision_sprites):
         self.rect.x += self.direction.x * self.speed
+        self.hitbox.x += self.direction.x * self.speed
         self.apply_gravity()
 
         # horizonatl collision
         for sprite in collision_sprites.sprites():
-            if sprite.rect.colliderect(self.rect):
+            if sprite.rect.colliderect(self.hitbox):
                 self.collision_sides["left"] = None
                 self.collision_sides["right"] = None
                 if self.direction.x < 0:
@@ -117,7 +122,7 @@ class Player(pygame.sprite.Sprite):
                 
         
         for sprite in collision_sprites.sprites():
-            if sprite.rect.colliderect(self.rect):
+            if sprite.rect.colliderect(self.hitbox):
                 self.collision_sides["top"] = None
                 self.collision_sides["bottom"] = None
                 if self.direction.y < 0:
@@ -126,14 +131,14 @@ class Player(pygame.sprite.Sprite):
                     self.collision_sides["bottom"] = sprite
         
         if self.collision_sides["left"]:
-            self.rect.left = self.collision_sides["left"].rect.right
+            self.hitbox.left = self.collision_sides["left"].rect.right
         elif self.collision_sides["right"]:
-            self.rect.right = self.collision_sides["right"].rect.left
+            self.hitbox.right = self.collision_sides["right"].rect.left
         
         if self.collision_sides["top"]:
-            self.rect.top = self.collision_sides["top"].rect.bottom
+            self.hitbox.top = self.collision_sides["top"].rect.bottom
         elif self.collision_sides["bottom"]:
-            self.rect.bottom = self.collision_sides["bottom"].rect.top
+            self.hitbox.bottom = self.collision_sides["bottom"].rect.top
             self.direction.y = 0
 
     def jump(self, collision_sprites):
@@ -142,11 +147,14 @@ class Player(pygame.sprite.Sprite):
     def apply_gravity(self):
         self.direction.y += self.gravity
         self.rect.y += self.direction.y
+        self.hitbox.y += self.direction.y
     
     def update(self, collision_sprites):
-        # print(self.rect, self.direction, self.collision_sides)
+        print(self.rect, self.hitbox)
         self.input(collision_sprites)
         self.move(collision_sprites)
         self.animate()
-
+        
+    def draw(self, screen):
+        screen.blit(self.image, self.hitbox)
 
