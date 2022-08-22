@@ -33,9 +33,8 @@ class Player(pygame.sprite.Sprite):
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
         self.frames_path = os.path.join(ROOT, CHARACTER_FOLDER, self.character.character_name)
         
-        self.image = self.scale_frame()
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x * SCALE_SIZE, y * SCALE_SIZE
+        self.image, dimensions = self.scale_frame()
+        self.rect = pygame.Rect(x * SCALE_SIZE, y * SCALE_SIZE, dimensions[1], dimensions[0])
     
     def trim_images(self, image):
         image_name = self.current_animation[int(self.animation_index)].split(".")[0]
@@ -54,13 +53,15 @@ class Player(pygame.sprite.Sprite):
     def scale_frame(self):
         image_path = os.path.join(self.frames_path, self.selected_folder)
         new_rect = self.trim_images(image_path)
+        normal_height, normal_width = new_rect[1] - new_rect[0], new_rect[3] - new_rect[2]
         self.current_frame = pygame.image.load(os.path.join(image_path, self.current_animation[int(self.animation_index)])).convert_alpha()
         self.current_frame.set_colorkey((0, 0, 0))
         self.frame_rect = self.current_frame.get_rect()
         scaled_surface = pygame.transform.scale(self.current_frame, (self.frame_rect.w * 2, self.frame_rect.h * 2)).convert_alpha()
+        scaled_height, scaled_width = normal_height * 2, normal_width * 2
         self.flipped_image = pygame.transform.flip(scaled_surface, True, False)
         self.normal_image = scaled_surface
-        return scaled_surface, new_rect
+        return scaled_surface, (scaled_height, scaled_width)
     
     def input(self, collision_sprites):
         keys_pressed = pygame.key.get_pressed()
@@ -87,7 +88,9 @@ class Player(pygame.sprite.Sprite):
         self.animation_index += 10
         if self.animation_index >= len(self.character.animations[self.selected_folder]["frames"]):
             self.animation_index = 0
-        self.image = self.scale_frame()
+        
+        self.image, dimensions = self.scale_frame()
+        self.rect = pygame.Rect(self.rect.x, self.rect.y, dimensions[1], dimensions[0])
 
         # flip player in which acceleration he is facing
         if self.flipped:
