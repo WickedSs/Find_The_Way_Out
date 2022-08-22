@@ -21,8 +21,7 @@ class CHARACATER:
             self.animations[anim_folder]["frames"] = []
             frames = os.path.join(ROOT, CHARACTERS_FOLDER, self.character_name, anim_folder)
             for frame in os.listdir(frames):
-                if "cropped" in frame:
-                    self.animations[anim_folder]["frames"].append(frame)
+                self.animations[anim_folder]["frames"].append(frame)
             
 
 

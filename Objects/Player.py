@@ -39,9 +39,6 @@ class Player(pygame.sprite.Sprite):
     
     def trim_images(self, image):
         image_name = self.current_animation[int(self.animation_index)].split(".")[0]
-        image_path = os.path.join(image, image_name + ".png")
-        if os.path.exists(image_path):
-            return image_path
 
         image_old = os.path.join(image, image_name + ".png")
         image_loaded = Image.open(image_old)
@@ -52,22 +49,18 @@ class Player(pygame.sprite.Sprite):
         non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
         non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
         cropBox = (min(non_empty_rows), max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
-        image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
-        new_image = Image.fromarray(image_data_new)
-        new_image_path = os.path.join(image, image_name + "-cropped.png")
-        # new_image.save(new_image_path)
-        return new_image_path
+        return cropBox
 
     def scale_frame(self):
         image_path = os.path.join(self.frames_path, self.selected_folder)
-        new_image = self.trim_images(image_path)
-        self.current_frame = pygame.image.load(new_image).convert_alpha()
+        new_rect = self.trim_images(image_path)
+        self.current_frame = pygame.image.load(os.path.join(image_path, self.current_animation[int(self.animation_index)])).convert_alpha()
         self.current_frame.set_colorkey((0, 0, 0))
         self.frame_rect = self.current_frame.get_rect()
         scaled_surface = pygame.transform.scale(self.current_frame, (self.frame_rect.w * 2, self.frame_rect.h * 2)).convert_alpha()
         self.flipped_image = pygame.transform.flip(scaled_surface, True, False)
         self.normal_image = scaled_surface
-        return scaled_surface
+        return scaled_surface, new_rect
     
     def input(self, collision_sprites):
         keys_pressed = pygame.key.get_pressed()
@@ -148,7 +141,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.y += self.direction.y
     
     def update(self, collision_sprites):
-        print(self.rect, self.direction, self.collision_sides)
+        # print(self.rect, self.direction, self.collision_sides)
         self.input(collision_sprites)
         self.move(collision_sprites)
         self.animate()
