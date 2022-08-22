@@ -46,8 +46,12 @@ class Game:
             # for sprite in self.tiles_group.sprites():
             #     pygame.draw.rect(self.screen, (255, 255, 255), sprite.rect, 1)
             
-            # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
-            # pygame.draw.rect(self.screen, (255, 255, 255), self.player.hitbox, 1)
+            pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
+            pygame.draw.rect(self.screen, (255, 255, 255), self.player.hitbox, 1)
+            pygame.draw.rect(self.screen, (255, 162, 255), self.player.up_hitbox, 2)
+            pygame.draw.rect(self.screen, (255, 162, 255), self.player.right_hitbox, 2)
+            pygame.draw.rect(self.screen, (255, 162, 255), self.player.down_hitbox, 2)
+            pygame.draw.rect(self.screen, (255, 162, 255), self.player.left_hitbox, 2)
             pygame.display.update()
             self.clock.tick(FPS)
 

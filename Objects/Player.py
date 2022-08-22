@@ -1,4 +1,5 @@
 
+import math
 from Settings import *
 import os, sys, pygame
 from PIL import Image
@@ -24,7 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.flipped = False
         self.jumped = False
         self.on_ground = False
-        self.collision_sides = { "top" : None, "left": None, "bottom" : None, "right" : None }
+        self.collision_sides = { "top" : False, "left": False, "bottom" : False, "right" : False }
 
         self.character = character
         self.animations_names = self.character.animations_folders
@@ -37,8 +38,12 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = x * SCALE_SIZE, y * SCALE_SIZE
         self.hitbox = pygame.Rect((croppedBox[2] * 2) + self.rect.x, (croppedBox[0] * 2) + self.rect.y, dimensions[0] + 2, dimensions[1] + 2)
-        print(self.rect, self.hitbox, croppedBox)
-    
+
+        self.up_hitbox = pygame.Rect(self.rect.x + (self.rect.width / 2) - 5, self.rect.y + croppedBox[0], 10, 10)
+        self.right_hitbox = pygame.Rect(self.rect.x + (croppedBox[3] * 2) - 2, self.rect.y + (self.rect.height / 2) - 5, 10, 10)
+        self.down_hitbox = pygame.Rect(self.rect.x + (self.rect.width / 2) - 5, self.rect.y + (croppedBox[1] * 2) - 2, 10, 10)
+        self.left_hitbox = pygame.Rect(self.rect.x + (croppedBox[2] * 2) - 5, self.rect.y + (self.rect.height / 2) - 5, 10, 10)
+
     def trim_images(self, image):
         image_name = self.current_animation[int(self.animation_index)].split(".")[0]
 
@@ -106,40 +111,40 @@ class Player(pygame.sprite.Sprite):
         # self.image = pygame.transform.scale(self.image, (SCALE_SIZE, SCALE_SIZE))
   
     def move(self, collision_sprites):
+        if self.collision_sides["left"]:
+            self.direction.x = 0 if self.direction.x < 0 else self.direction.x
+        elif self.collision_sides["right"]:
+            self.direction.x = 0 if self.direction.x > 0 else self.direction.x
+
         self.rect.x += self.direction.x * self.speed
-        self.hitbox.x += self.direction.x * self.speed
+        self.up_hitbox.x += self.direction.x * self.speed
+        self.left_hitbox.x += self.direction.x * self.speed
+        self.down_hitbox.x += self.direction.x * self.speed
+        self.right_hitbox.x += self.direction.x * self.speed
+        # self.hitbox.x += self.direction.x * self.speed
         self.apply_gravity()
 
         # horizonatl collision
         for sprite in collision_sprites.sprites():
-            if sprite.rect.colliderect(self.hitbox):
-                self.collision_sides["left"] = None
-                self.collision_sides["right"] = None
-                if self.direction.x < 0:
-                    self.collision_sides["left"] = sprite
-                if self.direction.x > 0:
-                    self.collision_sides["right"] = sprite
+            self.collision_sides["left"] = False
+            self.collision_sides["right"] = False
+            if sprite.rect.colliderect(self.left_hitbox):
+                self.hitbox.left = sprite.rect.right
+                self.collision_sides["left"] = True
+                self.rect.x = self.rect.x + abs(self.hitbox.x - self.rect.x)
+            if sprite.rect.colliderect(self.right_hitbox):
+                self.hitbox.right = sprite.rect.left
+                self.collision_sides["right"] = True
+                self.rect.x = self.rect.x - abs(self.hitbox.x - self.rect.x)
                 
         
         for sprite in collision_sprites.sprites():
-            if sprite.rect.colliderect(self.hitbox):
-                self.collision_sides["top"] = None
-                self.collision_sides["bottom"] = None
-                if self.direction.y < 0:
-                    self.collision_sides["top"] = sprite
-                if self.direction.y > 0:
-                    self.collision_sides["bottom"] = sprite
-        
-        if self.collision_sides["left"]:
-            self.hitbox.left = self.collision_sides["left"].rect.right
-        elif self.collision_sides["right"]:
-            self.hitbox.right = self.collision_sides["right"].rect.left
-        
-        if self.collision_sides["top"]:
-            self.hitbox.top = self.collision_sides["top"].rect.bottom
-        elif self.collision_sides["bottom"]:
-            self.hitbox.bottom = self.collision_sides["bottom"].rect.top
-            self.direction.y = 0
+            if sprite.rect.colliderect(self.up_hitbox):
+                self.hitbox.top = sprite.rect.bottom
+            if sprite.rect.colliderect(self.down_hitbox):
+                self.hitbox.bottom = sprite.rect.top
+                self.direction.y = 0
+
 
     def jump(self, collision_sprites):
         self.direction.y = self.jumpForce
@@ -148,13 +153,17 @@ class Player(pygame.sprite.Sprite):
         self.direction.y += self.gravity
         self.rect.y += self.direction.y
         self.hitbox.y += self.direction.y
+        self.up_hitbox.y += self.direction.y
+        self.right_hitbox.y += self.direction.y
+        self.down_hitbox.y += self.direction.y
+        self.left_hitbox.y += self.direction.y
     
     def update(self, collision_sprites):
-        print(self.rect, self.hitbox)
+        print(self.rect, self.direction)
         self.input(collision_sprites)
         self.move(collision_sprites)
-        self.animate()
+        # self.animate()
         
-    def draw(self, screen):
-        screen.blit(self.image, self.hitbox)
+    # def draw(self, screen):
+    #     screen.blit(self.image, self.hitbox)
 
