@@ -4,7 +4,7 @@ import uuid, pickle
 
 class Network:
     def __init__(self):
-        self.server_ip = "192.168.1.2"
+        self.server_ip = socket.gethostname()
         self.server_port = 4444
         self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.player = self.connect()

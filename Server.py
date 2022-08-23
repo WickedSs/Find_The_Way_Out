@@ -1,8 +1,10 @@
 import socket
 from threading import Thread
 import sys, os, uuid, pickle, random
-from Objects.Player import Player
+from .Client import Network
+from Objects.Player import NetworkPlayer, Player
 from Characters import Characters
+from Settings import *
 
 
 PLAYERS_PER_GAME = 10
@@ -11,7 +13,7 @@ CONNECTED_PLAYERS = {}
 class Server:
 
     def __init__(self):
-        self.server_ip = "192.168.1.2"
+        self.server_ip = socket.gethostname()
         self.port = 4444
         self.server_settings = (self.server_ip, self.port)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,22 +32,24 @@ class Server:
 
     def listen_connections(self):
         while True:
+            self.player_id = str(uuid.uuid4())
             conn, addr = self.server_socket.accept()
             print(f"[CONNECTION] Connection from {addr}")
-            ACCEPT_THREAD = Thread(target=self.thread_client, args=(conn, addr))
+            ACCEPT_THREAD = Thread(target=self.thread_client, args=(conn, addr, self.player_id))
             ACCEPT_THREAD.start()
 
-    def thread_client(self, conn, addr):
-        player_id = str(uuid.uuid4())
-        CONNECTED_PLAYERS[player_id] = ""
-        conn.send(str(player_id).encode())
-        current_player = CONNECTED_PLAYERS[player_id]
+    def thread_client(self, conn, addr, player_id):
+        player = NetworkPlayer(random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE, 24, 28, 0, False, player_id)
+        CONNECTED_PLAYERS[player_id] = player
+        conn.send(pickle.dumps(CONNECTED_PLAYERS[player_id]))
         print("[SERVER] Started thread with player index:", player_id)
+        current_player = CONNECTED_PLAYERS[player_id]
         is_online = True
         while is_online:
             try:
                 data = pickle.loads(conn.recv(2048))
                 CONNECTED_PLAYERS[player_id] = data
+                current_player = CONNECTED_PLAYERS[player_id]
                 list_players = {}
 
                 if not data:

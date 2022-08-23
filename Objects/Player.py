@@ -12,10 +12,11 @@ CHARACTER_FOLDER = "Assets\Characters"
 
 class NetworkPlayer:
     def __init__(self, x, y, width, height, anim_folder, flipped, player_id):
+        self.character = 0
         self.x, self.y = x, y
         self.anim_folder = anim_folder
         self.flipped = flipped
-        self.rect = (self.x, self.y, width, height)
+        self.width, self.height, = width, height
         self.player_id = player_id        
 
 class Player:
