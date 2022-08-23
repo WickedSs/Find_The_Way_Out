@@ -103,7 +103,6 @@ class Player(pygame.sprite.Sprite):
                 if self.direction.x < 0:
                     self.rect.left = sprite.rect.right
                     print(self.rect, sprite.rect, self.rect.left, sprite.rect.right)
-                    sys.exit(1)
                 elif self.direction.x > 0:
                     self.rect.right = sprite.rect.left
 
@@ -127,7 +126,6 @@ class Player(pygame.sprite.Sprite):
     
     def update(self, collision_sprites):
         self.rect.x += self.direction.x * self.speed
-        print(self.rect)
         self.input(collision_sprites)
         self.animate()
         self.horizontal_vertical_collision(collision_sprites)
