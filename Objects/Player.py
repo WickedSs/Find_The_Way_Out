@@ -66,7 +66,7 @@ class Player(pygame.sprite.Sprite):
         if keys_pressed[pygame.K_SPACE]:
             if self.jumped == False:
                 self.on_ground = False
-                self.jump(collision_sprites)
+                self.jump()
 
     def animate(self):
         self.animation_index += 0.12
@@ -106,7 +106,7 @@ class Player(pygame.sprite.Sprite):
 
 
 
-    def jump(self, collision_sprites):
+    def jump(self):
         self.direction.y = self.jumpForce
         self.jumped = True
         
@@ -127,9 +127,10 @@ class Player(pygame.sprite.Sprite):
         
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
-    def update(self, collision_sprites):
+    def update(self, collision_sprites):        
         self.horizontal_collision(collision_sprites)
         self.vertical_collision(collision_sprites)
         self.input(collision_sprites)
         self.get_animation()
         self.animate()
+
