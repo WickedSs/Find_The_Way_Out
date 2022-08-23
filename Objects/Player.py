@@ -74,7 +74,7 @@ class Player(pygame.sprite.Sprite):
                 self.jump()
 
     def animate(self):
-        self.animation_index += 0.15
+        self.animation_index += 0.12
         if self.animation_index >= len(self.character.animations[self.selected_folder]["frames"]):
             self.animation_index = 0
         
@@ -94,7 +94,8 @@ class Player(pygame.sprite.Sprite):
                     self.rect.left = sprite.rect.right
                 elif self.direction.x > 0:
                     self.rect.right = sprite.rect.left
-                    
+    
+              
     def vertical_collision(self, collision_sprites):
         self.apply_gravity()
         for sprite in collision_sprites.sprites():
