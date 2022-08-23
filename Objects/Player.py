@@ -13,6 +13,8 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, character, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.display_surface = pygame.display.get_surface()
+        self.x, self.y = x, y
+        self.playerID = None
         
         # paramaters
         self.speed = 3
@@ -40,7 +42,10 @@ class Player(pygame.sprite.Sprite):
         self.normal_image = self.image
         self.flipped_image = pygame.transform.flip(self.image, True, False)
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x * SCALE_SIZE, y * SCALE_SIZE
+        self.rect.x, self.rect.y = self.x, self.y
+
+    def set_playerID(self, playerID):
+        self.playerID = playerID
 
     def repetitive_bullshit(self):
         old_rect = self.rect.copy()
@@ -51,7 +56,7 @@ class Player(pygame.sprite.Sprite):
         self.normal_image = self.image
         self.flipped_image = pygame.transform.flip(self.image, True, False)
     
-    def input(self, collision_sprites):
+    def input(self):
         keys_pressed = pygame.key.get_pressed()
         
         if keys_pressed[pygame.K_LEFT]:
@@ -126,10 +131,13 @@ class Player(pygame.sprite.Sprite):
         
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
     def update(self, collision_sprites):        
         self.horizontal_collision(collision_sprites)
         self.vertical_collision(collision_sprites)
-        self.input(collision_sprites)
+        self.input()
         self.get_animation()
         self.animate()
 
