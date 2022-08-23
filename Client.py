@@ -3,9 +3,8 @@ import uuid, pickle
 
 
 class Network:
-    def __init__(self, player):
-        self.player = player
-        self.server_ip = "192.168.1.5"
+    def __init__(self):
+        self.server_ip = "192.168.1.2"
         self.server_port = 4444
         self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.player = self.connect()
@@ -13,14 +12,13 @@ class Network:
     def connect(self):
         try:
             self.socket_client.connect((self.server_ip, self.server_port))
-            self.id = self.socket_client.recv(2048).decode()
-            self.player.set_playerID(self.id)
+            self.id = self.socket_client.recv(2048).decode('utf-8', 'ignore').strip()
         except Exception as e:
             print("[ERROR] Error trying to connect to server", e)
 
     def send(self, data):
         try:
-            self.socket_client.send(data)
-            return self.socket_client.recv(2048).decode()
+            self.socket_client.send(pickle.dumps(data))
+            return pickle.loads(self.socket_client.recv(2048))
         except Exception as e:
             print("[ERROR] Error trying to send data to server.", e)

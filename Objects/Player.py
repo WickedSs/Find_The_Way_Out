@@ -9,9 +9,17 @@ import numpy as np
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 CHARACTER_FOLDER = "Assets\Characters"
 
-class Player(pygame.sprite.Sprite):
+
+class NetworkPlayer:
+    def __init__(self, x, y, width, height, anim_folder, flipped, player_id):
+        self.x, self.y = x, y
+        self.anim_folder = anim_folder
+        self.flipped = flipped
+        self.rect = (self.x, self.y, width, height)
+        self.player_id = player_id        
+
+class Player:
     def __init__(self, character, x, y):
-        pygame.sprite.Sprite.__init__(self)
         self.display_surface = pygame.display.get_surface()
         self.x, self.y = x, y
         self.playerID = None

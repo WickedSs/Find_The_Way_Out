@@ -11,7 +11,7 @@ CONNECTED_PLAYERS = {}
 class Server:
 
     def __init__(self):
-        self.server_ip = "192.168.1.5"
+        self.server_ip = "192.168.1.2"
         self.port = 4444
         self.server_settings = (self.server_ip, self.port)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,36 +32,32 @@ class Server:
         while True:
             conn, addr = self.server_socket.accept()
             print(f"[CONNECTION] Connection from {addr}")
-            ACCEPT_THREAD = Thread(target=self.thread_client, args=(conn, addr, self.player_index))
+            ACCEPT_THREAD = Thread(target=self.thread_client, args=(conn, addr))
             ACCEPT_THREAD.start()
 
-    def thread_client(self, conn, addr, player_id):
+    def thread_client(self, conn, addr):
         player_id = str(uuid.uuid4())
         CONNECTED_PLAYERS[player_id] = ""
         conn.send(str(player_id).encode())
+        current_player = CONNECTED_PLAYERS[player_id]
         print("[SERVER] Started thread with player index:", player_id)
         is_online = True
         while is_online:
             try:
-                data = conn.recv(2048).decode()
-                pid, x, y = self.unpack_received_data(data)
-                CONNECTED_PLAYERS[pid] = "{0},{1}".format(x, y)
-                ids = list(CONNECTED_PLAYERS.keys())
-                list_players = ""
-                for id in ids:
-                    list_players += "{},{}|".format(id, CONNECTED_PLAYERS[pid])
+                data = pickle.loads(conn.recv(2048))
+                CONNECTED_PLAYERS[player_id] = data
+                list_players = {}
 
                 if not data:
                     print(f"{addr} has disconnected")
                     is_online = False
-                # else:
-                #     for player_idx in CONNECTED_PLAYERS:
-                #         player = CONNECTED_PLAYERS[player_idx]
-                #         if player != current_player:
-                #             list_players[player_idx] = player
+                else:
+                    for player_idx in CONNECTED_PLAYERS:
+                        player = CONNECTED_PLAYERS[player_idx]
+                        if player != current_player:
+                            list_players[player_idx] = player
                 
-                print("Server Players: ", CONNECTED_PLAYERS)
-                conn.sendall(list_players.encode())
+                conn.sendall(pickle.dumps(CONNECTED_PLAYERS))
 
             except Exception as e:
                 print(f"[SERVER] {addr} has disconnected.", e)

@@ -1,7 +1,4 @@
-from calendar import day_abbr
-from re import A
-import pygame
-import os, sys
+import os, sys, pickle, pygame
 from Characters import Characters
 from Settings import *
 from Level import *
@@ -18,7 +15,8 @@ class Game:
         self.level = Level()
         self.character = Characters()
         self.player = Player(self.character.characters[0], random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE)
-        self.network = Network(self.player)
+        self.network = Network()
+        self.network_player = NetworkPlayer(self.player.rect.x, self.player.rect.x, self.player.rect.w, self.player.rect.h, self.player.selected_folder, False, self.network.id)
         self.setup_group_sprites()
 
     def setup_group_sprites(self):
@@ -27,27 +25,18 @@ class Game:
         self.tiles_group = self.level.collision_group
     
     def update_other_player(self):
-        player_position = "{0},{1},{2}".format(self.player.playerID, self.player.rect.x, self.player.rect.y)
-        PLAYERS_CONNECTED = self.network.send(player_position.encode())
-        players = PLAYERS_CONNECTED.split("|")
-        players = [player for player in players if player != ""]
-        print("Players: ", players, self.player.playerID)
-        self.new_group = pygame.sprite.Group()
-        if players:
-            for player in players:
-                data = player.split(",")
-                if data[0] != self.player.playerID:
-                    if data[0] not in self.joined_ids:
-                        new_player = Player(self.character.characters[0], int(data[1]), int(data[2]))
-                        new_player.set_playerID(data[0])
-                        self.joined_ids.append(data[0])
-                        self.joined_players.append(new_player)
-                    else:
-                        index = self.joined_ids.index(data[0])
-                        self.working_player = self.joined_players[index]
-                        self.working_player.rect.x, self.working_player.rect.y = int(data[1]), int(data[2])
-                else:
-                    pass
+        PLAYERS_CONNECTED = self.network.send(self.network_player)
+        print("Players: ", PLAYERS_CONNECTED, len(PLAYERS_CONNECTED))
+        if PLAYERS_CONNECTED:
+            for player_index in PLAYERS_CONNECTED:
+                player_to_draw = PLAYERS_CONNECTED[player_index]
+                new_player = Player(self.character.characters[0], player_to_draw.rect[0], player_to_draw.rect[1])
+                new_player.rect.width, new_player.rect.height = player_to_draw.rect[2], player_to_draw.rect[3]
+                new_player.selected_folder = player_to_draw.anim_folder
+                new_player.flipped = player_to_draw.flipped
+                new_player.playerID = player_to_draw.player_id
+                new_player.draw(self.screen)
+                new_player.update(self.tiles_group)
 
             
                     
