@@ -11,7 +11,7 @@ CONNECTED_PLAYERS = {}
 class Server:
 
     def __init__(self):
-        self.server_ip = "192.168.1.38"
+        self.server_ip = "192.168.1.5"
         self.port = 4444
         self.server_settings = (self.server_ip, self.port)
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
