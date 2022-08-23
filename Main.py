@@ -47,6 +47,14 @@ class Game:
             #     pygame.draw.rect(self.screen, (255, 255, 255), sprite.rect, 1)
             
             pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
+<<<<<<< HEAD
+=======
+            pygame.draw.rect(self.screen, (255, 255, 255), self.player.hitbox, 1)
+            # pygame.draw.rect(self.screen, (255, 162, 255), self.player.up_hitbox, 2)
+            # pygame.draw.rect(self.screen, (255, 162, 255), self.player.right_hitbox, 2)
+            # pygame.draw.rect(self.screen, (255, 162, 255), self.player.down_hitbox, 2)
+            # pygame.draw.rect(self.screen, (255, 162, 255), self.player.left_hitbox, 2)
+>>>>>>> 1fa1d39f3d87b7ac27d0eb8b5022e2abf5ee8c4e
             pygame.display.update()
             self.clock.tick(FPS)
 

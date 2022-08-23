@@ -15,17 +15,18 @@ class Player(pygame.sprite.Sprite):
         self.display_surface = pygame.display.get_surface()
         
         # paramaters
+        self.fixed_collision_point = [0, 0, 0, 0] # top, right, bottom, left
         self.speed = 1
-        self.jumpForce = -16
+        self.jumpForce = -5
         self.dash_distance = 50
-        self.gravity = 0.8
+        self.gravity = 0.2
+        self.collision_tolorance = 2
         self.direction = pygame.math.Vector2(0, 0)
 
         # booleans
         self.flipped = False
         self.jumped = False
         self.on_ground = False
-        self.collision_sides = { "top" : False, "left": False, "bottom" : False, "right" : False }
 
         self.character = character
         self.animations_names = self.character.animations_folders
@@ -92,7 +93,8 @@ class Player(pygame.sprite.Sprite):
             self.current_animation = self.character.animations[self.selected_folder]["frames"]
 
         if keys_pressed[pygame.K_SPACE]:
-            self.jump(collision_sprites)
+            if self.jumped == False:
+                self.jump(collision_sprites)
 
     def animate(self):
         self.animation_index += 10
@@ -112,12 +114,8 @@ class Player(pygame.sprite.Sprite):
         # self.image = pygame.transform.scale(self.image, (SCALE_SIZE, SCALE_SIZE))
   
     def move(self, collision_sprites):
-        if self.collision_sides["left"]:
-            self.direction.x = 0 if self.direction.x < 0 else self.direction.x
-        elif self.collision_sides["right"]:
-            self.direction.x = 0 if self.direction.x > 0 else self.direction.x
-
         self.rect.x += self.direction.x * self.speed
+<<<<<<< HEAD
         self.apply_gravity()
 
         # horizonatl collision
@@ -134,16 +132,59 @@ class Player(pygame.sprite.Sprite):
             if sprite.rect.colliderect(self.rect):
                 self.rect.bottom = sprite.rect.top
                 self.direction.y = 0
+=======
+        self.hitbox.x += self.direction.x * self.speed
+        self.apply_gravity()
+
+        # horizonatl collision
+        # for sprite in collision_sprites.sprites():
+        #     self.fixed_collision_point_x = 0
+        #     if sprite.rect.colliderect(self.hitbox):
+        #         self.hitbox.left = sprite.rect.right
+        #         # self.rect.x = self.rect.x - abs(sprite.rect.x - self.rect.x)
+        #     if sprite.rect.colliderect(self.hitbox):
+        #         self.hitbox.right = sprite.rect.left
+        #         # self.rect.x = self.rect.x + abs(sprite.rect.x - self.rect.x)
+                
+        
+        collided_with = pygame.sprite.spritecollide(self, collision_sprites, False)
+        if collided_with:
+            print("Falling: ", abs(self.hitbox.bottom - collided_with[0].rect.top), collided_with)
+            if abs(self.hitbox.bottom - collided_with[0].rect.top) <= self.collision_tolorance:
+                self.direction.y, self.jumped = 0, False
+                self.fixed_collision_point[2] = self.rect.y
+            elif abs(self.hitbox.top - collided_with[0].rect.bottom) <= self.collision_tolorance:
+                self.fixed_collision_point[0] = self.rect.y
+            else:
+                self.fixed_collision_point[0], self.fixed_collision_point[2] = 0, 0
+            #     self.rect.bottom = self.rect.bottom + abs(self.rect.bottom - self.hitbox.bottom)
+            #     self.rect.top = sprite.rect.bottom
+            # self.fixed_collision_point[2] = self.rect.y
+>>>>>>> 1fa1d39f3d87b7ac27d0eb8b5022e2abf5ee8c4e
 
 
     def jump(self, collision_sprites):
+        self.fixed_collision_point[2] = 0
         self.direction.y = self.jumpForce
+        self.jumped = True
         
     def apply_gravity(self):
+<<<<<<< HEAD
         self.direction.y += self.gravity
         self.rect.y += self.direction.y
     
     def update(self, collision_sprites):
+=======
+        if self.fixed_collision_point[2] == 0:
+            self.direction.y += self.gravity
+            self.rect.y += self.direction.y
+            self.hitbox.y += self.direction.y
+        else:
+            self.rect.y = self.fixed_collision_point[2]
+    
+    def update(self, collision_sprites):
+        # print(self.rect, self.direction, self.fixed_collision_point)
+>>>>>>> 1fa1d39f3d87b7ac27d0eb8b5022e2abf5ee8c4e
         self.input(collision_sprites)
         self.move(collision_sprites)
         # self.animate()
