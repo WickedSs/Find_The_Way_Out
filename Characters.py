@@ -32,12 +32,11 @@ class CHARACATER:
         image_data_bw = image_data.max(axis=2)
         non_empty_columns = np.where(image_data_bw.max(axis=0)>0)[0]
         non_empty_rows = np.where(image_data_bw.max(axis=1)>0)[0]
-        cropBox = (0, max(non_empty_rows), min(non_empty_columns), max(non_empty_columns))
-        image_data_new = image_data[cropBox[0]:cropBox[1]+1, cropBox[2]:cropBox[3]+1 , :]
+        cropBox = (min(non_empty_rows), len(image_data), min(non_empty_columns), max(non_empty_columns))
+        image_data_new = image_data[cropBox[0]:cropBox[1], cropBox[2]:cropBox[3]+1 , :]
         new_image = Image.fromarray(image_data_new)
-        if not os.path.exists(os.path.join(folder, "cropped")):
-            os.makedirs(os.path.join(folder, "cropped"))
         new_image.save(os.path.join(folder, "cropped", name + '-cropped.png'))
+        print(cropBox)
 
     def load_animation(self):
         path = os.path.join(ROOT, CHARACTERS_FOLDER, self.character_name)
