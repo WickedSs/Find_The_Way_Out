@@ -15,10 +15,10 @@ class Player(pygame.sprite.Sprite):
         self.display_surface = pygame.display.get_surface()
         
         # paramaters
-        self.speed = 1
-        self.jumpForce = -5
+        self.speed = 3
+        self.jumpForce = -12
         self.dash_distance = 50
-        self.gravity = 0.2
+        self.gravity = 0.8
         self.collision_tolorance = 2
         self.direction = pygame.math.Vector2(0, 0)
 
@@ -56,21 +56,22 @@ class Player(pygame.sprite.Sprite):
         
         if keys_pressed[pygame.K_LEFT]:
             self.direction.x = -1
-            self.selected_folder = self.animations_names[1]
-            self.current_animation = self.character.animations[self.selected_folder]["frames"]
+            # self.selected_folder = self.animations_names[1]
+            # self.current_animation = self.character.animations[self.selected_folder]["frames"]
             self.flipped = True
         elif keys_pressed[pygame.K_RIGHT]:
             self.direction.x = +1
-            self.selected_folder = self.animations_names[1]
-            self.current_animation = self.character.animations[self.selected_folder]["frames"]
+            # self.selected_folder = self.animations_names[1]
+            # self.current_animation = self.character.animations[self.selected_folder]["frames"]
             self.flipped = False
         else:
             self.direction.x = 0
-            self.selected_folder = self.animations_names[0]
-            self.current_animation = self.character.animations[self.selected_folder]["frames"]
+            # self.selected_folder = self.animations_names[0]
+            # self.current_animation = self.character.animations[self.selected_folder]["frames"]
 
         if keys_pressed[pygame.K_SPACE]:
             if self.jumped == False:
+                self.on_ground = False
                 self.jump(collision_sprites)
 
     def animate(self):
@@ -79,56 +80,75 @@ class Player(pygame.sprite.Sprite):
             self.animation_index = 0
         
         self.repetitive_bullshit()
-
+        
         if self.flipped:
             self.image = self.flipped_image
         else:
             self.image = self.normal_image
+
   
-    def horizontal_vertical_collision(self, collision_sprites):
+    def horizontal_collision(self, collision_sprites):
+        self.rect.x += self.direction.x * self.speed
+        for sprite in collision_sprites.sprites():
+            if sprite.rect.colliderect(self.rect):
+                if self.direction.x < 0:
+                    self.rect.left = sprite.rect.right
+                elif self.direction.x > 0:
+                    self.rect.right = sprite.rect.left
+                    
+    def vertical_collision(self, collision_sprites):
         self.apply_gravity()
-        
         for sprite in collision_sprites.sprites():
             if sprite.rect.colliderect(self.rect):
                 if self.direction.y > 0:
                     self.rect.bottom = sprite.rect.top
                     self.direction.y = 0
+                    self.on_ground = True
                     self.jumped = False
                 elif self.direction.y < 0:
                     self.rect.top = sprite.rect.bottom
-        
-
-        for sprite in collision_sprites.sprites():
-            if sprite.rect.colliderect(self.rect):
-                if self.direction.x < 0:
-                    self.rect.left = sprite.rect.right
-                    print(self.rect, sprite.rect, self.rect.left, sprite.rect.right)
-                elif self.direction.x > 0:
-                    self.rect.right = sprite.rect.left
+                    self.direction.y = 0
 
 
 
     def jump(self, collision_sprites):
-        self.fixed_collision_point[2] = 0
         self.direction.y = self.jumpForce
         self.jumped = True
         
     def apply_gravity(self):
         self.direction.y += self.gravity
         self.rect.y += self.direction.y
-    
-    # def update(self, collision_sprites):
-    #     if self.fixed_collision_point[2] == 0:
-    #         self.direction.y += self.gravity
-    #         self.rect.y += self.direction.y
-    #     else:
-    #         self.rect.y = self.fixed_collision_point[2]
+
+    def get_animation(self):
+        if self.direction.y < 0:
+            self.selected_folder = self.animations_names[2]
+        elif self.direction.y > 1:
+            self.selected_folder = self.animations_names[3]
+        else:
+            if self.direction.x != 0:
+                self.selected_folder = self.animations_names[1]
+            else:
+                self.selected_folder = self.animations_names[0]
+        
+        self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
     def update(self, collision_sprites):
-        self.rect.x += self.direction.x * self.speed
+        print("Current Animation: ", self.selected_folder, self.animation_index)
+        # if not self.jumped:
+        #     if self.on_ground and self.direction.x != 0:
+        #         self.selected_folder = self.animations_names[1]
+        #         self.current_animation = self.character.animations[self.selected_folder]["frames"]
+        #     else:
+        #         self.selected_folder = self.animations_names[0]
+        #         self.current_animation = self.character.animations[self.selected_folder]["frames"]
+                
+            
+        
+        self.horizontal_collision(collision_sprites)
+        self.vertical_collision(collision_sprites)
         self.input(collision_sprites)
+        self.get_animation()
         self.animate()
-        self.horizontal_vertical_collision(collision_sprites)
         
     # def draw(self, screen):
     #     screen.blit(self.image, self.hitbox)
