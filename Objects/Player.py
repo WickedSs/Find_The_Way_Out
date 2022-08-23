@@ -115,7 +115,6 @@ class Player(pygame.sprite.Sprite):
   
     def move(self, collision_sprites):
         self.rect.x += self.direction.x * self.speed
-<<<<<<< HEAD
         self.apply_gravity()
 
         # horizonatl collision
@@ -132,7 +131,7 @@ class Player(pygame.sprite.Sprite):
             if sprite.rect.colliderect(self.rect):
                 self.rect.bottom = sprite.rect.top
                 self.direction.y = 0
-=======
+
         self.hitbox.x += self.direction.x * self.speed
         self.apply_gravity()
 
@@ -160,7 +159,6 @@ class Player(pygame.sprite.Sprite):
             #     self.rect.bottom = self.rect.bottom + abs(self.rect.bottom - self.hitbox.bottom)
             #     self.rect.top = sprite.rect.bottom
             # self.fixed_collision_point[2] = self.rect.y
->>>>>>> 1fa1d39f3d87b7ac27d0eb8b5022e2abf5ee8c4e
 
 
     def jump(self, collision_sprites):
@@ -169,12 +167,10 @@ class Player(pygame.sprite.Sprite):
         self.jumped = True
         
     def apply_gravity(self):
-<<<<<<< HEAD
         self.direction.y += self.gravity
         self.rect.y += self.direction.y
     
     def update(self, collision_sprites):
-=======
         if self.fixed_collision_point[2] == 0:
             self.direction.y += self.gravity
             self.rect.y += self.direction.y
@@ -184,7 +180,6 @@ class Player(pygame.sprite.Sprite):
     
     def update(self, collision_sprites):
         # print(self.rect, self.direction, self.fixed_collision_point)
->>>>>>> 1fa1d39f3d87b7ac27d0eb8b5022e2abf5ee8c4e
         self.input(collision_sprites)
         self.move(collision_sprites)
         # self.animate()
