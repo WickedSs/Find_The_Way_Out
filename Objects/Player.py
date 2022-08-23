@@ -56,23 +56,17 @@ class Player(pygame.sprite.Sprite):
         
         if keys_pressed[pygame.K_LEFT]:
             self.direction.x = -1
-            # self.selected_folder = self.animations_names[1]
-            # self.current_animation = self.character.animations[self.selected_folder]["frames"]
             self.flipped = True
         elif keys_pressed[pygame.K_RIGHT]:
             self.direction.x = +1
-            # self.selected_folder = self.animations_names[1]
-            # self.current_animation = self.character.animations[self.selected_folder]["frames"]
             self.flipped = False
         else:
             self.direction.x = 0
-            # self.selected_folder = self.animations_names[0]
-            # self.current_animation = self.character.animations[self.selected_folder]["frames"]
 
         if keys_pressed[pygame.K_SPACE]:
             if self.jumped == False:
                 self.on_ground = False
-                self.jump(collision_sprites)
+                self.jump()
 
     def animate(self):
         self.animation_index += 0.15
@@ -111,7 +105,7 @@ class Player(pygame.sprite.Sprite):
 
 
 
-    def jump(self, collision_sprites):
+    def jump(self):
         self.direction.y = self.jumpForce
         self.jumped = True
         
@@ -132,24 +126,10 @@ class Player(pygame.sprite.Sprite):
         
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
-    def update(self, collision_sprites):
-        print("Current Animation: ", self.selected_folder, self.animation_index)
-        # if not self.jumped:
-        #     if self.on_ground and self.direction.x != 0:
-        #         self.selected_folder = self.animations_names[1]
-        #         self.current_animation = self.character.animations[self.selected_folder]["frames"]
-        #     else:
-        #         self.selected_folder = self.animations_names[0]
-        #         self.current_animation = self.character.animations[self.selected_folder]["frames"]
-                
-            
-        
+    def update(self, collision_sprites):        
         self.horizontal_collision(collision_sprites)
         self.vertical_collision(collision_sprites)
         self.input(collision_sprites)
         self.get_animation()
         self.animate()
-        
-    # def draw(self, screen):
-    #     screen.blit(self.image, self.hitbox)
 
