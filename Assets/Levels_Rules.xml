@@ -1,0 +1,12 @@
+
+<Root>
+    <Levels>
+        <Level name="Level_01" />
+        <Level name="Level_02" />
+        <Level name="Level_03" />
+    </Levels>
+
+    <Rules>
+        <Rule left="Level_02" right="Level_01">
+    </Rules>    
+</Root>

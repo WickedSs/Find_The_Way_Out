@@ -27,7 +27,7 @@ class Player:
         self.playerID = None
         
         # paramaters
-        self.speed = 3
+        self.speed = PLAYER_SPEED
         self.jumpForce = -12
         self.dash_distance = 50
         self.gravity = 0.8
@@ -100,6 +100,10 @@ class Player:
                 self.on_ground = False
                 self.jump()
 
+        if keys_pressed[pygame.K_f]:
+            if self.player_fov <= 80 * 2:
+                self.player_fov += 5
+
     def animate(self):
         self.animation_index += 0.12
         if self.animation_index >= len(self.character.animations[self.selected_folder]["frames"]):
@@ -115,7 +119,7 @@ class Player:
   
     def horizontal_collision(self, collision_sprites):
         self.rect.x += self.direction.x * self.speed
-        for sprite in collision_sprites.sprites():
+        for sprite in collision_sprites:
             if sprite.rect.colliderect(self.rect):
                 if self.direction.x < 0:
                     self.rect.left = sprite.rect.right
@@ -125,7 +129,7 @@ class Player:
               
     def vertical_collision(self, collision_sprites):
         self.apply_gravity()
-        for sprite in collision_sprites.sprites():
+        for sprite in collision_sprites:
             if sprite.rect.colliderect(self.rect):
                 if self.direction.y > 0:
                     self.rect.bottom = sprite.rect.top
@@ -160,16 +164,26 @@ class Player:
         self.selected_folder = self.animations_names[self.selected_animation]
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
-    def draw(self, screen):
+    def field_of_view(self, screen):
         self.fov_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         self.fill_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
         pygame.draw.circle(self.fill_surface, (0, 0, 0), self.center_circle, self.player_fov)
         pygame.draw.circle(self.fov_surface, (0, 0, 0), self.center_circle, self.player_hiddenarea)
         self.fov_surface.blit(self.fill_surface, (0, 0), special_flags = pygame.BLEND_RGBA_SUB)
         screen.blit(self.fov_surface, (0, 0))
+
+    def dim_screen(self, screen):
+        dim = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        dim.set_alpha(128)
+        dim.fill((0, 0, 0))
+        screen.blit(dim, (0, 0))
+
+    def draw(self, screen):
+        self.dim_screen(screen)
+        # self.field_of_view(screen)
         screen.blit(self.image, self.rect)
 
-    def update(self, collision_sprites, screen):
+    def update(self, collision_sprites):
         self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]
         self.horizontal_collision(collision_sprites)
         self.vertical_collision(collision_sprites)

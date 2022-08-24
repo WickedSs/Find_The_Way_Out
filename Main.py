@@ -19,6 +19,7 @@ class Game:
         # self.network_player = self.network.player
         # self.setup_player()
         self.setup_group_sprites()
+        self.scroll = [0, 0]
 
     def setup_player(self):
         self.player = Player(self.character.characters[0], self.network_player.x, self.network_player.y)
@@ -65,11 +66,13 @@ class Game:
                     sys.exit()
             
             self.screen.fill("black")
-            self.level.run()
+            self.scroll[0] += self.player.rect.x - self.scroll[0] - ((SCREEN_WIDTH / 2) + (self.player.rect.w / 2) )
+            self.scroll[1] += self.player.rect.y - self.scroll[1] - ((SCREEN_HEIGHT / 2) + (self.player.rect.h / 2))
+            self.level.run(self.screen, self.scroll[0])
             
             # handle current player
             self.player.draw(self.screen)
-            self.player.update(self.tiles_group, self.screen)
+            self.player.update(self.tiles_group)
             # self.network_player = self.player.player_update(self.network_player)
 
             # handling other player
