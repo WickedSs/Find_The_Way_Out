@@ -3,16 +3,18 @@ from Settings import *
 
 
 
-class Tile:
+class Tile(pygame.sprite.Sprite):
     def __init__(self, x, y, image):
+        super().__init__()
         self.image = pygame.transform.scale(image, (SCALE_SIZE, SCALE_SIZE))
         self.mask = pygame.mask.from_surface(image)
         self.x, self.y = x, y
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x * SCALE_SIZE, self.y * SCALE_SIZE
 
-    def draw(self, screen):
-        screen.blit(self.image, (self.rect.x, self.rect.y))
+    def update(self, x_shift, y_shift):
+        self.rect.x += x_shift
+        self.rect.y += y_shift
     
 
 class Tile_WFC:

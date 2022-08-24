@@ -66,9 +66,7 @@ class Game:
                     sys.exit()
             
             self.screen.fill("black")
-            self.scroll[0] += self.player.rect.x - self.scroll[0] - ((SCREEN_WIDTH / 2) + (self.player.rect.w / 2) )
-            self.scroll[1] += self.player.rect.y - self.scroll[1] - ((SCREEN_HEIGHT / 2) + (self.player.rect.h / 2))
-            self.level.run(self.screen, self.scroll[0])
+            self.level.run(self.player)
             
             # handle current player
             self.player.draw(self.screen)
