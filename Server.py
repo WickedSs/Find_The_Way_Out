@@ -1,7 +1,7 @@
 import socket
 from threading import Thread
 import sys, os, uuid, pickle, random
-from .Client import Network
+from Client import Network
 from Objects.Player import NetworkPlayer, Player
 from Characters import Characters
 from Settings import *
@@ -39,7 +39,7 @@ class Server:
             ACCEPT_THREAD.start()
 
     def thread_client(self, conn, addr, player_id):
-        player = NetworkPlayer(random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE, 24, 28, 0, False, player_id)
+        player = NetworkPlayer(random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE, 24 * 2, 28 * 2, 0, False, player_id)
         CONNECTED_PLAYERS[player_id] = player
         conn.send(pickle.dumps(CONNECTED_PLAYERS[player_id]))
         print("[SERVER] Started thread with player index:", player_id)

@@ -12,7 +12,7 @@ class Network:
     def connect(self):
         try:
             self.socket_client.connect((self.server_ip, self.server_port))
-            self.id = self.socket_client.recv(2048).decode('utf-8', 'ignore').strip()
+            return pickle.loads(self.socket_client.recv(2048))
         except Exception as e:
             print("[ERROR] Error trying to connect to server", e)
 
