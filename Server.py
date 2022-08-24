@@ -61,7 +61,8 @@ class Server:
                         if player != current_player:
                             list_players[player_idx] = player
                 
-                conn.sendall(pickle.dumps(CONNECTED_PLAYERS))
+                print("list_players: ", list_players)
+                conn.sendall(pickle.dumps(list_players))
 
             except Exception as e:
                 print(f"[SERVER] {addr} has disconnected.", e)

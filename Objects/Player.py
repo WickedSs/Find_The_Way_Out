@@ -11,10 +11,10 @@ CHARACTER_FOLDER = "Assets\Characters"
 
 
 class NetworkPlayer:
-    def __init__(self, x, y, width, height, anim_folder, flipped, player_id):
+    def __init__(self, x, y, width, height, selected_animation, flipped, player_id):
         self.character = 0
         self.x, self.y = x, y
-        self.anim_folder = anim_folder
+        self.selected_animation = selected_animation
         self.flipped = flipped
         self.width, self.height, = width, height
         self.player_id = player_id        
@@ -32,6 +32,8 @@ class Player:
         self.gravity = 0.8
         self.collision_tolorance = 2
         self.direction = pygame.math.Vector2(0, 0)
+        self.selected_animation = 0
+        self.animation_index = 0
 
         # booleans
         self.flipped = False
@@ -40,8 +42,7 @@ class Player:
 
         self.character = character
         self.animations_names = self.character.animations_folders
-        self.selected_folder = self.animations_names[0]
-        self.animation_index = 0
+        self.selected_folder = self.animations_names[self.selected_animation]
         self.current_animation = self.character.animations[self.selected_folder]["frames"][0]
         self.frames_path = os.path.join(ROOT, CHARACTER_FOLDER, self.character.character_name)
         
@@ -55,6 +56,13 @@ class Player:
 
     def set_playerID(self, playerID):
         self.playerID = playerID
+
+    def player_update(self, network_player):
+        network_player.x, network_player.y = self.rect.x, self.rect.y
+        network_player.selected_animation = self.selected_animation
+        network_player.flipped = self.flipped
+        network_player.playerID = self.playerID
+        return network_player
 
     def repetitive_bullshit(self):
         old_rect = self.rect.copy()
@@ -72,7 +80,7 @@ class Player:
             self.direction.x = -1
             self.flipped = True
         elif keys_pressed[pygame.K_RIGHT]:
-            self.direction.x = +1
+            self.direction.x = 1
             self.flipped = False
         else:
             self.direction.x = 0
@@ -130,15 +138,16 @@ class Player:
 
     def get_animation(self):
         if self.direction.y < 0:
-            self.selected_folder = self.animations_names[2]
+            self.selected_animation = 2
         elif self.direction.y > 1:
-            self.selected_folder = self.animations_names[3]
+            self.selected_animation = 3
         else:
             if self.direction.x != 0:
-                self.selected_folder = self.animations_names[1]
+                self.selected_animation = 1
             else:
-                self.selected_folder = self.animations_names[0]
+                self.selected_animation = 0
         
+        self.selected_folder = self.animations_names[self.selected_animation]
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
     def draw(self, screen):
