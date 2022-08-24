@@ -35,6 +35,8 @@ class Player:
         self.direction = pygame.math.Vector2(0, 0)
         self.selected_animation = 0
         self.animation_index = 0
+        
+        self.player_fov, self.player_hiddenarea = 80, 1000
 
         # booleans
         self.flipped = False
@@ -54,10 +56,18 @@ class Player:
         self.flipped_image = pygame.transform.flip(self.image, True, False)
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x, self.y
+        self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]
 
     def set_playerID(self, playerID):
         self.playerID = playerID
 
+    def isInside(self, circle, rad, x, y):
+        if ((x - circle[0]) * (x - circle[0]) +
+            (y - circle[1]) * (y - circle[1]) <= rad * rad):
+            return True;
+        else:
+            return False;
+    
     def player_update(self, network_player):
         network_player.x, network_player.y = self.rect.x, self.rect.y
         network_player.direction = (self.direction.x, self.direction.y)
@@ -151,9 +161,16 @@ class Player:
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
     def draw(self, screen):
+        self.fov_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self.fill_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        pygame.draw.circle(self.fill_surface, (0, 0, 0), self.center_circle, self.player_fov)
+        pygame.draw.circle(self.fov_surface, (0, 0, 0), self.center_circle, self.player_hiddenarea)
+        self.fov_surface.blit(self.fill_surface, (0, 0), special_flags = pygame.BLEND_RGBA_SUB)
+        screen.blit(self.fov_surface, (0, 0))
         screen.blit(self.image, self.rect)
 
-    def update(self, collision_sprites):        
+    def update(self, collision_sprites, screen):
+        self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]
         self.horizontal_collision(collision_sprites)
         self.vertical_collision(collision_sprites)
         self.input()

@@ -14,10 +14,10 @@ class Game:
         self.clock = pygame.time.Clock()
         self.level = Level()
         self.character = Characters()
-        # self.player = Player(self.character.characters[0], random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE)
-        self.network = Network()
-        self.network_player = self.network.player
-        self.setup_player()
+        self.player = Player(self.character.characters[0], random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE)
+        # self.network = Network()
+        # self.network_player = self.network.player
+        # self.setup_player()
         self.setup_group_sprites()
 
     def setup_player(self):
@@ -69,14 +69,14 @@ class Game:
             
             # handle current player
             self.player.draw(self.screen)
-            self.player.update(self.tiles_group)
-            self.network_player = self.player.player_update(self.network_player)
+            self.player.update(self.tiles_group, self.screen)
+            # self.network_player = self.player.player_update(self.network_player)
 
             # handling other player
-            self.update_other_player()
-            for player in self.joined_players:
-                player.draw(self.screen)
-                player.update(self.tiles_group)
+            # self.update_other_player()
+            # for player in self.joined_players:
+            #     player.draw(self.screen)
+            #     player.update(self.tiles_group)
 
             # print("Rects: ", self.player.rect, [player.rect for player in self.joined_players])
 
