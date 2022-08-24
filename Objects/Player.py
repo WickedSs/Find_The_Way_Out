@@ -11,9 +11,10 @@ CHARACTER_FOLDER = "Assets\Characters"
 
 
 class NetworkPlayer:
-    def __init__(self, x, y, width, height, selected_animation, flipped, player_id):
+    def __init__(self, x, y, direction, width, height, selected_animation, flipped, player_id):
         self.character = 0
         self.x, self.y = x, y
+        self.direction = direction
         self.selected_animation = selected_animation
         self.flipped = flipped
         self.width, self.height, = width, height
@@ -59,9 +60,8 @@ class Player:
 
     def player_update(self, network_player):
         network_player.x, network_player.y = self.rect.x, self.rect.y
+        network_player.direction = (self.direction.x, self.direction.y)
         network_player.selected_animation = self.selected_animation
-        network_player.flipped = self.flipped
-        network_player.playerID = self.playerID
         return network_player
 
     def repetitive_bullshit(self):

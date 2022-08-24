@@ -39,7 +39,7 @@ class Server:
             ACCEPT_THREAD.start()
 
     def thread_client(self, conn, addr, player_id):
-        player = NetworkPlayer(random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE, 24 * 2, 28 * 2, 0, False, player_id)
+        player = NetworkPlayer(random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE, (0, 0), 24 * 2, 28 * 2, 0, False, player_id)
         CONNECTED_PLAYERS[player_id] = player
         conn.send(pickle.dumps(CONNECTED_PLAYERS[player_id]))
         print("[SERVER] Started thread with player index:", player_id)
@@ -61,7 +61,12 @@ class Server:
                         if player != current_player:
                             list_players[player_idx] = player
                 
-                print("list_players: ", list_players)
+                for idx in CONNECTED_PLAYERS:
+                    connected = CONNECTED_PLAYERS[idx]
+                    print(connected.player_id.split("-")[0], connected.direction[0], end=" ")
+                
+                print("")
+                
                 conn.sendall(pickle.dumps(list_players))
 
             except Exception as e:

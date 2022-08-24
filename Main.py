@@ -39,19 +39,23 @@ class Game:
                 player_to_draw = PLAYERS_CONNECTED[player_index]
                 if player_to_draw.player_id not in players_ids:
                     new_player = Player(self.character.characters[0], player_to_draw.x, player_to_draw.y)
-                    new_player.selected_animation = player_to_draw.selected_animation
-                    new_player.rect.width, new_player.rect.height = player_to_draw.width, player_to_draw.height
                     new_player.playerID = player_to_draw.player_id
+                    new_player.rect.width, new_player.rect.height = player_to_draw.width, player_to_draw.height
+                    new_player.direction = pygame.math.Vector2(player_to_draw.direction)
+                    new_player.selected_animation = player_to_draw.selected_animation
                     self.joined_players.append(new_player)
                 else:
                     index = players_ids.index(player_to_draw.player_id)
                     player = self.joined_players[index]
+                    player.direction = pygame.math.Vector2(player_to_draw.direction)
                     player.selected_animation = player_to_draw.selected_animation
-                    player.rect.x, player.rect.y = player_to_draw.x, player_to_draw.y
-                    player.playerID = player_to_draw.player_id 
+                    
 
         if self.joined_players:
-            print("Player: ", self.player.rect, self.joined_players[0].rect)
+            _ = self.joined_players[0]
+            # print(_.playerID.split("-")[0], _.selected_animation, self.player.playerID.split("-")[0], self.player.selected_animation, "---", self.network_player.selected_animation)
+            print("Me: ", self.player.playerID.split("-")[0], self.player.direction[0], " - You: ", _.playerID.split("-")[0], _.direction[0])
+            # print("[*]", _.selected_folder, _.selected_animation, _.direction)
                     
     def run(self):
         while True:
