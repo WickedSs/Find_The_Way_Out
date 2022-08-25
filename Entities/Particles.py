@@ -1,10 +1,24 @@
-from genericpath import isfile
-import os, sys
+import os, sys, pygame
+from Entities.Item import Item
 
 
 
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 PARTICLES_FOLDER = "Assets\Particles"
+
+
+class Particle:
+    def __init__(self):
+        pass
+
+
+class Big_Map_particle(Item):
+    def __init__(self):
+        self.display_surface = pygame.display.get_surface()
+        self.asset_name = "Big_Map"
+        self.particles = {}
+
+
 
 class Particles:
     def __init__(self, character):

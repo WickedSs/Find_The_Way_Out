@@ -4,7 +4,7 @@ from Settings import *
 import os, sys, pygame
 from PIL import Image
 import numpy as np
-from VFX.Particles import Particles
+from Entities.Particles import Particles
 
 
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
@@ -43,6 +43,7 @@ class Player:
         self.animation_index, self.particles_index = 0, 0
         self.player_fov, self.player_hiddenarea = 80, 1000
         self.previous_block_position = -1
+        self.collected_maps = 0
 
         # booleans
         self.flipped = False

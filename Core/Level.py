@@ -131,8 +131,12 @@ class Level:
         self.level_sprites.update(self.world_shift, 0)
         self.level_sprites.draw(self.display_surface)
         for item in self.items:
-            item.update(self.world_shift, 0)
-            item.draw()
+            picked_up = item.on_pickeup(player)
+            if not picked_up:
+                item.update(self.world_shift, 0)
+                item.draw()
+            else:
+                self.items.remove(item)
 
         # outline for collition rect
         # for sprite in self.collision_group.sprites():
