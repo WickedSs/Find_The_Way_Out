@@ -121,13 +121,10 @@ class Player:
     def input(self):
         keys_pressed = pygame.key.get_pressed()
         if keys_pressed[pygame.K_LEFT]:
-            if not self.jumped and not self.falling:
-                self.draw_run_particles()
+            
             self.direction.x = -1
             self.flipped = True
         elif keys_pressed[pygame.K_RIGHT]:
-            if not self.jumped and not self.falling:
-                self.draw_run_particles()
             self.direction.x = 1
             self.flipped = False
         else:
@@ -229,6 +226,8 @@ class Player:
     def draw(self, screen):
         # self.field_of_view(screen)
         screen.blit(self.image, self.rect)
+        if not self.jumped and not self.falling and self.direction.x != 0:
+            self.draw_run_particles()
         self.dim_screen(screen)
 
     def update(self, collision_sprites):
