@@ -68,13 +68,13 @@ class Game:
             self.screen.fill("black")
             self.level.run(self.player)
             
-            # handle current player
+            ## handle current player
             self.player.draw(self.screen)
             self.player.update(self.tiles_group)
             # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
             # self.network_player = self.player.player_update(self.network_player)
 
-            # handling other player
+            ## handling other player
             # self.update_other_player()
             # for player in self.joined_players:
             #     player.draw(self.screen)
