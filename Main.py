@@ -1,8 +1,8 @@
 import os, sys, pickle, pygame
-from Characters import Characters
+from Core.Characters import Characters
 from Settings import *
-from Level import *
-from Objects.Player import *
+from Core.Level import *
+from Entities.Player import *
 from Client import Network
 
 
@@ -14,7 +14,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.level = Level()
         self.character = Characters()
-        self.player = Player(self.character.characters[0], random.randrange(2, 6) * SCALE_SIZE, random.randrange(3, 5) * SCALE_SIZE)
+        self.player = Player(self.character.characters[0], 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
         # self.network = Network()
         # self.network_player = self.network.player
         # self.setup_player()
@@ -71,6 +71,7 @@ class Game:
             # handle current player
             self.player.draw(self.screen)
             self.player.update(self.tiles_group)
+            # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
             # self.network_player = self.player.player_update(self.network_player)
 
             # handling other player

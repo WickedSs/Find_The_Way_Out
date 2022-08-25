@@ -3,7 +3,7 @@ from threading import Thread
 import sys, os, uuid, pickle, random
 from Client import Network
 from Objects.Player import NetworkPlayer, Player
-from Characters import Characters
+from Core.Characters import Characters
 from Settings import *
 
 

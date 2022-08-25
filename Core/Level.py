@@ -1,9 +1,10 @@
+from math import ceil
 from multiprocessing import current_process
 from tkinter import Grid
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string, operator
-from Objects.Level_CONFIG import *
-from Objects.Tile import *
+from Entities.Cell import Cell
+from Entities.Tile import *
 from Settings import *
 import xml.etree.ElementTree as ET
 import json
@@ -18,7 +19,18 @@ DIM = 8
 
 
 
+class Level_CONFIG:
+    def __init__(self, data):
+        self.data = data
+        self.load_json()
     
+    def load_json(self):
+        self.collide_layer = self.data["layers"][0]["data"]
+        self.background_layer = self.data["layers"][1]["data"]
+        self.tile_width, self.tile_height = self.data["tilewidth"], self.data["tileheight"]
+        self.room_width, self.room_height = self.data["width"], self.data["height"]
+    
+
 class Level:
     spritesheet_filename = os.path.join(ROOT, "Assets/Spritesheet.png")
     def __init__(self):
@@ -31,23 +43,24 @@ class Level:
         self.levels, self.picked_level = [], 0
         self.world_shift = 0
         self.scroll_offset = [0, 0]
+        self.DIM = 2
         self.initialize()
 
     def initialize(self):
-        # self.initialize_grid()
+        self.initialize_grid()
         self.load_json_levels()
         self.initialize_sprite()
-        self.picked_level = self.levels[0] #random.choice(self.levels)
+        self.picked_level = self.levels[1] #random.choice(self.levels)
         self.setup_map()
     
     def scroll_X(self, player):
         player_x = player.rect.centerx
         direction_x = player.direction.x
 
-        if player_x < 200 and direction_x < 0:
+        if direction_x < 0 and not player.blocked:
             self.world_shift = PLAYER_SPEED
             player.speed = 0
-        elif player_x > 1240 and direction_x > 0:
+        elif direction_x > 0 and not player.blocked:
             self.world_shift = -PLAYER_SPEED
             player.speed = 0
         else:
@@ -86,33 +99,35 @@ class Level:
 
     def initialize_grid(self):
         self.grid = []
-        currentX, currentY = 0, 0
-        for j in range(0, 768 * 2, 768):
-            self.grid.append([])
-            for i in range(0, 1440 * 2, 1440):
-                self.grid[int(j / 768)].append([i, j])
+        for i in range(DIM * DIM):
+            self.grid.append(Cell(i))
+            
         
     def setup_map(self):
         self.level_sprites = pygame.sprite.Group()
         self.collision_group = pygame.sprite.Group()
-        currentX, currentY = 0, 0 
-        for x in range(len(self.picked_level.collide_layer)):
-            tile_index = self.picked_level.collide_layer[x] - 1
-            tile = Tile(currentX, currentY, SPRITES[tile_index])
-            self.level_sprites.add(tile)
-            if tile_index <= 174 and tile_index != 36:
-                self.collision_group.add(tile)
-            currentX += 1
-            if currentX >= self.picked_level.room_width:
-                currentY += 1
-                currentX = 0
-
+        random_level = self.levels[1]
+        self.grid[0].set_level(random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), 0, 0)
+        for j in range(self.DIM):
+            for i in range(self.DIM):
+                index = i + j * self.DIM
+                if not self.grid[index].collapsed:
+                    last_index = (i - 1) + j * self.DIM
+                    room_type = self.grid[last_index].room_type
+                    if room_type == 1:
+                        random_level = self.levels[0]
+                        self.grid[index].set_level(random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), i, j)
             # to be fixed with a grid later on
             # currentX = (64 * 15) * (i + 1)
             # currentY = 0              
     
     def run(self, player):
+        # print(len(self.level_sprites.sprites()), len(self.collision_group.sprites()))
         self.level_sprites.update(self.world_shift, 0)
         self.level_sprites.draw(self.display_surface)
+
+        # outline for collition rect
+        # for sprite in self.collision_group.sprites():
+        #     pygame.draw.rect(self.display_surface, (0, 255, 0), sprite.rect, 1)
         self.scroll_X(player)
     

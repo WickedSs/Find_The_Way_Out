@@ -4,13 +4,13 @@ from Settings import *
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, x, y, image):
+    def __init__(self, x, y, position, image):
         super().__init__()
         self.image = pygame.transform.scale(image, (SCALE_SIZE, SCALE_SIZE))
         self.mask = pygame.mask.from_surface(image)
-        self.x, self.y = x, y
+        self.x, self.y, self.position = x, y, position
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = self.x * SCALE_SIZE, self.y * SCALE_SIZE
+        self.rect.x, self.rect.y = (self.x * SCALE_SIZE) + self.position[0], (self.y * SCALE_SIZE) + self.position[1]
 
     def update(self, x_shift, y_shift):
         self.rect.x += x_shift
