@@ -90,7 +90,10 @@ class Level:
             data = json.load(json_file)
             level = Level_CONFIG(data)
             self.levels.append(level)
-    
+
+    def rooms_with_maps(self):
+        self.picked_rooms = [0, 1]
+
     def initialize_sprite(self):
         for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
             for x in range(0, self.sprite_sheet_rect.width, TILE_SIZE):

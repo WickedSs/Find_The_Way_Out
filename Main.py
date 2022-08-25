@@ -16,8 +16,6 @@ class Game:
         self.level = Level()
         self.character = Characters()
         self.items = Items()
-        print("Items: ", self.items.items)
-        print("Big_map: ", self.items.big_map)
         self.player = Player(self.character.characters[0], 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
         # self.network = Network()
         # self.network_player = self.network.player
