@@ -3,7 +3,7 @@ from multiprocessing import current_process
 from tkinter import Grid
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string, operator
-from Entities.Cell import Cell
+from Entities.Cell import Room
 from Entities.Tile import *
 from Settings import *
 import xml.etree.ElementTree as ET
@@ -51,6 +51,7 @@ class Level:
         self.load_json_levels()
         self.initialize_sprite()
         self.picked_level = self.levels[1] #random.choice(self.levels)
+        self.rooms_with_maps()
         self.setup_map()
     
     def scroll_X(self, player):
@@ -103,14 +104,14 @@ class Level:
     def initialize_grid(self):
         self.grid = []
         for i in range(DIM * DIM):
-            self.grid.append(Cell(i))
+            self.grid.append(Room(i))
             
         
     def setup_map(self):
         self.level_sprites = pygame.sprite.Group()
         self.collision_group = pygame.sprite.Group()
         random_level = self.levels[1]
-        self.grid[0].set_level(random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), 0, 0)
+        self.grid[0].set_level(random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), 0, 0, self.picked_rooms)
         for j in range(self.DIM):
             for i in range(self.DIM):
                 index = i + j * self.DIM
@@ -119,7 +120,7 @@ class Level:
                     room_type = self.grid[last_index].room_type
                     if room_type == 1:
                         random_level = self.levels[0]
-                        self.grid[index].set_level(random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), i, j)
+                        self.grid[index].set_level(random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), i, j, self.picked_rooms)
             # to be fixed with a grid later on
             # currentX = (64 * 15) * (i + 1)
             # currentY = 0              

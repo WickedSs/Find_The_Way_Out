@@ -1,5 +1,4 @@
 import os, sys, pickle, pygame
-from Core.Items import Items
 from Core.Characters import Characters
 from Settings import *
 from Core.Level import *
@@ -13,9 +12,8 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.level = Level()
         self.character = Characters()
-        self.items = Items()
+        self.level = Level()
         self.player = Player(self.character.characters[0], 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
         # self.network = Network()
         # self.network_player = self.network.player
