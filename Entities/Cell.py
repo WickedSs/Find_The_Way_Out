@@ -14,32 +14,15 @@ class Room:
         self.room_tiles = []
         self.items_positions = []
         self.max_items = 5
-        self.big_map = Big_Map()
+        self.big_map = Big_Map(1 * SCALE_SIZE, 4 * SCALE_SIZE)
             
-    def set_level(self, level, tiles, tiles_collision, SPRITES, room_type, i, j, has_item):
+    def set_level(self, items, level, tiles, tiles_collision, SPRITES, room_type, i, j, has_item):
         self.level = level
         self.collapsed = True
         self.room_type = room_type
         self.position = (i * self.width, j * self.height)
         self.trigger_draw(tiles, tiles_collision, SPRITES)
-        if self.index in has_item:
-            self.trigger_items()
-    
-    def trigger_items(self):
-        while self.max_items > 0:
-            rand = random.randrange(0, 5)
-            if rand == 0 or rand == 1:
-                return
-            elif rand == 2 or rand == 3:
-                return
-            else:
-                return
-
-            self.max_items -= 1
-            
-    def check_surroundings(self):
-        for tile in self.room_tiles:
-            return
+        items.append(self.big_map)
 
     def trigger_draw(self, tiles, tiles_collision, SPRITES):
         for x in range(len(self.level.collide_layer)):
@@ -53,3 +36,4 @@ class Room:
             if self.currentX >= self.level.room_width:
                 self.currentY += 1
                 self.currentX = 0
+            
