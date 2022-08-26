@@ -16,7 +16,7 @@ class Game:
         self.overlay = Overlay()
         self.character = Characters()
         self.level = Level(self.overlay)
-        self.player = Player(self.character.characters[0], 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
+        self.player = Player(self.character.characters[0], self.overlay, 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
         # self.network = Network()
         # self.network_player = self.network.player
         # self.setup_player()
@@ -72,11 +72,12 @@ class Game:
             
             ## handle current player
             self.player.draw(self.screen)
+            self.overlay.draw(self.player)
+            
             self.player.update(self.tiles_group)
+            self.overlay.update()
             
             # Draw Overlay
-            self.overlay.update()
-            self.overlay.draw(self.player)
             # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
             # self.network_player = self.player.player_update(self.network_player)
 

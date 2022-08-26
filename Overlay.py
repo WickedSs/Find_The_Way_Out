@@ -39,7 +39,9 @@ class Overlay:
         self.bottom_bar_path = os.path.join(ROOT, GUI_FOLDER, "Prefabs", "7.png")
         self.player_frame = os.path.join(ROOT, GUI_FOLDER, "Prefabs", "13.png")
         self.health_bar_files = ["1.png", "3.png", "4.png"]
+        self.health_bar_inner = "1.png"
         self.mana_bar_files = ["1.png", "4.png", "5.png"]
+        self.mana_bar_inner = "2.png"
 
         # Sliding text
         self.slide_text_surface = None
@@ -58,6 +60,7 @@ class Overlay:
             self.slinding_text_rect.x += 20
             if self.slinding_text_rect.x >= 10:
                 self.slinding_text_rect.x = 10
+                self.trigger_sliding_text = False
                 self.start_tickes = pygame.time.get_ticks()
         
         if self.slide_text_surface:    
@@ -67,16 +70,18 @@ class Overlay:
         
             
     def hide_sliding_text(self):
-        print(self.trigger_sliding_text, self.start_tickes)
-        if self.trigger_sliding_text and self.start_tickes != -1:
-            if (pygame.time.get_ticks() - self.start_tickes) / 1000 == 5:
+        if self.start_tickes != -1:
+            if (pygame.time.get_ticks() - self.start_tickes) / 1000 >= 3:
                 self.slide_text_surface.set_alpha(self.slide_fade_out)
+                self.slide_fade_out -= 30
             
             if self.slide_fade_out == 0:
                 self.slinding_text_rect.x = -100
                 self.slide_fade_out = 255
                 self.trigger_sliding_text = False
-                
+                self.start_tickes = -1
+                self.slide_text_surface = None
+
     def player_data(self, player):
         self.player_frame_image = pygame.image.load(self.player_frame)
         self.player_frame_rect = self.player_frame_image.get_rect()
@@ -106,6 +111,16 @@ class Overlay:
             image_rect.x, image_rect.y = heath_bar_pos.x, heath_bar_pos.y
             self.overlay_surface.blit(image, image_rect)
             heath_bar_pos.x += image_rect.width
+
+        self.heath_bar_inner_pos = pygame.math.Vector2(45, SCREEN_HEIGHT - 86)
+        self.inner_bar_red = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, "Life_Bars\Colors", self.health_bar_inner)).convert_alpha()
+        # current_health = (player * (self.inner_bar_red_rect.x * 4.8)) / 100
+        # self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (current_health, 4))
+        # self.inner_bar_red_rect = image.get_rect()
+        # self.inner_bar_red_rect.x, self.inner_bar_red_rect.y = heath_bar_inner_pos.x, heath_bar_inner_pos.y
+        self.increase_health_bar(player)
+        self.overlay_surface.blit(self.inner_bar_red, self.inner_bar_red_rect)
+
         
         heath_bar_pos = pygame.math.Vector2(12.5, SCREEN_HEIGHT - 60)
         for pic in self.mana_bar_files:
@@ -115,16 +130,50 @@ class Overlay:
             image_rect = image.get_rect()
             image_rect.x, image_rect.y = heath_bar_pos.x, heath_bar_pos.y
             self.overlay_surface.blit(image, image_rect)
-            heath_bar_pos.x += image_rect.width 
-            
-        
+            heath_bar_pos.x += image_rect.width
+
+        self.mana_bar_inner_pos = pygame.math.Vector2(40, SCREEN_HEIGHT - 46)
+        self.inner_bar_blue = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, "Life_Bars\Colors", self.mana_bar_inner)).convert_alpha()
+        # self.inner_bar_blue_rect = self.inner_bar_blue.get_rect()
+        # self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (self.inner_bar_blue_rect.w, 4))
+        # self.inner_bar_blue_rect = image.get_rect()
+        # self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y = self.mana_bar_inner_pos.x, self.mana_bar_inner_pos.y
+        self.increase_mana_bar(player)
+        self.overlay_surface.blit(self.inner_bar_blue, self.inner_bar_blue_rect)
+                
         self.overlay_surface.blit(self.player_frame_image, self.player_frame_rect)
         self.overlay_surface.blit(self.player_name, self.player_name_rect)
         self.overlay_surface.blit(self.maps_text, self.maps_text_rect)
         self.overlay_surface.blit(self.maps_holded, self.maps_holded_rect)
         self.overlay_surface.blit(player.player_portrait, self.player_portrait_rect)
         # pygame.draw.rect(self.overlay_surface, (255, 255, 255), self.player_portrait_rect, 1)
-        
+    
+    def increase_health_bar(self, player):
+        if player.health <= player.max_health:
+            self.inner_bar_red_rect = self.inner_bar_red.get_rect()
+            current_health = (player.health * (self.inner_bar_red_rect.w * 4.8)) / player.max_health
+            self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (current_health, 4))
+            player.health += 0.05
+        else:
+            current_health = 32 * 4.8
+            self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (current_health, 4))
+
+        self.inner_bar_red_rect = self.inner_bar_red.get_rect()
+        self.inner_bar_red_rect.x, self.inner_bar_red_rect.y = self.heath_bar_inner_pos.x, self.heath_bar_inner_pos.y
+
+    def increase_mana_bar(self, player):
+        if player.mana <= player.max_mana:
+            self.inner_bar_blue_rect = self.inner_bar_blue.get_rect()
+            current_mana = (player.mana * (self.inner_bar_blue_rect.w * 3.2)) / player.max_mana
+            self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (current_mana, 4))
+            player.mana += 0.10
+        else:
+            current_mana = 32 * 3.2
+            self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (current_mana, 4))
+
+        self.inner_bar_blue_rect = self.inner_bar_blue.get_rect()
+        self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y = self.mana_bar_inner_pos.x, self.mana_bar_inner_pos.y
+
     def inventory_bar(self):
         current_slot_x, current_slot_y = (SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), SCREEN_HEIGHT - 85
         for i in range(self.slots):
@@ -133,7 +182,6 @@ class Overlay:
             self.overlay_surface.blit(slot.item, slot.rect)
             current_slot_x += slot.rect.width + 10
             
-        # self.overlay_surface.blit(self.bottom_bar, (posX, posY))
 
     def set_text_to_slide(self, text):
         self.text_to_slide = text

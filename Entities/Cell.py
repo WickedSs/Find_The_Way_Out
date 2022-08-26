@@ -17,7 +17,8 @@ class Room:
         self.max_items = 5
         self.big_map = Big_Map(30, 31, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
         self.door = Door(41, 49, False, 2 * SCALE_SIZE, 6 * SCALE_SIZE + 6)
-            
+
+
     def set_level(self, items, decorations, level, tiles, tiles_collision, SPRITES, room_type, i, j, has_item):
         self.level = level
         self.collapsed = True

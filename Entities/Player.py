@@ -23,9 +23,10 @@ class NetworkPlayer:
         self.player_id = player_id        
 
 class Player:
-    def __init__(self, character, x, y):
+    def __init__(self, character, overlay, x, y):
         self.display_surface = pygame.display.get_surface()
         self.x, self.y = x, y
+        self.overlay = overlay
         self.playerID = None
         self.player_name = "Gwynbleidd"
 
@@ -34,6 +35,8 @@ class Player:
         self.particle = Particles(self.character.character_name)
         
         # paramaters
+        self.health, self.max_health = 45, 100
+        self.mana, self.max_mana = 10, 60
         self.speed = PLAYER_SPEED
         self.jumpForce = -12
         self.dash_distance = 50
@@ -87,7 +90,7 @@ class Player:
             return True;
         else:
             return False;
-    
+
     def player_update(self, network_player):
         network_player.x, network_player.y = self.rect.x, self.rect.y
         network_player.direction = (self.direction.x, self.direction.y)
