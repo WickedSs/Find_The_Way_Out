@@ -35,8 +35,8 @@ class Player:
         self.particle = Particles(self.character.character_name)
         
         # paramaters
-        self.health, self.max_health = 45, 100
-        self.mana, self.max_mana = 10, 60
+        self.health, self.max_health = 100, 100
+        self.mana, self.max_mana = 60, 60
         self.speed = PLAYER_SPEED
         self.jumpForce = -12
         self.dash_distance = 50
@@ -55,6 +55,7 @@ class Player:
         self.on_ground = False
         self.blocked = False
         self.falling = False
+        self.E_Action, self.floating_text = False, False
 
         self.particles_names = self.particle.particle_folders
         self.particle_folder = self.particles_names[self.selected_particle]
@@ -149,6 +150,9 @@ class Player:
         if keys_pressed[pygame.K_f]:
             if self.player_fov <= 80 * 2:
                 self.player_fov += 5
+                
+        if keys_pressed[pygame.K_e] and self.floating_text:
+            self.E_Action = True
 
     def animate(self):
         self.animation_index += 0.12
@@ -240,6 +244,14 @@ class Player:
         if not self.jumped and not self.falling and self.direction.x != 0:
             self.draw_run_particles()
         # self.dim_screen(screen)
+        
+    def trigger_floating_text(self, text, posx, posy):
+        self.floating_text = True
+        self.overlay.draw_text(text, posx, posy)
+        if self.E_Action:
+            return True
+        
+        return False
 
     def update(self, collision_sprites):
         self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]

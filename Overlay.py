@@ -49,11 +49,31 @@ class Overlay:
         self.slide_fade_out = 255
         self.start_tickes = -1
         self.text_to_slide = "DEFAULT"
-
+        
+        
+        # floating text
+        self.floating_text_distance_max = 5
+        self.floating_text_distance = 0
+        self.add_number = 0.25
+        
         # Bottom Bar
-        self.slots = 3
+        self.slots = 4
         self.bottom_bar_width, self.bottom_bar_height = (64 * self.slots) + (15 * 6), 70
         
+    
+    def draw_text(self, text, posx, posy):
+        self.floating_text = self.text_renderer_24.render(text, False, (255, 255, 255))
+        self.floating_text_rect = self.floating_text.get_rect()
+        self.floating_text_rect.x, self.floating_text_rect.y = posx, posy
+        
+        self.floating_text_distance += self.add_number
+        if self.floating_text_distance >= 8:
+            self.add_number = -0.35
+        elif self.floating_text_distance <= 0:
+            self.add_number = 0.35
+        
+        self.floating_text_rect.y += self.floating_text_distance
+        self.display_surface.blit(self.floating_text, self.floating_text_rect)
     
     def sliding_text(self):
         if self.trigger_sliding_text:
@@ -67,7 +87,6 @@ class Overlay:
             self.overlay_surface.blit(self.slide_text_surface, self.slinding_text_rect)
             
         self.hide_sliding_text()
-        
             
     def hide_sliding_text(self):
         if self.start_tickes != -1:
@@ -153,7 +172,7 @@ class Overlay:
             self.inner_bar_red_rect = self.inner_bar_red.get_rect()
             current_health = (player.health * (self.inner_bar_red_rect.w * 4.8)) / player.max_health
             self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (current_health, 4))
-            player.health += 0.05
+            player.health += 0.08
         else:
             current_health = 32 * 4.8
             self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (current_health, 4))
@@ -166,7 +185,7 @@ class Overlay:
             self.inner_bar_blue_rect = self.inner_bar_blue.get_rect()
             current_mana = (player.mana * (self.inner_bar_blue_rect.w * 3.2)) / player.max_mana
             self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (current_mana, 4))
-            player.mana += 0.10
+            player.mana += 0.25
         else:
             current_mana = 32 * 3.2
             self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (current_mana, 4))

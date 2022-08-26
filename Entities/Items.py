@@ -11,8 +11,8 @@ ITEMS_FOLDER = "Assets\Items"
 
 
 class Big_Map(Item):
-    def __init__(self, width, height, animate, x, y):
-        super().__init__(width, height, animate, x, y)
+    def __init__(self, width, height, animate, scale, x, y):
+        super().__init__(width, height, animate, scale, x, y)
         self.display_surface = pygame.display.get_surface()
         self.asset_name = "Big_Map"
         self.animation_type = "Multiple"
@@ -36,6 +36,39 @@ class Big_Map(Item):
         return
 
 
+class Chest(Item):
+    def __init__(self, width, height, animate, scale, x, y):
+        super().__init__(width, height, animate, scale, x, y)
+        self.asset_name = "Chest"
+        self.animation_type = "Multiple"
+        self.status = "Idle"
+        self.open = False
+        self.path = os.path.join(ITEMS_FOLDER, self.asset_name)
+        self.status_path = os.path.join(self.path, self.status)
+        self.multiple_animations()
+        self.working_animation = self.animations[self.status]
+        self.possible_loot = [Big_Map(30, 31, True, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)]
+        # self.big_map = Big_Map(30, 31, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
+        
+    def on_pickup(self, player):
+        if player.rect.colliderect(self.rect) and not self.open:
+            action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 2 - 10, self.rect.y - 40)
+            if action:
+                self.status = "Unlocked"
+                self.open = True
+        
+        if self.open:
+            self.unlock_chest(player)
+    
+    def unlock_chest(self, player):
+        status = self.play_animation_once()
+        if status:
+            self.player_effect(player)
+            self.open = False
+            
+    def player_effect(self, player):
+        return
+
 class Blue_Diamond(Item):
     def __init__(self):
         self.asset_name = "Blue_Diamond"
@@ -45,7 +78,8 @@ class Blue_Diamond(Item):
         self.path = os.path.join(ITEMS_FOLDER, self.asset_name)
         self.single_animations()
         self.working_animation = self.animations["frame"]
-
+        
+        
 class Blue_Potion(Item):
     def __init__(self):
         pass

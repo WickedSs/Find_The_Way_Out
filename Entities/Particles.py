@@ -14,7 +14,7 @@ class Particle:
 
 class Big_Map_particle(Item):
     def __init__(self, status, width, height):
-        super().__init__(width, height, 0, 0)
+        super().__init__(width, height, True, True, 0, 0)
         self.display_surface = pygame.display.get_surface()
         self.asset_name = "Map_Effect"
         self.animation_type = "Multiple"
@@ -30,7 +30,6 @@ class Big_Map_particle(Item):
         self.animation_index += 0.12
         if self.animation_index >= len(self.working_animation):
             self.animation_index = 0
-            print("Ended")
             return True
         
         self.get_frame(True, 30, 31)

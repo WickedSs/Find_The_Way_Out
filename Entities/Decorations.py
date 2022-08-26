@@ -22,8 +22,8 @@ class Chains:
         pass
 
 class Door(Item):
-    def __init__(self, width, height, animate, x, y):
-        super().__init__(width, height, animate, x, y)
+    def __init__(self, width, height, animate, scale, x, y):
+        super().__init__(width, height, animate, scale, x, y)
         self.asset_name = "Door"
         self.animation_type = "Multiple"
         self.animations = {}
@@ -33,7 +33,7 @@ class Door(Item):
         self.status_path = os.path.join(self.path, self.status)
         self.multiple_animations()
         self.working_animation = self.animations[self.status]
-        self.get_frame(True, width * 2, height * 2)
+        self.get_frame()
 
     def on_collision(self, player):
         return

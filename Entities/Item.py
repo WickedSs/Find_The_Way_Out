@@ -3,12 +3,14 @@ from Settings import *
 import os, sys, pygame
 
 class Item:
-    def __init__(self, width, height, animate, x=0, y=0):
+    def __init__(self, width, height, animate, scale, x=0, y=0, scalex=2, scaley=2):
         self.display_surface = pygame.display.get_surface()
         self.animations = {}
         self.animation_names = []
         self.animation_index = 0
         self.animate = animate
+        self.scale = scale
+        self.scalex, self.scaley = scalex, scaley
         self.disappear, self.hide_image = False, False
         self.x, self.y, self.width, self.height = x, y, width, height
         self.rect = pygame.Rect(self.x + (self.width / 2 ), self.y + (self.height / 2 ), self.width, self.height)
@@ -24,16 +26,16 @@ class Item:
         for frame in os.listdir(self.path):
             self.animations["frame"].append(frame)
 
-    def get_frame(self, scale=False, scalex=0, scaley=0):
+    def get_frame(self):
         self.old_rect = self.rect.copy()
         working_path = os.path.join(self.status_path, self.working_animation[int(self.animation_index)])
         self.image = pygame.image.load(working_path)
         self.rect.w, self.rect.h = self.image.get_rect().w, self.image.get_rect().h
-        if scale:
-            self.image = pygame.transform.scale(self.image, (scalex, scaley))
+        if self.scale:
+            self.image = pygame.transform.scale(self.image, (self.rect.w * self.scalex, self.rect.h * self.scaley))
             self.rect = pygame.Rect(self.rect.x, self.rect.y, self.image.get_rect().w, self.image.get_rect().h)
             
-
+    
     def play_animation(self):
         if self.animate:
             self.animation_index += 0.12
@@ -41,6 +43,17 @@ class Item:
                 self.animation_index = 0
             
             self.get_frame()
+            
+    def play_animation_once(self):
+        self.animation_index += 0.12
+        if self.animation_index >= len(self.working_animation):
+            self.animation_index = 0
+            return True
+        
+        self.get_frame()
+        self.update(0, 0)
+        self.display_surface.blit(self.image, self.rect)
+        return False
 
     def draw(self):
         self.play_animation()
