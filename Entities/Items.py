@@ -1,6 +1,7 @@
 import os, sys, pygame
 from Entities.Item import *
 from Settings import *
+from Entities.Particles import *
 
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 ITEMS_FOLDER = "Assets\Items"
@@ -10,23 +11,21 @@ ITEMS_FOLDER = "Assets\Items"
 
 
 class Big_Map(Item):
-    def __init__(self, x, y):
+    def __init__(self, width, height, x, y):
+        super().__init__(width, height, x, y)
         self.display_surface = pygame.display.get_surface()
         self.asset_name = "Big_Map"
         self.animation_type = "Multiple"
-        self.x, self.y = x, y
-        self.rect = pygame.Rect(self.x + (30 / 2 ), self.y + (31 / 2 ), 0, 0)
-        self.animations = {}
-        self.animation_names = []
-        self.animation_index = 0
         self.status = "Idle"
         self.path = os.path.join(ITEMS_FOLDER, self.asset_name)
         self.status_path = os.path.join(self.path, self.status)
         self.multiple_animations()
         self.working_animation = self.animations[self.status]
+        self.out_particle = Big_Map_particle("Out", 19, 19)
         
     def on_pickeup(self, player):
         if player.rect.colliderect(self.rect):
+            self.out_particle.set_position(self.rect.x, self.rect.y)
             return True
 
         return False

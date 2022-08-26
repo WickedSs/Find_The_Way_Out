@@ -14,7 +14,7 @@ class Room:
         self.room_tiles = []
         self.items_positions = []
         self.max_items = 5
-        self.big_map = Big_Map(1 * SCALE_SIZE, 4 * SCALE_SIZE)
+        self.big_map = Big_Map(30, 31, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
             
     def set_level(self, items, level, tiles, tiles_collision, SPRITES, room_type, i, j, has_item):
         self.level = level
@@ -22,7 +22,8 @@ class Room:
         self.room_type = room_type
         self.position = (i * self.width, j * self.height)
         self.trigger_draw(tiles, tiles_collision, SPRITES)
-        items.append(self.big_map)
+        if self.index in has_item:
+            items.append(self.big_map)
 
     def trigger_draw(self, tiles, tiles_collision, SPRITES):
         for x in range(len(self.level.collide_layer)):

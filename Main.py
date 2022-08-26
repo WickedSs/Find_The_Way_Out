@@ -1,5 +1,6 @@
 import os, sys, pickle, pygame
 from Core.Characters import Characters
+from Overlay import Overlay
 from Settings import *
 from Core.Level import *
 from Entities.Player import *
@@ -12,6 +13,7 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
+        self.overlay = Overlay()
         self.character = Characters()
         self.level = Level()
         self.player = Player(self.character.characters[0], 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
@@ -71,6 +73,9 @@ class Game:
             ## handle current player
             self.player.draw(self.screen)
             self.player.update(self.tiles_group)
+            
+            # Draw Overlay
+            self.overlay.draw()
             # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
             # self.network_player = self.player.player_update(self.network_player)
 

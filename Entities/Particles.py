@@ -13,12 +13,32 @@ class Particle:
 
 
 class Big_Map_particle(Item):
-    def __init__(self):
+    def __init__(self, status, width, height):
+        super().__init__(width, height, 0, 0)
         self.display_surface = pygame.display.get_surface()
-        self.asset_name = "Big_Map"
-        self.particles = {}
-
-
+        self.asset_name = "Map_Effect"
+        self.animation_type = "Multiple"
+        self.rect = pygame.Rect(0, 0, self.width, self.height)
+        self.animations = {}
+        self.animation_index = 0
+        self.status = status
+        self.path = os.path.join(PARTICLES_FOLDER, self.asset_name)
+        self.status_path = os.path.join(self.path, self.status)
+        self.multiple_animations()
+        self.working_animation = self.animations[status]
+        
+    def play_animation_once(self):
+        self.animation_index += 0.12
+        if self.animation_index >= len(self.working_animation):
+            self.animation_index = 0
+            print("Ended")
+            return True
+        
+        self.get_frame(True, 30, 31)
+        self.update(0, 0)
+        self.draw()
+        return False
+        
 
 class Particles:
     def __init__(self, character):

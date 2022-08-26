@@ -3,6 +3,13 @@ from Settings import *
 import os, sys, pygame
 
 class Item:
+    def __init__(self, width, height, x=0, y=0):
+        self.display_surface = pygame.display.get_surface()
+        self.animations = {}
+        self.animation_names = []
+        self.animation_index = 0
+        self.x, self.y, self.width, self.height = x, y, width, height
+        self.rect = pygame.Rect(self.x + (self.width / 2 ), self.y + (self.height / 2 ), self.width, self.height)
     
     def multiple_animations(self):
         for folder in os.listdir(self.path):
@@ -15,11 +22,15 @@ class Item:
         for frame in os.listdir(self.path):
             self.animations["frame"].append(frame)
 
-    def get_frame(self):
+    def get_frame(self, scale=False, scalex=0, scaley=0):
         self.old_rect = self.rect.copy()
         working_path = os.path.join(self.status_path, self.working_animation[int(self.animation_index)])
         self.image = pygame.image.load(working_path)
         self.rect.w, self.rect.h = self.image.get_rect().w, self.image.get_rect().h
+        if scale:
+            self.image = pygame.transform.scale(self.image, (scalex, scaley))
+            self.rect = pygame.Rect(self.rect.x, self.rect.y, self.image.get_rect().w, self.image.get_rect().h)
+            
 
     def play_animation(self):
         self.animation_index += 0.12
@@ -38,7 +49,7 @@ class Item:
         self.rect.y += world_shift_y
         
     def set_position(self, x, y):
-        self.rect.x, self.rect.y = x * SCALE_SIZE, y * SCALE_SIZE
+        self.rect.x, self.rect.y = x, y
     
     def set_status(self, status):
         self.status = status

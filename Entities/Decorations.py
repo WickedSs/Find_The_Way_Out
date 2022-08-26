@@ -1,4 +1,5 @@
-
+import os, sys, pygame
+from Entities.Item import Item
 
 
 class Cannon:
@@ -12,14 +13,16 @@ class Candle:
     
 
 class Chains:
-    def __init__(self):
+    def __init__(self, x, y):
         pass
-    
 
-class Door:
-    def __init__(self):
-        pass
-    
+class Door(Item):
+    def __init__(self, x, y, width, height):
+        super().__init__(self, x, y, width, height)
+        self.asset_name = "Big_Map"
+        self.animation_type = "Multiple"
+        self.x, self.y = x, y
+        print(self.display_surface)
 
 class Window:
     def __init__(self):

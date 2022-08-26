@@ -93,7 +93,7 @@ class Level:
             self.levels.append(level)
 
     def rooms_with_maps(self):
-        self.picked_rooms = [0, 1]
+        self.picked_rooms = [0]
 
     def initialize_sprite(self):
         for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
@@ -106,7 +106,6 @@ class Level:
         for i in range(DIM * DIM):
             self.grid.append(Room(i))
             
-        
     def setup_map(self):
         self.level_sprites = pygame.sprite.Group()
         self.collision_group = pygame.sprite.Group()
@@ -131,12 +130,18 @@ class Level:
         self.level_sprites.update(self.world_shift, 0)
         self.level_sprites.draw(self.display_surface)
         for item in self.items:
+            pygame.draw.rect(self.display_surface, (0, 255, 0), item.rect, 1)
+            # print("Item: ", self.items.index(item), item.asset_name, item.animation_index, item.rect, len(self.items))
             picked_up = item.on_pickeup(player)
             if not picked_up:
                 item.update(self.world_shift, 0)
                 item.draw()
             else:
-                self.items.remove(item)
+                status = item.out_particle.play_animation_once()
+                if status:
+                    self.items.remove(item)
+                    
+                
 
         # outline for collition rect
         # for sprite in self.collision_group.sprites():

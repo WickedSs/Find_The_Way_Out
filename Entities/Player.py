@@ -229,7 +229,7 @@ class Player:
         screen.blit(self.image, self.rect)
         if not self.jumped and not self.falling and self.direction.x != 0:
             self.draw_run_particles()
-        self.dim_screen(screen)
+        # self.dim_screen(screen)
 
     def update(self, collision_sprites):
         self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]

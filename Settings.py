@@ -3,7 +3,7 @@ from pygame.math import Vector2
 
 
 FPS = 60
-PLAYER_SPEED = 3
+PLAYER_SPEED = 5
 SCREEN_WIDTH = 64 * 15 #1440
 SCREEN_HEIGHT = 64 * 9 #768
 TILE_SIZE = 32
