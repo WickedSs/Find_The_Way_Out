@@ -11,8 +11,8 @@ ITEMS_FOLDER = "Assets\Items"
 
 
 class Big_Map(Item):
-    def __init__(self, width, height, x, y):
-        super().__init__(width, height, x, y)
+    def __init__(self, width, height, animate, x, y):
+        super().__init__(width, height, animate, x, y)
         self.display_surface = pygame.display.get_surface()
         self.asset_name = "Big_Map"
         self.animation_type = "Multiple"

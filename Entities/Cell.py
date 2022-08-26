@@ -1,3 +1,4 @@
+from .Decorations import Door
 from Entities.Tile import Tile
 from Settings import SCREEN_HEIGHT, SCREEN_WIDTH
 import random
@@ -14,15 +15,17 @@ class Room:
         self.room_tiles = []
         self.items_positions = []
         self.max_items = 5
-        self.big_map = Big_Map(30, 31, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
+        self.big_map = Big_Map(30, 31, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
+        self.door = Door(41, 49, False, 2 * SCALE_SIZE, 6 * SCALE_SIZE + 6)
             
-    def set_level(self, items, level, tiles, tiles_collision, SPRITES, room_type, i, j, has_item):
+    def set_level(self, items, decorations, level, tiles, tiles_collision, SPRITES, room_type, i, j, has_item):
         self.level = level
         self.collapsed = True
         self.room_type = room_type
         self.position = (i * self.width, j * self.height)
         self.trigger_draw(tiles, tiles_collision, SPRITES)
         if self.index in has_item:
+            decorations.append(self.door)
             items.append(self.big_map)
 
     def trigger_draw(self, tiles, tiles_collision, SPRITES):

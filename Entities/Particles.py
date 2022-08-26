@@ -18,7 +18,6 @@ class Big_Map_particle(Item):
         self.display_surface = pygame.display.get_surface()
         self.asset_name = "Map_Effect"
         self.animation_type = "Multiple"
-        self.rect = pygame.Rect(0, 0, self.width, self.height)
         self.animations = {}
         self.animation_index = 0
         self.status = status

@@ -2,6 +2,11 @@ import os, sys, pygame
 from Entities.Item import Item
 
 
+ROOT = os.path.dirname(sys.modules['__main__'].__file__)
+DECORATIONS_FOLDER = "Assets\Decorations"
+
+
+
 class Cannon:
     def __init__(self):
         pass
@@ -17,12 +22,21 @@ class Chains:
         pass
 
 class Door(Item):
-    def __init__(self, x, y, width, height):
-        super().__init__(self, x, y, width, height)
-        self.asset_name = "Big_Map"
+    def __init__(self, width, height, animate, x, y):
+        super().__init__(width, height, animate, x, y)
+        self.asset_name = "Door"
         self.animation_type = "Multiple"
-        self.x, self.y = x, y
-        print(self.display_surface)
+        self.animations = {}
+        self.animation_index = 0
+        self.status = "Opening"
+        self.path = os.path.join(DECORATIONS_FOLDER, self.asset_name)
+        self.status_path = os.path.join(self.path, self.status)
+        self.multiple_animations()
+        self.working_animation = self.animations[self.status]
+        self.get_frame(True, width * 2, height * 2)
+
+    def on_collision(self, player):
+        return
 
 class Window:
     def __init__(self):

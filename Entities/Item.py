@@ -3,11 +3,12 @@ from Settings import *
 import os, sys, pygame
 
 class Item:
-    def __init__(self, width, height, x=0, y=0):
+    def __init__(self, width, height, animate, x=0, y=0):
         self.display_surface = pygame.display.get_surface()
         self.animations = {}
         self.animation_names = []
         self.animation_index = 0
+        self.animate = animate
         self.disappear, self.hide_image = False, False
         self.x, self.y, self.width, self.height = x, y, width, height
         self.rect = pygame.Rect(self.x + (self.width / 2 ), self.y + (self.height / 2 ), self.width, self.height)
@@ -34,11 +35,12 @@ class Item:
             
 
     def play_animation(self):
-        self.animation_index += 0.12
-        if self.animation_index >= len(self.working_animation):
-            self.animation_index = 0
-        
-        self.get_frame()
+        if self.animate:
+            self.animation_index += 0.12
+            if self.animation_index >= len(self.working_animation):
+                self.animation_index = 0
+            
+            self.get_frame()
 
     def draw(self):
         self.play_animation()
