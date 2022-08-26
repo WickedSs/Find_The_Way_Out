@@ -6,7 +6,7 @@ from Entities.Items import *
 class Room:
     def __init__(self, index, level=None):
         self.index = index
-        self.width, self.height = SCREEN_WIDTH, SCREEN_HEIGHT
+        self.width, self.height = ROOM_WIDTH, ROOM_HEIGHT
         self.level = level
         self.collapsed = False
         self.room_type = None

@@ -75,6 +75,7 @@ class Game:
             self.player.update(self.tiles_group)
             
             # Draw Overlay
+            self.overlay.update()
             self.overlay.draw()
             # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
             # self.network_player = self.player.player_update(self.network_player)
