@@ -24,11 +24,13 @@ class Big_Map(Item):
         self.out_particle = Big_Map_particle("Out", 19, 19)
         
     def on_pickup(self, player):
-        if player.rect.colliderect(self.rect):
+        if player.rect.colliderect(self.rect) and not self.hide_image:
             self.out_particle.set_position(self.rect.x, self.rect.y)
             self.hide_image = True
-            self.disappear = self.out_particle.play_animation_once()
 
+        if self.hide_image:
+            self.disappear = self.out_particle.play_animation_once()
+        
     def player_effect(self, player):
         player.collected_maps += 1
         return

@@ -27,6 +27,7 @@ class Player:
         self.display_surface = pygame.display.get_surface()
         self.x, self.y = x, y
         self.playerID = None
+        self.player_name = "Gwynbleidd"
 
         # Objects
         self.character = character
@@ -43,8 +44,8 @@ class Player:
         self.animation_index, self.particles_index = 0, 0
         self.player_fov, self.player_hiddenarea = 80, 1000
         self.previous_block_position = -1
-        self.collected_maps = 0
-
+        
+        
         # booleans
         self.flipped = False
         self.jumped = False
@@ -61,6 +62,12 @@ class Player:
         self.selected_folder = self.animations_names[self.selected_animation]
         self.current_animation = self.character.animations[self.selected_folder]["frames"][0]
         self.frames_path = os.path.join(ROOT, CHARACTER_FOLDER, self.character.character_name)
+        
+        # player data
+        self.player_portrait_name = self.character.animations[self.selected_folder]["frames"][0]
+        self.player_portrait = pygame.image.load(os.path.join(self.frames_path, self.selected_folder, "cropped", self.current_animation))
+        self.player_portrait = pygame.transform.scale(self.player_portrait, (self.player_portrait.get_rect().w * 1.2, self.player_portrait.get_rect().h * 1.2))
+        self.collected_maps = 0
         
         self.image = pygame.image.load(os.path.join(self.frames_path, self.selected_folder, "cropped", self.current_animation))
         old_rect = self.image.get_rect()
@@ -132,9 +139,9 @@ class Player:
             self.direction.x = 0
 
         if keys_pressed[pygame.K_SPACE]:
-            if self.jumped == False:
-                self.on_ground = False
-                self.jump()
+            # if not self.jumped and not self.falling:
+            self.on_ground = False
+            self.jump()
 
         if keys_pressed[pygame.K_f]:
             if self.player_fov <= 80 * 2:

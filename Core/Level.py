@@ -132,14 +132,13 @@ class Level:
         self.level_sprites.update(self.world_shift, 0)
         self.level_sprites.draw(self.display_surface)
         for item in self.items:
-            print("Items: ", self.items)
             item.on_pickup(player)
             item.update(self.world_shift, 0)
             item.draw()
             if item.disappear:
                 self.overlay.set_text_to_slide("Part of the map was found!")
                 self.overlay.trigger_sliding_text = True
-                item.player_effect()
+                item.player_effect(player)
                 self.items.remove(item)
                     
                 
