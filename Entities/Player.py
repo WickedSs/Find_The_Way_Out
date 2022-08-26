@@ -211,15 +211,15 @@ class Player:
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
     def field_of_view(self, screen):
-        self.fov_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
-        self.fill_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+        self.fov_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA).convert_alpha()
+        self.fill_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA).convert_alpha()
         pygame.draw.circle(self.fill_surface, (0, 0, 0), self.center_circle, self.player_fov)
         pygame.draw.circle(self.fov_surface, (0, 0, 0), self.center_circle, self.player_hiddenarea)
         self.fov_surface.blit(self.fill_surface, (0, 0), special_flags = pygame.BLEND_RGBA_SUB)
         screen.blit(self.fov_surface, (0, 0))
 
     def dim_screen(self, screen):
-        dim = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        dim = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
         dim.set_alpha(128)
         dim.fill((0, 0, 0))
         screen.blit(dim, (0, 0))

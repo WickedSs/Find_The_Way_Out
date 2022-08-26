@@ -34,49 +34,51 @@ class Overlay:
         
         # Bottom_bar
         self.bottom_bar_path = os.path.join(ROOT, GUI_FOLDER, "Prefabs", "7.png")
-        
+        self.slide_text_surface = None
+
         # Booleans
-        self.trigger_sliding_text = True
+        self.trigger_sliding_text = False
         self.text_to_slide = "DEFAULT"
-        
-        # Sliding Text
-        self.text_surface = self.text_renderer.render(self.text_to_slide, False, (255, 255, 255))
-        self.slinding_text_rect = self.text_surface.get_rect()
-        self.slinding_text_rect.x, self.slinding_text_rect.y = -100, 100
+
+        # Bottom Bar
+        self.bottom_bar_width, self.bottom_bar_height = (64 * 6) + (15 * 6), 70
+        # self.bottom_bar = pygame.Surface((self.bottom_bar_width, self.bottom_bar_height), pygame.SRCALPHA).convert_alpha()
+        # self.bottom_bar.set_colorkey((0, 0, 0))
+        # self.bottom_bar.fill((0, 0, 0))
+        # self.bottom_bar.set_alpha(255)
         
     
     def sliding_text(self):
         
         if self.trigger_sliding_text:
-            self.slinding_text_rect.x += 5
-            print(self.slinding_text_rect, self.trigger_sliding_text)
-            if self.slinding_text_rect.x == 10:
+            self.slinding_text_rect.x += 20
+            if self.slinding_text_rect.x >= 10:
                 self.trigger_sliding_text = False
-                self.slinding_text_rect.x, self.slinding_text_rect.y = -100, 100
+                self.slinding_text_rect.x = 10
+        
+        if self.slide_text_surface:    
+            self.overlay_surface.blit(self.slide_text_surface, self.slinding_text_rect)
                 
             
             
     def inventory_bar(self):
-        width = (64 * 6) + (15 * 6)
-        height = 70
-        bottom_bar = pygame.Surface((width, height), pygame.SRCALPHA, 32)
-        bottom_bar.set_colorkey((0, 0, 0))
-        bottom_bar.fill((0, 0, 0))
-        bottom_bar.set_alpha(128)
-        posX, posY = (SCREEN_WIDTH / 2) - (width / 2), SCREEN_HEIGHT - 85
-        
-        current_slot_x, current_slot_y = 0, 0
+        current_slot_x, current_slot_y = (SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), SCREEN_HEIGHT - 85
         for i in range(6):
             slot_image = pygame.image.load(self.bottom_bar_path)
             slot = BOTTOM_BAR_SLOT(current_slot_x, current_slot_y, slot_image)
-            bottom_bar.blit(slot.item, slot.rect)
+            self.overlay_surface.blit(slot.item, slot.rect)
             current_slot_x += slot.rect.width + 10
             
-        self.overlay_surface.blit(bottom_bar, (posX, posY))
-                
+        # self.overlay_surface.blit(self.bottom_bar, (posX, posY))
+
+    def set_text_to_slide(self, text):
+        self.text_to_slide = text
+        self.slide_text_surface = self.text_renderer.render(self.text_to_slide, False, (255, 255, 255))
+        self.slinding_text_rect = self.slide_text_surface.get_rect()
+        self.slinding_text_rect.x, self.slinding_text_rect.y = -100, 100
+
     def draw(self):
         self.inventory_bar()
-        self.overlay_surface.blit(self.text_surface, self.slinding_text_rect)
         self.display_surface.blit(self.overlay_surface, (10, 10))
         
     def update(self):
@@ -85,6 +87,5 @@ class Overlay:
         self.overlay_surface.set_colorkey((0, 0, 0))
         self.overlay_surface.set_alpha(255)
         self.overlay_surface.fill((0, 0, 0))
-        
         
         self.sliding_text()

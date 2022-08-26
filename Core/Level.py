@@ -13,9 +13,11 @@ import json
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 LEVELS_FOLDER = "Assets/Levels"
 SPRITES = []
-GRID = []
-VISITED = []
 DIM = 8
+
+PARTICLE_EFFECTS = {
+
+}
 
 
 
@@ -33,8 +35,9 @@ class Level_CONFIG:
 
 class Level:
     spritesheet_filename = os.path.join(ROOT, "Assets/Spritesheet.png")
-    def __init__(self):
+    def __init__(self, overlay):
         global SPRITES
+        self.overlay = overlay
         self.display_surface = pygame.display.get_surface()
         self.sprite_sheet = pygame.image.load(self.spritesheet_filename).convert_alpha()
         self.level_sprite_sheet = None
@@ -126,20 +129,18 @@ class Level:
             # currentY = 0              
     
     def run(self, player):
-        # print(len(self.level_sprites.sprites()), len(self.collision_group.sprites()))
         self.level_sprites.update(self.world_shift, 0)
         self.level_sprites.draw(self.display_surface)
         for item in self.items:
-            pygame.draw.rect(self.display_surface, (0, 255, 0), item.rect, 1)
-            # print("Item: ", self.items.index(item), item.asset_name, item.animation_index, item.rect, len(self.items))
-            picked_up = item.on_pickeup(player)
-            if not picked_up:
-                item.update(self.world_shift, 0)
-                item.draw()
-            else:
-                status = item.out_particle.play_animation_once()
-                if status:
-                    self.items.remove(item)
+            print("Items: ", self.items)
+            item.on_pickup(player)
+            item.update(self.world_shift, 0)
+            item.draw()
+            if item.disappear:
+                self.overlay.set_text_to_slide("Part of the map was found!")
+                self.overlay.trigger_sliding_text = True
+                item.player_effect()
+                self.items.remove(item)
                     
                 
 

@@ -8,6 +8,7 @@ class Item:
         self.animations = {}
         self.animation_names = []
         self.animation_index = 0
+        self.disappear, self.hide_image = False, False
         self.x, self.y, self.width, self.height = x, y, width, height
         self.rect = pygame.Rect(self.x + (self.width / 2 ), self.y + (self.height / 2 ), self.width, self.height)
     
@@ -41,7 +42,8 @@ class Item:
 
     def draw(self):
         self.play_animation()
-        self.display_surface.blit(self.image, self.rect)
+        if not self.hide_image:
+            self.display_surface.blit(self.image, self.rect)
         # pygame.draw.rect(self.display_surface, (255, 255, 255), self.rect, 1)
 
     def update(self, world_shift_x, world_shift_y):
@@ -53,3 +55,6 @@ class Item:
     
     def set_status(self, status):
         self.status = status
+
+    def delete(self, items):
+        items.remove(self)

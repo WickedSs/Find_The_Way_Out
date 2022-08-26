@@ -15,7 +15,7 @@ class Game:
         self.clock = pygame.time.Clock()
         self.overlay = Overlay()
         self.character = Characters()
-        self.level = Level()
+        self.level = Level(self.overlay)
         self.player = Player(self.character.characters[0], 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
         # self.network = Network()
         # self.network_player = self.network.player

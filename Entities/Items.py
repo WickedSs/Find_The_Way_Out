@@ -23,12 +23,15 @@ class Big_Map(Item):
         self.working_animation = self.animations[self.status]
         self.out_particle = Big_Map_particle("Out", 19, 19)
         
-    def on_pickeup(self, player):
+    def on_pickup(self, player):
         if player.rect.colliderect(self.rect):
             self.out_particle.set_position(self.rect.x, self.rect.y)
-            return True
+            self.hide_image = True
+            self.disappear = self.out_particle.play_animation_once()
 
-        return False
+    def player_effect(self, player):
+        player.collected_maps += 1
+        return
 
 
 class Blue_Diamond(Item):
