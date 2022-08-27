@@ -110,7 +110,6 @@ class Overlay:
             pygame.draw.rect(self.display_surface, (0, 0, 0), (0, i * 100, self.dim_screen_counter, 100))
             pygame.draw.rect(self.display_surface, (0, 0, 0), (SCREEN_WIDTH - self.dim_screen_counter, (i + 1) * 100, SCREEN_WIDTH, SCREEN_HEIGHT / 2)) 
         
-        return 
         
     def draw_text(self, text, posx, posy):
         self.floating_text = self.text_renderer_24.render(text, False, (255, 255, 255))
@@ -268,6 +267,7 @@ class Overlay:
             
         self.player_data(player)
         self.display_surface.blit(self.overlay_surface, (0, 0))
+        
         if self.dim_screen_bool: 
             self.fade_out_screen()
         

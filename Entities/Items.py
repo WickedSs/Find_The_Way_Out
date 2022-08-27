@@ -73,6 +73,7 @@ class Chest(Item):
         
         # print(self.item, self.open)
         if self.open_chest and not self.item_chest:
+            player.disable_movement = True
             self.item_chest = self.play_animation_once()
             self.open_chest = False
         
@@ -101,7 +102,7 @@ class Chest(Item):
             status = self.random_item.play_animation_once(player)
             if status:
                 self.player_effect(player)
-                self.open = player.E_Action = self.particle = self.item_chest = False
+                self.open = player.E_Action = self.particle = self.item_chest = player.disable_movement = False
                 items_list.remove(self)
     
     def player_effect(self, player):

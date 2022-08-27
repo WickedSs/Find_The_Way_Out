@@ -58,6 +58,7 @@ class Player:
         self.dash_masks = []
         
         # booleans
+        self.disable_movement = False
         self.flipped = False
         self.jumped = False
         self.on_ground = False
@@ -139,34 +140,34 @@ class Player:
 
 
     def input(self):
-        keys_pressed = pygame.key.get_pressed()
-        if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_q]:
-            
-            self.direction.x = -1
-            self.flipped = True
-        elif keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
-            self.direction.x = 1
-            self.flipped = False
-        else:
-            self.direction.x = 0
+        if not self.disable_movement:
+            keys_pressed = pygame.key.get_pressed()
+            if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_q]:
+                self.direction.x = -1
+                self.flipped = True
+            elif keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
+                self.direction.x = 1
+                self.flipped = False
+            else:
+                self.direction.x = 0
 
-        if keys_pressed[pygame.K_SPACE]:
-            # if not self.jumped and not self.falling:
-            self.on_ground = False
-            self.jump()
+            if keys_pressed[pygame.K_SPACE]:
+                # if not self.jumped and not self.falling:
+                self.on_ground = False
+                self.jump()
 
-        if keys_pressed[pygame.K_f]:
-            if self.player_fov <= 80 * 2:
-                self.player_fov += 5
+            if keys_pressed[pygame.K_f]:
+                if self.player_fov <= 80 * 2:
+                    self.player_fov += 5
+                    
+            if keys_pressed[pygame.K_e] and self.floating_text:
+                self.E_Action = True
                 
-        if keys_pressed[pygame.K_e] and self.floating_text:
-            self.E_Action = True
-            
-        if keys_pressed[pygame.K_LSHIFT]:
-            if not self.dash_bool and self.mana >= 20 and self.time_between_dahses == 0:
-                self.dash_bool = True
-                self.mana -= 20
-                self.time_between_dahses = 3
+            if keys_pressed[pygame.K_LSHIFT]:
+                if not self.dash_bool and self.mana >= 20 and self.time_between_dahses == 0:
+                    self.dash_bool = True
+                    self.mana -= 20
+                    self.time_between_dahses = 3
                 
 
     def animate(self):
