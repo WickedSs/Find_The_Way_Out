@@ -16,7 +16,7 @@ class Game:
         self.overlay = Overlay()
         self.character = Characters()
         self.level = Level(self.overlay)
-        self.player = Player(self.character.characters[0], self.overlay, 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
+        self.player = Player(self.character.characters[0], self.overlay, self.level, 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
         # self.network = Network()
         # self.network_player = self.network.player
         # self.setup_player()

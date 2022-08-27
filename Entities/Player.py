@@ -1,5 +1,6 @@
 
 import math
+from turtle import color
 from Settings import *
 import os, sys, pygame
 from PIL import Image
@@ -23,10 +24,11 @@ class NetworkPlayer:
         self.player_id = player_id        
 
 class Player:
-    def __init__(self, character, overlay, x, y):
+    def __init__(self, character, overlay, level, x, y):
         self.display_surface = pygame.display.get_surface()
         self.x, self.y = x, y
         self.overlay = overlay
+        self.level = level
         self.playerID = None
         self.player_name = "Aurora"
 
@@ -138,11 +140,11 @@ class Player:
 
     def input(self):
         keys_pressed = pygame.key.get_pressed()
-        if keys_pressed[pygame.K_LEFT]:
+        if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_q]:
             
             self.direction.x = -1
             self.flipped = True
-        elif keys_pressed[pygame.K_RIGHT]:
+        elif keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]:
             self.direction.x = 1
             self.flipped = False
         else:
@@ -215,9 +217,24 @@ class Player:
 
 
     def dash(self):
+        start_dash_position = self.rect.copy()
+        end_dash_position = self.rect.x + self.dash_speed
+        direction = -1 if self.flipped else 1
+        colors= [(202, 240, 248), (173, 232, 244), (144, 224, 239), (72, 202, 228), (0, 180, 216)]
+        start_positions = [(20*direction), 0, (40*direction), (60* direction), (70* direction), (80* direction)]
+        for i in range(len(colors)):
+            pygame.draw.rect(self.display_surface, colors[0], (start_dash_position.x - start_positions[i], start_dash_position.y + (i * 10), end_dash_position - start_dash_position.x, 10))
+            
+            if self.flipped:
+                start_dash_position.x -= self.dash_speed / len(colors)
+            else:
+                start_dash_position.x += self.dash_speed / len(colors)
+            
         direction = -1 if self.flipped else 1
         self.rect.x += self.dash_speed * direction
+        # self.level.dash_scroll()
         self.dash_bool = False
+
 
     def jump(self):
         self.direction.y = self.jumpForce
@@ -289,5 +306,5 @@ class Player:
             self.time_between_dahses -= (pygame.time.get_ticks() - self.dash_minus) / 1000
             if self.time_between_dahses < 0:
                 self.time_between_dahses = 0
-        
+
 

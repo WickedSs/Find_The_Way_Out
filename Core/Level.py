@@ -72,6 +72,9 @@ class Level:
             self.world_shift = 0
             player.speed = PLAYER_SPEED
 
+    def dash_scroll(self):
+        self.world_shift = 150
+
     def get_sprite(self, x, y, sprite_sheet):
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
