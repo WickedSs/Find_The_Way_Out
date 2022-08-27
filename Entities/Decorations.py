@@ -37,7 +37,7 @@ class Door(Item):
 
     def on_collision(self, player, items_list):
         if player.rect.colliderect(self.rect) and not self.open:
-            action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 4, self.rect.y - (self.rect.h / 2))
+            action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 4, self.rect.y - (self.rect.h / 4))
             if action:
                 self.working_animation = self.animations[self.status]
                 self.open = True

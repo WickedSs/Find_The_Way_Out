@@ -56,28 +56,27 @@ class Chest(Item):
         self.asset_name = "Chest"
         self.animation_type = "Multiple"
         self.status = "Idle"
-        self.open, self.item = False, False
+        self.open_chest, self.item_chest = False, False
         self.path = os.path.join(ITEMS_FOLDER, self.asset_name)
         self.multiple_animations()
         self.working_animation = self.animations[self.status]
         self.possible_loot = [Big_Map(30, 31, True, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)]
         self.get_frame()
-        # self.big_map = Big_Map(30, 31, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
         
     def on_collision(self, player, items_list):
-        if player.rect.colliderect(self.rect) and not self.open:
-            action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 4, self.rect.y - (self.rect.h / 2))
+        if player.rect.colliderect(self.rect) and not self.open_chest:
+            action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 4, self.rect.y - (self.rect.h / 4))
             if action:
                 self.status = "Unlocked"
                 self.working_animation = self.animations[self.status]
-                self.open = True
+                self.open_chest = True
         
         # print(self.item, self.open)
-        if self.open and not self.item:
-            self.item = self.play_animation_once()
-            self.open = False
+        if self.open_chest and not self.item_chest:
+            self.item_chest = self.play_animation_once()
+            self.open_chest = False
         
-        if self.item:
+        if self.item_chest:
             self.pick_item(player, items_list)
             
     def play_animation_once(self):
