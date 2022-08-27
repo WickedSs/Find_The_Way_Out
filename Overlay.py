@@ -5,6 +5,7 @@ from Settings import *
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 FONT_FILE = "Assets\Font\m6x11.ttf"
 GUI_FOLDER = "Assets\GUI"
+ITEMS_FOLDER = "Assets\Items"
 
 
 ITEMS_IDENTIFIERS = {
@@ -13,15 +14,37 @@ ITEMS_IDENTIFIERS = {
 
 
 class BOTTOM_BAR_SLOT:
-    def __init__(self, x, y, image):
+    def __init__(self, x, y, background, item, text_render):
         self.item_identifier = 0
         self.x, self.y = x, y
-        self.item = image
-        self.item = pygame.transform.scale(self.item, (SCALE_SIZE, SCALE_SIZE))
-        self.rect = self.item.get_rect()
-        self.rect.x, self.rect.y = self.x, self.y
-        self.amount = 0
+        self.text_render = text_render
+        
+        self.background = background
+        self.rect_background = self.background.get_rect()
+        self.background = pygame.transform.scale(self.background, (self.rect_background.w * 2, self.rect_background.h * 2))
+        self.rect_background = self.background.get_rect()
+        self.rect_background.x, self.rect_background.y = self.x, self.y
+        
+        self.item = item
+        self.rect_item = self.item.get_rect()
+        self.item = pygame.transform.scale(self.item, (self.rect_item.w * 3, self.rect_item.h * 3))
+        self.rect_item = self.item.get_rect()
+        self.rect_item.x, self.rect_item.y = self.rect_background.x + self.rect_background.w / 3, self.rect_background.y + self.rect_background.h / 5
+        
+        self.amount = 5
+        self.amount_text = self.text_render.render(str(self.amount), False, (0, 0, 0))
+        self.amount_rect = self.amount_text.get_rect()
+        self.amount_rect.x, self.amount_rect.y = self.rect_background.x + self.rect_background.w - 15, self.rect_background.y + self.rect_background.h - 25
 
+        
+    def update(self):
+        return
+    
+    def draw(self, screen):
+        screen.blit(self.background, self.rect_background)
+        screen.blit(self.item, self.rect_item)
+        screen.blit(self.amount_text, self.amount_rect)
+        
 
 class Overlay:
     def __init__(self):
@@ -31,9 +54,9 @@ class Overlay:
         self.overlay_surface.set_alpha(255)
         self.overlay_surface.fill((0, 0, 0))
         
+        self.text_renderer_16 = pygame.font.Font(os.path.join(ROOT, FONT_FILE), 16)
         self.text_renderer_20 = pygame.font.Font(os.path.join(ROOT, FONT_FILE), 20)
         self.text_renderer_24 = pygame.font.Font(os.path.join(ROOT, FONT_FILE), 24)
-        self.text_renderer_32 = pygame.font.Font(os.path.join(ROOT, FONT_FILE), 16)
         
         # Bottom_bar
         self.bottom_bar_path = os.path.join(ROOT, GUI_FOLDER, "Prefabs", "7.png")
@@ -62,8 +85,10 @@ class Overlay:
         self.floating_add_number = 0.25
         
         # Bottom Bar
-        self.slots = 4
+        self.slots = 3
         self.bottom_bar_width, self.bottom_bar_height = (64 * self.slots) + (15 * 6), 70
+        self.bottom_bar_items = []
+        self.inventory_bar()
     
     def fade_out_screen(self):
         if self.dim_screen_counter < SCREEN_WIDTH:
@@ -77,7 +102,6 @@ class Overlay:
             pygame.draw.rect(self.display_surface, (0, 0, 0), (0, i * 100, self.dim_screen_counter, 100))
             pygame.draw.rect(self.display_surface, (0, 0, 0), (SCREEN_WIDTH - self.dim_screen_counter, (i + 1) * 100, SCREEN_WIDTH, SCREEN_HEIGHT / 2)) 
         
-    
     def fade_in_screen(self):
         if self.dim_screen_counter >= 0:
             self.dim_screen_counter -= 30
@@ -221,12 +245,14 @@ class Overlay:
         self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y = self.mana_bar_inner_pos.x, self.mana_bar_inner_pos.y
 
     def inventory_bar(self):
+        self.slots_content = ["Red_Potion\\01.png", "Blue_Potion\\01.png", "Chest_Key\\1.png"]
         current_slot_x, current_slot_y = (SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), SCREEN_HEIGHT - 85
         for i in range(self.slots):
-            slot_image = pygame.image.load(self.bottom_bar_path)
-            slot = BOTTOM_BAR_SLOT(current_slot_x, current_slot_y, slot_image)
-            self.overlay_surface.blit(slot.item, slot.rect)
-            current_slot_x += slot.rect.width + 10
+            slot_background_image = pygame.image.load(self.bottom_bar_path)
+            slot_content = pygame.image.load(os.path.join(ROOT, ITEMS_FOLDER, self.slots_content[i]))
+            slot = BOTTOM_BAR_SLOT(current_slot_x, current_slot_y, slot_background_image, slot_content, self.text_renderer_24)
+            current_slot_x += slot.rect_background.width + 10
+            self.bottom_bar_items.append(slot)
             
 
     def set_text_to_slide(self, text):
@@ -236,7 +262,10 @@ class Overlay:
         self.slinding_text_rect.x, self.slinding_text_rect.y = -100, 100
 
     def draw(self, player):
-        self.inventory_bar()
+        for slot in self.bottom_bar_items:
+            slot.update()
+            slot.draw(self.overlay_surface)
+            
         self.player_data(player)
         self.display_surface.blit(self.overlay_surface, (0, 0))
         if self.dim_screen_bool: 

@@ -48,6 +48,10 @@ class Player:
         self.player_fov, self.player_hiddenarea = 80, 1000
         self.previous_block_position = -1
         
+        # dash paramaters
+        self.dash_speed = 20
+        self.dash_time = 1
+        self.dash_bool = False
         
         # booleans
         self.flipped = False
@@ -153,6 +157,10 @@ class Player:
                 
         if keys_pressed[pygame.K_e] and self.floating_text:
             self.E_Action = True
+            
+        if keys_pressed[pygame.K_LSHIFT]:
+            if not self.dash_bool:
+                self.dash_start_time = pygame.time.get_ticks()
 
     def animate(self):
         self.animation_index += 0.12
@@ -200,6 +208,16 @@ class Player:
                     self.falling = False
 
 
+    def dash(self):
+        if (pygame.time.get_ticks() / 1000) - self.dash_start_time < self.dash_time:
+            direction = -1 if self.flipped else 1
+            self.speed = self.dash_speed
+            self.rect.x += self.speed * direction
+            
+        else:
+            self.speed = PLAYER_SPEED
+            self.dash_bool = False
+        
 
     def jump(self):
         self.direction.y = self.jumpForce
@@ -261,4 +279,8 @@ class Player:
         self.input()
         self.get_animation()
         self.animate()
+        
+        if self.dash_bool:
+            self.dash()
+            
 
