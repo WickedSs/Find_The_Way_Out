@@ -95,7 +95,7 @@ class Chest(Item):
         status = random_item.play_animation_once(player)
         if status:
             self.player_effect(player)
-            self.open = False
+            self.open = player.E_Action = False
             items_list.remove(self)
     
     def player_effect(self, player):

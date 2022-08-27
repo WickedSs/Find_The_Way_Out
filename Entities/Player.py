@@ -249,7 +249,7 @@ class Player:
         self.floating_text = True
         self.overlay.draw_text(text, posx, posy)
         if self.E_Action:
-            self.E_Action = self.floating_text = False
+            self.floating_text = False
             return True
         
         return False

@@ -47,7 +47,9 @@ class Door(Item):
             status = self.play_animation_once()
             if status:
                 player.overlay.dim_screen_bool = status
-                self.open, self.action, self.played = False, False, 1
+                self.open = self.action = player.E_Action = False
+                self.played = 1
+                
                 
     def play_animation_once(self):
         self.animation_index += 0.12
