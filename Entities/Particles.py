@@ -36,7 +36,6 @@ class Big_Map_particle(Item):
         self.update(0, 0)
         self.draw()
         return False
-        
 
 class Particles:
     def __init__(self, character):

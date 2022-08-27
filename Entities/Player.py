@@ -49,9 +49,11 @@ class Player:
         self.previous_block_position = -1
         
         # dash paramaters
-        self.dash_speed = 20
+        self.dash_speed = 150
         self.dash_time = 1
         self.dash_bool = False
+        self.time_between_dahses = 0
+        self.dash_masks = []
         
         # booleans
         self.flipped = False
@@ -159,8 +161,11 @@ class Player:
             self.E_Action = True
             
         if keys_pressed[pygame.K_LSHIFT]:
-            if not self.dash_bool:
-                self.dash_start_time = pygame.time.get_ticks()
+            if not self.dash_bool and self.mana >= 20 and self.time_between_dahses == 0:
+                self.dash_bool = True
+                self.mana -= 20
+                self.time_between_dahses = 3
+                
 
     def animate(self):
         self.animation_index += 0.12
@@ -168,6 +173,7 @@ class Player:
             self.animation_index = 0
         
         self.repetitive_bullshit_character()
+        self.mask = pygame.mask.from_surface(self.image)
 
         if self.flipped:
             self.image = self.flipped_image
@@ -209,15 +215,9 @@ class Player:
 
 
     def dash(self):
-        if (pygame.time.get_ticks() / 1000) - self.dash_start_time < self.dash_time:
-            direction = -1 if self.flipped else 1
-            self.speed = self.dash_speed
-            self.rect.x += self.speed * direction
-            
-        else:
-            self.speed = PLAYER_SPEED
-            self.dash_bool = False
-        
+        direction = -1 if self.flipped else 1
+        self.rect.x += self.dash_speed * direction
+        self.dash_bool = False
 
     def jump(self):
         self.direction.y = self.jumpForce
@@ -282,5 +282,12 @@ class Player:
         
         if self.dash_bool:
             self.dash()
+            self.speed = PLAYER_SPEED
+            self.dash_minus = pygame.time.get_ticks()
             
+        if self.time_between_dahses > 0:
+            self.time_between_dahses -= (pygame.time.get_ticks() - self.dash_minus) / 1000
+            if self.time_between_dahses < 0:
+                self.time_between_dahses = 0
+        
 
