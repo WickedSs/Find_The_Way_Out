@@ -32,7 +32,7 @@ class Big_Map_particle(Item):
             self.animation_index = 0
             return True
         
-        self.get_frame(True, 30, 31)
+        self.get_frame()
         self.update(0, 0)
         self.draw()
         return False
