@@ -47,6 +47,7 @@ class Level:
         self.world_shift = 0
         self.scroll_offset = [0, 0]
         self.DIM = 2
+        self.infinite_animation, self.single_animation = [], []
         self.initialize()
 
     def initialize(self):
@@ -112,9 +113,8 @@ class Level:
     def setup_map(self):
         self.level_sprites = pygame.sprite.Group()
         self.collision_group = pygame.sprite.Group()
-        self.items, self.decorations = [], []
         random_level = self.levels[1]
-        self.grid[0].set_level(self.items, self.decorations, random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), 0, 0, self.picked_rooms)
+        self.grid[0].set_level(self.infinite_animation, self.single_animation, random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), 0, 0, self.picked_rooms)
         for j in range(self.DIM):
             for i in range(self.DIM):
                 index = i + j * self.DIM
@@ -123,15 +123,13 @@ class Level:
                     room_type = self.grid[last_index].room_type
                     if room_type == 1:
                         random_level = self.levels[0]
-                        self.grid[index].set_level(self.items, self.decorations, random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), i, j, self.picked_rooms)
-            # to be fixed with a grid later on
-            # currentX = (64 * 15) * (i + 1)
-            # currentY = 0              
+                        self.grid[index].set_level(self.infinite_animation, self.single_animation, random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), i, j, self.picked_rooms)             
     
     def run(self, player):
         self.level_sprites.update(self.world_shift, 0)
         self.level_sprites.draw(self.display_surface)
-        for item in self.items:
+        for item in self.infinite_animation:
+            pygame.draw.rect(self.display_surface, (0, 255, 0), item.rect, 1)
             item.on_pickup(player)
             item.update(self.world_shift, 0)
             item.draw()
@@ -141,8 +139,9 @@ class Level:
                 item.player_effect(player)
                 self.items.remove(item)
         
-        for decoration in self.decorations:
-            decoration.on_collision(player)
+        for decoration in self.single_animation:
+            # pygame.draw.rect(self.display_surface, (0, 255, 0), decoration.rect, 1)
+            decoration.on_collision(player, self.single_animation)
             decoration.update(self.world_shift, 0)
             decoration.draw()
                     
@@ -150,6 +149,5 @@ class Level:
 
         # outline for collition rect
         # for sprite in self.collision_group.sprites():
-        #     pygame.draw.rect(self.display_surface, (0, 255, 0), sprite.rect, 1)
         self.scroll_X(player)
     

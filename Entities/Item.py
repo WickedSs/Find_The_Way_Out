@@ -13,7 +13,7 @@ class Item:
         self.scalex, self.scaley = scalex, scaley
         self.disappear, self.hide_image = False, False
         self.x, self.y, self.width, self.height = x, y, width, height
-        self.rect = pygame.Rect(self.x + (self.width / 2 ), self.y + (self.height / 2 ), self.width, self.height)
+        self.rect = pygame.Rect(self.x, self.y + (SCALE_SIZE - self.height), self.width, self.height)
     
     def multiple_animations(self):
         for folder in os.listdir(self.path):
@@ -27,14 +27,15 @@ class Item:
             self.animations["frame"].append(frame)
 
     def get_frame(self):
+        self.status_path = os.path.join(self.path, self.status)
         self.old_rect = self.rect.copy()
         working_path = os.path.join(self.status_path, self.working_animation[int(self.animation_index)])
         self.image = pygame.image.load(working_path)
         self.rect.w, self.rect.h = self.image.get_rect().w, self.image.get_rect().h
         if self.scale:
             self.image = pygame.transform.scale(self.image, (self.rect.w * self.scalex, self.rect.h * self.scaley))
-            self.rect = pygame.Rect(self.rect.x, self.rect.y, self.image.get_rect().w, self.image.get_rect().h)
-            
+            self.rect = pygame.Rect(self.old_rect.x, self.old_rect.y, self.image.get_rect().w, self.image.get_rect().h)
+        
     
     def play_animation(self):
         if self.animate:
@@ -43,17 +44,6 @@ class Item:
                 self.animation_index = 0
             
             self.get_frame()
-            
-    def play_animation_once(self):
-        self.animation_index += 0.12
-        if self.animation_index >= len(self.working_animation):
-            self.animation_index = 0
-            return True
-        
-        self.get_frame()
-        self.update(0, 0)
-        self.display_surface.blit(self.image, self.rect)
-        return False
 
     def draw(self):
         self.play_animation()

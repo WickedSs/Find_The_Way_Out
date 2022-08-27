@@ -26,7 +26,7 @@ class BOTTOM_BAR_SLOT:
 class Overlay:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
-        self.overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
         self.overlay_surface.set_colorkey((0, 0, 0))
         self.overlay_surface.set_alpha(255)
         self.overlay_surface.fill((0, 0, 0))
@@ -50,27 +50,54 @@ class Overlay:
         self.start_tickes = -1
         self.text_to_slide = "DEFAULT"
         
+        # transition screen
+        self.current_alpha = self.overlay_surface.get_alpha()
+        self.dim_screen_counter = 0
+        self.dim_screen_bool = False
+        self.trigger_fade_in = False
         
         # floating text
         self.floating_text_distance_max = 5
         self.floating_text_distance = 0
-        self.add_number = 0.25
+        self.floating_add_number = 0.25
         
         # Bottom Bar
         self.slots = 4
         self.bottom_bar_width, self.bottom_bar_height = (64 * self.slots) + (15 * 6), 70
+    
+    def fade_out_screen(self):
+        if self.dim_screen_counter < SCREEN_WIDTH:
+            self.dim_screen_counter += 30
+        else:
+            pygame.time.delay(2000)
+            self.trigger_fade_in = True
+            self.dim_screen_bool = False
+            
+        for i in range(0, 6, 2):
+            pygame.draw.rect(self.display_surface, (0, 0, 0), (0, i * 100, self.dim_screen_counter, 100))
+            pygame.draw.rect(self.display_surface, (0, 0, 0), (SCREEN_WIDTH - self.dim_screen_counter, (i + 1) * 100, SCREEN_WIDTH, SCREEN_HEIGHT / 2)) 
         
     
+    def fade_in_screen(self):
+        if self.dim_screen_counter >= 0:
+            self.dim_screen_counter -= 30
+        
+        for i in range(6, -1, -2):
+            pygame.draw.rect(self.display_surface, (0, 0, 0), (0, i * 100, self.dim_screen_counter, 100))
+            pygame.draw.rect(self.display_surface, (0, 0, 0), (SCREEN_WIDTH - self.dim_screen_counter, (i + 1) * 100, SCREEN_WIDTH, SCREEN_HEIGHT / 2)) 
+        
+        return 
+        
     def draw_text(self, text, posx, posy):
         self.floating_text = self.text_renderer_24.render(text, False, (255, 255, 255))
         self.floating_text_rect = self.floating_text.get_rect()
         self.floating_text_rect.x, self.floating_text_rect.y = posx, posy
         
-        self.floating_text_distance += self.add_number
+        self.floating_text_distance += self.floating_add_number
         if self.floating_text_distance >= 8:
-            self.add_number = -0.35
+            self.floating_add_number = -0.35
         elif self.floating_text_distance <= 0:
-            self.add_number = 0.35
+            self.floating_add_number = 0.35
         
         self.floating_text_rect.y += self.floating_text_distance
         self.display_surface.blit(self.floating_text, self.floating_text_rect)
@@ -104,14 +131,14 @@ class Overlay:
     def player_data(self, player):
         self.player_frame_image = pygame.image.load(self.player_frame)
         self.player_frame_rect = self.player_frame_image.get_rect()
-        self.player_frame_rect.x, self.player_frame_rect.y = 0, 0
+        self.player_frame_rect.x, self.player_frame_rect.y = 10, 10
         
         self.player_portrait_rect = player.player_portrait.get_rect()
-        self.player_portrait_rect.x, self.player_portrait_rect.y = 12.5, 10
+        self.player_portrait_rect.x, self.player_portrait_rect.y = 22.5, 20
         
         self.player_name = self.text_renderer_20.render(player.player_name, False, (255, 255, 255))
         self.player_name_rect = self.player_name.get_rect()
-        self.player_name_rect.x, self.player_name_rect.y = self.player_frame_rect.right + 5, 5
+        self.player_name_rect.x, self.player_name_rect.y = self.player_frame_rect.right + 5, 15
         
         self.maps_text = self.text_renderer_20.render("Maps ", False, (255, 255, 255))
         self.maps_text_rect = self.maps_text.get_rect()
@@ -211,13 +238,19 @@ class Overlay:
     def draw(self, player):
         self.inventory_bar()
         self.player_data(player)
-        self.display_surface.blit(self.overlay_surface, (10, 10))
+        self.display_surface.blit(self.overlay_surface, (0, 0))
+        if self.dim_screen_bool: 
+            self.fade_out_screen()
+        
+        if self.trigger_fade_in:
+            self.fade_in_screen()
         
     def update(self):
         
         # clear surface
-        self.overlay_surface.set_colorkey((0, 0, 0))
-        self.overlay_surface.set_alpha(255)
-        self.overlay_surface.fill((0, 0, 0))
+        if not self.dim_screen_bool and not self.trigger_fade_in:
+            self.overlay_surface.set_colorkey((0, 0, 0))
+            self.overlay_surface.set_alpha(255)
+            self.overlay_surface.fill((0, 0, 0))
         
         self.sliding_text()

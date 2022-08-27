@@ -28,7 +28,7 @@ class Player:
         self.x, self.y = x, y
         self.overlay = overlay
         self.playerID = None
-        self.player_name = "Gwynbleidd"
+        self.player_name = "Aurora"
 
         # Objects
         self.character = character
@@ -249,6 +249,7 @@ class Player:
         self.floating_text = True
         self.overlay.draw_text(text, posx, posy)
         if self.E_Action:
+            self.E_Action = False
             return True
         
         return False
