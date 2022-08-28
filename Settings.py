@@ -48,6 +48,7 @@ ITEMS_TRACK = {
     "Chest" : {
         "max" : 5,
         "current": 0,
+        "per_room" : 2,
         "requirements" : [(0, 0, 1, 1), (1, 0, 1, 1), (0, 1, 1, 0), (0, 0, 1, 0)]
     }   
 }
@@ -56,7 +57,7 @@ DECORATIONS_TRACK = {
     "Door" : {
         "max" : 10,
         "current" : 0,
+        "per_room" : 1,
         "requirements" : [(0, 0, 1, 1), (1, 1, 1, 0), (0, 1, 1, 0)],
-        "per_room" : 1
     }
 }

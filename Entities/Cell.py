@@ -21,36 +21,50 @@ class Room:
         self.chest = Chest(64, 64, False, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
 
     def get_position(self):
-        conditions = [0, 0, 0, 0]
-        current_position = pygame.math.Vector2(0, 0)
+        conditions = (0, 0, 0, 0)
+        possible_position = []
         for y in range(len(self.room_tiles)):
             for x in range(len(self.room_tiles[y])): 
                 if y > 0:
                     lookup = self.room_tiles[y - 1][x]
+                    if lookup.collision:
+                        conditions[0] = 1
+                        return
                     return
                 
                 if x < (DIM - 1):
                     lookright = self.room_tiles[y][x + 1]
+                    if lookup.collision:
+                        conditions[1] = 1
+                        return
                     return
                 
                 if y < (DIM - 1):
                     lookdown = self.room_tiles[y + 1][x]
+                    if lookup.collision:
+                        conditions[2] = 1
+                        return
                     return
                 
                 if x > 0:
                     lookleft = self.room_tiles[y][x - 1]
+                    if lookup.collision:
+                        conditions[3] = 1
+                        return
                     return
                 
-        return 0, 0
+        return possible_position
 
     def generate_decorations(self):
         self.decorations_names = list(DECORATIONS_TRACK.keys())
         for name in DECORATIONS_TRACK:
             current_decoration = DECORATIONS_TRACK[name]
-            spawn = random.randrange(0, 6)
-            if spawn in [1, 3]:
-                self.door = Door(41, 64, False, True, 2 * SCALE_SIZE, 6 * SCALE_SIZE)
-                return
+            iterations = DECORATIONS_TRACK[name]["per_rooZm"]
+            for iteration in iterations:
+                spawn = random.randrange(0, 6)
+                if spawn in [1, 3]:
+                    self.door = Door(41, 64, False, True, 2 * SCALE_SIZE, 6 * SCALE_SIZE)
+                    return
             
     
     def generate_items(self):
