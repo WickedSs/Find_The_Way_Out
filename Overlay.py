@@ -1,5 +1,4 @@
 import os, sys, pygame
-
 from Settings import *
 
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
@@ -44,14 +43,33 @@ class BOTTOM_BAR_SLOT:
         screen.blit(self.background, self.rect_background)
         screen.blit(self.item, self.rect_item)
         screen.blit(self.amount_text, self.amount_rect)
+
+
+class GUI_ITEM(pygame.sprite.Sprite):
+    def __init__(self, x, y, image, font=None, amount=None):
+        self.x, self.y = x, y
+        self.font = font
+        self.image = image
+        if font:
+            self.image = self.font.render(str(amount), False, (255, 255, 255))
         
+        self.rect = self.image.get_rect()
+        
+    def update(self):
+        return
+        
+    def draw(self, screen):
+        return
+
 
 class Overlay:
     def __init__(self):
         self.display_surface = pygame.display.get_surface()
+        self.overlay_group = pygame.sprite.Group()
+        
+        
         self.overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
         self.overlay_surface.set_colorkey((0, 0, 0))
-        self.overlay_surface.set_alpha(255)
         self.overlay_surface.fill((0, 0, 0))
         
         self.text_renderer_16 = pygame.font.Font(os.path.join(ROOT, FONT_FILE), 16)
@@ -89,6 +107,9 @@ class Overlay:
         self.bottom_bar_width, self.bottom_bar_height = (64 * self.slots) + (15 * 6), 70
         self.bottom_bar_items = []
         self.inventory_bar()
+    
+    def initialize_overlay(self):
+        return
     
     def fade_out_screen(self):
         if self.dim_screen_counter < SCREEN_WIDTH:
@@ -255,7 +276,6 @@ class Overlay:
             current_slot_x += slot.rect_background.width + 10
             self.bottom_bar_items.append(slot)
             
-
     def set_text_to_slide(self, text):
         self.text_to_slide = text
         self.slide_text_surface = self.text_renderer_24.render(self.text_to_slide, False, (255, 255, 255))
@@ -279,9 +299,8 @@ class Overlay:
     def update(self):
         
         # clear surface
-        if not self.dim_screen_bool and not self.trigger_fade_in:
-            self.overlay_surface.set_colorkey((0, 0, 0))
-            self.overlay_surface.set_alpha(255)
-            self.overlay_surface.fill((0, 0, 0))
-        
+        # if not self.dim_screen_bool and not self.trigger_fade_in:
+        #     self.overlay_surface.set_colorkey((0, 0, 0))
+        #     self.overlay_surface.set_alpha(255)
+        self.overlay_surface.fill((0, 0, 0))
         self.sliding_text()

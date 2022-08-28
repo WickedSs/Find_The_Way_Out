@@ -1,15 +1,14 @@
 from turtle import width
 from pygame.math import Vector2
 
-
 FPS = 60
 PLAYER_SPEED = 5
 SCREEN_WIDTH = 1440 #64 * 15
-SCREEN_HEIGHT = 768 #64 * 9
+SCREEN_HEIGHT = 576 #64 * 9
 ROOM_WIDTH, ROOM_WIDTH_TILES = 64 * 15, 15
 ROOM_HEIGHT, ROOM_HEIGHT_TILES = 64 * 9, 9
 TILE_SIZE = 32
-DIM = 2
+DIM = 1
 SCALE_SIZE = TILE_SIZE * 2
 DIRECTIONS = [(0, -1), (1, 0), (0, 1), (-1, 0)] # (x, y) UP, RIGHT, DOWN, LEFT
 ENTROPY_DICT = { 0 : 2, 1 : 3, 2 : 0, 3 : 1}

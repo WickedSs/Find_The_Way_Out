@@ -5,12 +5,15 @@ from Settings import *
 from Core.Level import *
 from Entities.Player import *
 from Client import Network
+from pygame.locals import *
+
 
 
 
 class Game:
     def __init__(self):
         pygame.init()
+        self.flags = FULLSCREEN | DOUBLEBUF
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
         self.overlay = Overlay()
@@ -70,11 +73,11 @@ class Game:
             self.screen.fill("black")
             self.level.run(self.player)
             
-            ## handle current player
-            self.player.draw(self.screen)
-            self.overlay.draw(self.player)
             
+            self.player.draw(self.screen)
             self.player.update(self.tiles_group)
+            
+            self.overlay.draw(self.player)
             self.overlay.update()
             
             # Draw Overlay
@@ -91,6 +94,7 @@ class Game:
 
             pygame.display.update()
             self.clock.tick(FPS)
+            print(self.clock.get_fps())
 
 if __name__ == '__main__':
     game = Game()
