@@ -39,29 +39,37 @@ class Door(Item):
 
     def on_collision(self, player, items_list):
         if player.rect.colliderect(self.rect) and not self.open and not self.action:
-            self.action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 4, self.rect.y - (self.rect.h / 4))
+            self.action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 3, self.rect.y)
             if self.action:
                 self.working_animation = self.animations[self.status]
                 self.open = True
             
         if self.open and self.action and self.played == 0:
+            self.status = "Opening"
             status = self.play_animation_once()
+            player.disable_movement = True
             if status:
                 player.overlay.dim_screen_counter = 0
                 player.overlay.dim_screen_bool = status
                 self.open = self.action = player.E_Action = False
                 self.played = 1
                 self.delay = pygame.time.get_ticks()
-                player.disable_movement = True
+                player.hide_player = True
         
         if self.delay:
-            self.status = "Closing"
-            if (pygame.time.get_ticks() - self.delay) / 1000 >= 3:
+            if (pygame.time.get_ticks() - self.delay) / 1000 >= 2:
+                self.status = "Closing"
                 status = self.play_animation_once()
                 if status:
                     player.disable_movement = False
                     self.delay = None
-                    self.played = 0        
+                    self.played = 0
+                    player.overlay.dim_screen_bool = False
+                    player.overlay.trigger_fade_in = False
+                    player.hide_player = False
+                    
+        
+        print(self.open, self.action, player.overlay.dim_screen_bool, player.overlay.dim_screen_counter, self.played)
         
     def play_animation_once(self):
         self.animation_index += 0.12

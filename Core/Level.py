@@ -13,7 +13,7 @@ import json
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 LEVELS_FOLDER = "Assets/Levels"
 SPRITES = []
-DIM = 8
+
 
 PARTICLE_EFFECTS = {
 
@@ -47,16 +47,16 @@ class Level:
         self.world_shift = 0
         self.scroll_offset = [0, 0]
         self.DIM = 2
-        self.infinite_animation, self.single_animation = [], []
+        self.infinite_list, self.single_list = [], []
         self.initialize()
 
     def initialize(self):
+        self.level_sprites = pygame.sprite.Group()
+        self.collision_group = pygame.sprite.Group()
         self.initialize_grid()
         self.load_json_levels()
         self.initialize_sprite()
-        self.picked_level = self.levels[1] #random.choice(self.levels)
-        self.rooms_with_maps()
-        self.setup_map()
+        self.generate_map()
     
     def scroll_X(self, player):
         player_x = player.rect.centerx
@@ -81,15 +81,6 @@ class Level:
         sprite.blit(sprite_sheet, (0, 0), (x, y, TILE_SIZE, TILE_SIZE))
         return pygame.transform.scale(sprite, (SCALE_SIZE, SCALE_SIZE))
 
-    def convert_pixelarray(self, pxarray):
-        array = []
-        for i in range(len(pxarray)):
-            array.append([])
-            for j in range(len(pxarray[i])):
-                array[i].append(pxarray[i][j])
-        
-        return array
-
     def load_json_levels(self):
         folder = os.path.join(ROOT, LEVELS_FOLDER)
         for filename in os.listdir(folder):
@@ -98,9 +89,6 @@ class Level:
             data = json.load(json_file)
             level = Level_CONFIG(data)
             self.levels.append(level)
-
-    def rooms_with_maps(self):
-        self.picked_rooms = [0]
 
     def initialize_sprite(self):
         for y in range(0, self.sprite_sheet_rect.height, TILE_SIZE):
@@ -111,27 +99,19 @@ class Level:
     def initialize_grid(self):
         self.grid = []
         for i in range(DIM * DIM):
-            self.grid.append(Room(i))
+            self.grid.append(Room(i, self.infinite_list, self.single_list, SPRITES, self.level_sprites, self.collision_group))
             
-    def setup_map(self):
-        self.level_sprites = pygame.sprite.Group()
-        self.collision_group = pygame.sprite.Group()
-        random_level = self.levels[1]
-        self.grid[0].set_level(self.infinite_animation, self.single_animation, random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), 0, 0, self.picked_rooms)
+    def generate_map(self):
         for j in range(self.DIM):
             for i in range(self.DIM):
                 index = i + j * self.DIM
-                if not self.grid[index].collapsed:
-                    last_index = (i - 1) + j * self.DIM
-                    room_type = self.grid[last_index].room_type
-                    if room_type == 1:
-                        random_level = self.levels[0]
-                        self.grid[index].set_level(self.infinite_animation, self.single_animation, random_level, self.level_sprites, self.collision_group, SPRITES, self.levels.index(random_level), i, j, self.picked_rooms)             
+                self.picked_level = random.choice(self.levels)
+                self.grid[index].set_level(self.picked_level, self.levels.index(self.picked_level), i, j)            
     
     def run(self, player):
         self.level_sprites.update(self.world_shift, 0)
         self.level_sprites.draw(self.display_surface)
-        for item in self.infinite_animation:
+        for item in self.infinite_list:
             pygame.draw.rect(self.display_surface, (0, 255, 0), item.rect, 1)
             item.on_pickup(player)
             item.update(self.world_shift, 0)
@@ -142,15 +122,11 @@ class Level:
                 item.player_effect(player)
                 self.items.remove(item)
         
-        for decoration in self.single_animation:
+        for decoration in self.single_list:
             # pygame.draw.rect(self.display_surface, (0, 255, 0), decoration.rect, 1)
-            decoration.on_collision(player, self.single_animation)
+            decoration.on_collision(player, self.single_list)
             decoration.update(self.world_shift, 0)
             decoration.draw()
-                    
-                
-
-        # outline for collition rect
-        # for sprite in self.collision_group.sprites():
+        
         self.scroll_X(player)
     

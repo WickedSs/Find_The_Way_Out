@@ -9,6 +9,7 @@ SCREEN_HEIGHT = 768 #64 * 9
 ROOM_WIDTH = 64 * 15
 ROOM_HEIGHT = 64 * 9
 TILE_SIZE = 32
+DIM = 2
 SCALE_SIZE = TILE_SIZE * 2
 DIRECTIONS = [(0, -1), (1, 0), (0, 1), (-1, 0)] # (x, y) UP, RIGHT, DOWN, LEFT
 ENTROPY_DICT = { 0 : 2, 1 : 3, 2 : 0, 3 : 1}
@@ -40,5 +41,22 @@ SPRITESHEET_LAYOUT = {
             "From": (),
             "To" : ()
         }
+    }
+}
+
+ITEMS_TRACK = {
+    "Chest" : {
+        "max" : 5,
+        "current": 0,
+        "requirements" : [(0, 0, 1, 1), (1, 0, 1, 1), (0, 1, 1, 0), (0, 0, 1, 0)]
+    }   
+}
+
+DECORATIONS_TRACK = {
+    "Door" : {
+        "max" : 10,
+        "current" : 0,
+        "requirements" : [(0, 0, 1, 1), (1, 1, 1, 0), (0, 1, 1, 0)],
+        "per_room" : 1
     }
 }

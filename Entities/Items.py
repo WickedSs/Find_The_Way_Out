@@ -65,7 +65,7 @@ class Chest(Item):
         
     def on_collision(self, player, items_list):
         if player.rect.colliderect(self.rect) and not self.open_chest:
-            action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 4, self.rect.y - (self.rect.h / 4))
+            action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 3, self.rect.y - (self.rect.h / 4))
             if action:
                 self.status = "Unlocked"
                 self.working_animation = self.animations[self.status]

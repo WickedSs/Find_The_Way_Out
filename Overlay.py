@@ -92,7 +92,7 @@ class Overlay:
     
     def fade_out_screen(self):
         if self.dim_screen_counter < SCREEN_WIDTH:
-            self.dim_screen_counter += 30
+            self.dim_screen_counter += 60
         else:
             pygame.time.delay(2000)
             self.trigger_fade_in = True
@@ -104,7 +104,9 @@ class Overlay:
         
     def fade_in_screen(self):
         if self.dim_screen_counter >= 0:
-            self.dim_screen_counter -= 30
+            self.dim_screen_counter -= 60
+        else:
+            self.dim_screen_counter = 0
         
         for i in range(6, -1, -2):
             pygame.draw.rect(self.display_surface, (0, 0, 0), (0, i * 100, self.dim_screen_counter, 100))

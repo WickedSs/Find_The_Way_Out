@@ -30,7 +30,7 @@ class Player:
         self.overlay = overlay
         self.level = level
         self.playerID = None
-        self.player_name = "Aurora"
+        self.player_name = "Gwynbleidd"
 
         # Objects
         self.character = character
@@ -59,6 +59,7 @@ class Player:
         
         # booleans
         self.disable_movement = False
+        self.hide_player = False
         self.flipped = False
         self.jumped = False
         self.on_ground = False
@@ -276,7 +277,8 @@ class Player:
 
     def draw(self, screen):
         # self.field_of_view(screen)
-        screen.blit(self.image, self.rect)
+        if not self.hide_player:
+            screen.blit(self.image, self.rect)
         if not self.jumped and not self.falling and self.direction.x != 0:
             self.draw_run_particles()
         # self.dim_screen(screen)
