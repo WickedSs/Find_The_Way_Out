@@ -70,8 +70,8 @@ class Room:
                 random_offset = tuple(map(operator.sub, random_position, current_decoration["offset"]))
                 if spawn in [1, 3, 5]:
                     door_x, door_y = (random_offset[0] * SCALE_SIZE) + self.position[0], (random_offset[1] * SCALE_SIZE) + self.position[1]
-                    print("Door: ", spawn, random_position, side, random_offset, self.position, door_x, door_y)
                     self.door = Door(41, 64, False, True, side, door_x, door_y)
+                    print("Spawned: ", spawn, random_position, side, random_offset, self.position, door_x, door_y, self.door.id)
                     self.single_list.add(self.door)
                     positions.remove(random_position)
             
@@ -91,6 +91,10 @@ class Room:
         self.room_type = room_type
         self.position = (i * self.width, j * self.height)
         self.trigger_draw()
+        for single in self.single_list:
+            filtered = list(filter(lambda decor: decor.asset_name == single.asset_name and single.id != decor.id, self.single_list))
+            # print("FL: ", [filt.rect for filt in filtered], [filt.rect for filt in self.single_list])
+            single.set_destination(filtered) 
         # for y in range(ROOM_HEIGHT_TILES):
             # print("Row: ", y, [tile.collision for tile in self.room_tiles[y]])
         # self.single_list.append(self.door)
@@ -110,5 +114,4 @@ class Room:
                 self.currentY += 1
                 self.currentX = 0
                 
-        self.generate_decorations()
-            
+        self.generate_decorations()     

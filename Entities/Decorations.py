@@ -1,5 +1,4 @@
-import os, sys, pygame
-from tkinter.tix import Tree
+import os, sys, pygame, random, uuid
 from Entities.Item import Item
 
 
@@ -25,17 +24,24 @@ class Chains:
 class Door(Item):
     def __init__(self, width, height, animate, scale, side, x, y):
         super().__init__(width, height, animate, scale, side, x, y)
+        self.id = str(uuid.uuid4()).split("-")[0]
         self.asset_name = "Door"
         self.animation_type = "Multiple"
         self.animations = {}
         self.animation_index = 0
         self.status = "Opening"
         self.delay = None
+        self.destinations = None
+        self.next_destination = None
         self.open, self.action, self.played = False, False, 0
         self.path = os.path.join(DECORATIONS_FOLDER, self.asset_name)
         self.multiple_animations()
         self.working_animation = self.animations[self.status]
         self.get_frame()
+
+    def set_destination(self, destination):
+        self.destination = destination
+        # print("Door: ", self.id, [filt.id for filt in self.destination])
 
     def on_collision(self, player, items_list):
         if player.rect.colliderect(self.rect) and not self.open and not self.action:
@@ -55,6 +61,10 @@ class Door(Item):
                 self.played = 1
                 self.delay = pygame.time.get_ticks()
                 player.hide_player = True
+                if self.destination:
+                    self.next_destination = random.choice(self.destination)
+                    next_position = (self.next_destination.rect.x, self.next_destination.rect.y)
+                    player.rect.x, player.rect.y = next_position[0], next_position[1] 
         
         if self.delay:
             if (pygame.time.get_ticks() - self.delay) / 1000 >= 2:
