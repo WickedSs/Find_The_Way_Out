@@ -2,17 +2,21 @@
 from Settings import *
 import os, sys, pygame
 
-class Item:
-    def __init__(self, width, height, animate, scale, x=0, y=0, scalex=2, scaley=2):
+class Item(pygame.sprite.Sprite):
+    def __init__(self, width, height, animate, scale, side=None, x=0, y=0, scalex=2, scaley=2):
+        super().__init__()
         self.display_surface = pygame.display.get_surface()
         self.animations = {}
         self.animation_names = []
         self.animation_index = 0
         self.animate = animate
         self.scale = scale
+        self.side = side
         self.scalex, self.scaley = scalex, scaley
         self.disappear, self.hide_image = False, False
         self.x, self.y, self.width, self.height = x, y, width, height
+        if self.side:
+            self.x = self.x + (( - 1 if self.side == "Right" else 1) * (SCALE_SIZE - self.width))
         self.rect = pygame.Rect(self.x, self.y + (SCALE_SIZE - self.height), self.width, self.height)
     
     def multiple_animations(self):

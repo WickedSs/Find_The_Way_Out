@@ -51,8 +51,10 @@ class Level:
         self.initialize()
 
     def initialize(self):
-        self.level_sprites = pygame.sprite.Group()
+        self.sprites_group = pygame.sprite.Group()
         self.collision_group = pygame.sprite.Group()
+        self.infinite_group = pygame.sprite.Group()
+        self.single_group = pygame.sprite.Group()
         self.initialize_grid()
         self.load_json_levels()
         self.initialize_sprite()
@@ -99,19 +101,26 @@ class Level:
     def initialize_grid(self):
         self.grid = []
         for i in range(DIM * DIM):
-            self.grid.append(Room(i, self.infinite_list, self.single_list, SPRITES, self.level_sprites, self.collision_group))
+            self.grid.append(Room(i, self.infinite_group, self.single_group, SPRITES, self.sprites_group, self.collision_group))
             
     def generate_map(self):
-        for j in range(self.DIM):
-            for i in range(self.DIM):
-                index = i + j * self.DIM
-                self.picked_level = random.choice(self.levels)
-                self.grid[index].set_level(self.picked_level, self.levels.index(self.picked_level), i, j)            
+        if DIM > 1:
+            for j in range(self.DIM):
+                for i in range(self.DIM):
+                    index = i + j * self.DIM
+                    self.picked_level = random.choice(self.levels)
+                    self.grid[index].set_level(self.picked_level, self.levels.index(self.picked_level), i, j)
+        else:
+            self.picked_level = random.choice(self.levels)
+            self.grid[0].set_level(self.picked_level, self.levels.index(self.picked_level), 0, 0)
     
     def run(self, player):
-        self.level_sprites.update(self.world_shift, 0)
-        self.level_sprites.draw(self.display_surface)
-        for item in self.infinite_list:
+        self.sprites_group.update(self.world_shift, 0)
+        self.sprites_group.draw(self.display_surface)
+        
+        # print("Lengths: ", len(self.single_group.sprites()), len(self.infinite_group.sprites()))
+        
+        for item in self.infinite_group.sprites():
             pygame.draw.rect(self.display_surface, (0, 255, 0), item.rect, 1)
             item.on_pickup(player)
             item.update(self.world_shift, 0)
@@ -122,11 +131,12 @@ class Level:
                 item.player_effect(player)
                 self.items.remove(item)
         
-        for decoration in self.single_list:
+        for decoration in self.single_group.sprites():
             # pygame.draw.rect(self.display_surface, (0, 255, 0), decoration.rect, 1)
             decoration.on_collision(player, self.single_list)
             decoration.update(self.world_shift, 0)
             decoration.draw()
+        
         
         self.scroll_X(player)
     

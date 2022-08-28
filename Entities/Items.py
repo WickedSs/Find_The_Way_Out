@@ -8,9 +8,6 @@ ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 ITEMS_FOLDER = "Assets\Items"
 
 
-
-
-
 class Big_Map(Item):
     def __init__(self, width, height, animate, scale, x, y):
         super().__init__(width, height, animate, scale, x, y, 1, 1)

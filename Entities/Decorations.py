@@ -23,8 +23,8 @@ class Chains:
         pass
 
 class Door(Item):
-    def __init__(self, width, height, animate, scale, x, y):
-        super().__init__(width, height, animate, scale, x, y)
+    def __init__(self, width, height, animate, scale, side, x, y):
+        super().__init__(width, height, animate, scale, side, x, y)
         self.asset_name = "Door"
         self.animation_type = "Multiple"
         self.animations = {}
@@ -68,9 +68,7 @@ class Door(Item):
                     player.overlay.trigger_fade_in = False
                     player.hide_player = False
                     
-        
-        print(self.open, self.action, player.overlay.dim_screen_bool, player.overlay.dim_screen_counter, self.played)
-        
+                
     def play_animation_once(self):
         self.animation_index += 0.12
         if self.animation_index >= len(self.working_animation):

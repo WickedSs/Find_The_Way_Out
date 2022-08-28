@@ -4,8 +4,9 @@ from Settings import *
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, x, y, position, image, collision=False):
+    def __init__(self, x, y, position, image, index, collision=False):
         super().__init__()
+        self.index = index
         self.image = pygame.transform.scale(image, (SCALE_SIZE, SCALE_SIZE))
         self.mask = pygame.mask.from_surface(image)
         self.x, self.y, self.position = x, y, position
