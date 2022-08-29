@@ -15,10 +15,9 @@ class Game:
     def __init__(self):
         pygame.init()
         self.flags = FULLSCREEN | DOUBLEBUF
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), self.flags if FULL_SCREEN else 0)
         self.clock = pygame.time.Clock()
         self.camera = Camera()
-        print("Camera: ", self.camera.rect)
         self.overlay = Overlay(self.clock)
         self.character = Characters()
         self.level = Level(self.overlay)
@@ -60,8 +59,8 @@ class Game:
                     player.selected_animation = player_to_draw.selected_animation
                     
 
-        if self.joined_players:
-            _ = self.joined_players[0]
+        # if self.joined_players:
+        #     _ = self.joined_players[0]
             # print(_.playerID.split("-")[0], _.selected_animation, self.player.playerID.split("-")[0], self.player.selected_animation, "---", self.network_player.selected_animation)
             # print("Me: ", self.player.playerID.split("-")[0], self.player.direction[0], " - You: ", _.playerID.split("-")[0], _.direction[0])
             # print("[*]", _.selected_folder, _.selected_animation, _.direction)

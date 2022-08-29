@@ -74,9 +74,6 @@ class Level:
             self.world_shift = 0
             player.speed = PLAYER_SPEED
 
-    def dash_scroll(self):
-        self.world_shift = 150
-
     def get_sprite(self, x, y, sprite_sheet):
         sprite = pygame.Surface((TILE_SIZE, TILE_SIZE))
         sprite.set_colorkey((0,0,0))
@@ -110,12 +107,13 @@ class Level:
                     index = i + j * self.DIM
                     self.picked_level = random.choice(self.levels)
                     self.grid[index].set_level(self.picked_level, self.levels.index(self.picked_level), i, j)
+
         else:
             self.picked_level = random.choice(self.levels)
             self.grid[0].set_level(self.picked_level, self.levels.index(self.picked_level), 0, 0)
     
     def run(self, player):
-        self.sprites_group.update(self.world_shift, 0)
+        # self.sprites_group.update(self.world_shift, 0)
         self.sprites_group.draw(self.display_surface)
         
         # print("Lengths: ", len(self.single_group.sprites()), len(self.infinite_group.sprites()))
@@ -123,7 +121,6 @@ class Level:
         for item in self.infinite_group.sprites():
             pygame.draw.rect(self.display_surface, (0, 255, 0), item.rect, 1)
             item.on_pickup(player)
-            item.update(self.world_shift, 0)
             item.draw()
             if item.disappear:
                 self.overlay.set_text_to_slide("Part of the map was found!")
@@ -133,8 +130,7 @@ class Level:
         
         for decoration in self.single_group.sprites():
             # pygame.draw.rect(self.display_surface, (0, 255, 0), decoration.rect, 1)
-            decoration.on_collision(player, self.single_list)
-            decoration.update(self.world_shift, 0)
+            decoration.on_collision(player, self.single_list, self)
             decoration.draw()
         
         

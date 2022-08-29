@@ -43,7 +43,7 @@ class Door(Item):
         self.destination = destination
         # print("Door: ", self.id, [filt.id for filt in self.destination])
 
-    def on_collision(self, player, items_list):
+    def on_collision(self, player, items_list, level):
         if player.rect.colliderect(self.rect) and not self.open and not self.action:
             self.action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 3, self.rect.y)
             if self.action:
@@ -64,7 +64,12 @@ class Door(Item):
                 if self.destination:
                     self.next_destination = random.choice(self.destination)
                     next_position = (self.next_destination.rect.x, self.next_destination.rect.y)
-                    player.rect.x, player.rect.y = next_position[0], next_position[1] 
+                    player.rect.x, player.rect.y = next_position[0], next_position[1]
+                    direction_x = self.next_destination.x - self.rect.x
+                    direction_y = self.next_destination.y - self.rect.y
+                    level.sprites_group.update(direction_x, direction_y)
+                    level.infinite_group.update(direction_x, direction_y)
+                    level.single_group.update(direction_x, direction_y)
         
         if self.delay:
             if (pygame.time.get_ticks() - self.delay) / 1000 >= 2:
@@ -77,6 +82,8 @@ class Door(Item):
                     player.overlay.dim_screen_bool = False
                     player.overlay.trigger_fade_in = False
                     player.hide_player = False
+                    print("New_position:", self.rect)
+                    player.level.world_shift = 0
                     
                 
     def play_animation_once(self):

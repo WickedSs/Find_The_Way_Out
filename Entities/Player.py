@@ -245,6 +245,8 @@ class Player:
         # self.level.dash_scroll()
         self.dash_bool = False
 
+    def focus_player(self):
+        return
 
     def jump(self):
         self.direction.y = self.jumpForce

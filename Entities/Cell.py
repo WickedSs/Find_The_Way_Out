@@ -8,7 +8,7 @@ import random, operator
 class Room:
     def __init__(self, index, infinite_list, single_list, SPRITES, all_tiles, collsion_tiles, level=None):
         self.index = index
-        self.width, self.height = ROOM_WIDTH, ROOM_HEIGHT
+        self.width, self.height = SCREEN_WIDTH, SCREEN_HEIGHT
         self.level = level
         self.sprites = SPRITES
         self.collapsed = False
@@ -88,7 +88,7 @@ class Room:
         self.level = level
         self.collapsed = True
         self.room_type = room_type
-        self.position = (i * self.width, j * self.height)
+        self.position = ((i * self.width), (j * self.height))
         self.trigger_draw()
         for single in self.single_list:
             filtered = list(filter(lambda decor: decor.asset_name == single.asset_name and single.id != decor.id, self.single_list))

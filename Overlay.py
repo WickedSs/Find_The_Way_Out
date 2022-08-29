@@ -160,10 +160,10 @@ class Overlay:
                 self.slide_text_surface = None
 
     def player_UI(self, player):
-        self.player_name = GUI_ITEM(10, 15, None, self.set_font(20), player.player_name)
-        self.fps = GUI_ITEM(SCREEN_WIDTH / 2, 15, None, self.set_font(20), self.clock.get_fps())
-        self.maps_text = GUI_ITEM(10, self.player_name.rect.top + 30, None, self.set_font(20), "Maps ")
-        self.maps_holded = GUI_ITEM(self.maps_text.rect.right, self.player_name.rect.top + 30, None, self.set_font(20), "x" + str(player.collected_maps))
+        self.player_name = GUI_ITEM(10, 15, None, self.set_font(32), player.player_name)
+        self.fps = GUI_ITEM(SCREEN_WIDTH / 2, 15, None, self.set_font(26), self.clock.get_fps())
+        self.maps_text = GUI_ITEM(10, self.player_name.rect.top + 30, None, self.set_font(26), "Maps ")
+        self.maps_holded = GUI_ITEM(self.maps_text.rect.right, self.player_name.rect.top + 30, None, self.set_font(26), "x" + str(player.collected_maps))
         
         heath_bar_pos = pygame.math.Vector2(12.5, SCREEN_HEIGHT - 80)
         for i in range(len(self.health_bar_files)-1):
@@ -229,7 +229,6 @@ class Overlay:
             slot_sprite = GUI_ITEM(current_slot_x, current_slot_y, slot_background_image)
             slot_content_sprite = GUI_ITEM(current_slot_content_x, current_slot_content_y, slot_content)
 
-            print("Slot:", slot_sprite.rect, "Slot_Content:", slot_content_sprite.rect, "Current_x_y:", current_slot_content_x, current_slot_content_y)
             current_slot_x += slot_background_rect.width
             self.overlay_group.add(slot_sprite)
             self.overlay_group.add(slot_content_sprite)
