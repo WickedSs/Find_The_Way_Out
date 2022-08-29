@@ -1,8 +1,6 @@
 
-import math
-from turtle import color
 from Settings import *
-import os, sys, pygame
+import os, sys, pygame, random
 from PIL import Image
 import numpy as np
 from Entities.Particles import Particles
@@ -66,6 +64,7 @@ class Player:
         self.blocked = False
         self.falling = False
         self.E_Action, self.floating_text = False, False
+        self.killed = False
 
         self.particles_names = self.particle.particle_folders
         self.particle_folder = self.particles_names[self.selected_particle]
@@ -169,6 +168,13 @@ class Player:
                     self.dash_bool = True
                     self.mana -= 20
                     self.time_between_dahses = 3
+                    
+            if keys_pressed[pygame.K_v]:
+                damage_taken = random.randrange(0, 20)
+                if self.health < damage_taken:
+                    damage_taken = self.health
+                
+                self.take_damage(damage_taken)
                 
 
     def animate(self):
@@ -217,6 +223,8 @@ class Player:
                     self.direction.y = 0
                     self.falling = False
 
+    def take_damage(self, amount):
+        self.health -= amount
 
     def dash(self):
         start_dash_position = self.rect.copy()
@@ -277,10 +285,11 @@ class Player:
 
     def draw(self, screen):
         # self.field_of_view(screen)
-        if not self.hide_player:
-            screen.blit(self.image, self.rect)
-        if not self.jumped and not self.falling and self.direction.x != 0:
-            self.draw_run_particles()
+        if not self.killed:
+            if not self.hide_player:
+                screen.blit(self.image, self.rect)
+            if not self.jumped and not self.falling and self.direction.x != 0:
+                self.draw_run_particles()
         # self.dim_screen(screen)
         
     def trigger_floating_text(self, text, posx, posy):
@@ -299,6 +308,9 @@ class Player:
         self.input()
         self.get_animation()
         self.animate()
+        
+        if self.health <= 0:
+            self.killed = False
         
         if self.dash_bool:
             self.dash()

@@ -138,5 +138,5 @@ class Level:
             decoration.draw()
         
         
-        self.scroll_X(player)
+        # self.scroll_X(player)
     

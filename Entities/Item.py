@@ -86,6 +86,38 @@ class GUI_ITEM(pygame.sprite.Sprite):
     def set_text(self, text):
         self.image = self.font.render(str(text), False, (255, 255, 255))
     
-    def update(self, offset_x, offset_y):
+    def update(self, offset_x, offset_y, player):
         self.x += offset_x
         self.x += offset_y
+        
+
+class GUI_ITEM_BAR(pygame.sprite.Sprite):
+    def __init__(self, x, y, image, bar_type, player):
+        super().__init__()
+        self.x, self.y = x, y
+        self.image = image
+        self.player = player
+        self.bar_type = bar_type
+        self.bar_max = 3.24 if bar_type == "Mana" else 4.8
+        self.max = player.max_mana if bar_type == "Mana" else player.max_health
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.x, self.y
+    
+    def update(self):
+        self.bar_current = self.player.mana if self.bar_type == "Mana" else self.player.health
+        if self.bar_current < self.max:
+            if self.bar_type == "Mana": 
+                self.player.mana += 0.25
+            else:
+                self.player.health += 0.8
+            new_width = (self.bar_current * (32 * self.bar_max)) / self.max
+            self.image = pygame.transform.scale(self.image, (new_width, 4))
+            self.rect = self.image.get_rect(topleft=(self.x, self.y))
+        else:
+            if self.bar_type == "Mana": 
+                self.player.mana = self.max
+            else:
+                self.player.health = self.max
+            
+        # print(self.bar_type, self.bar_current, self.max, self.rect, "Increasing" if self.bar_current < self.max else "")
+        

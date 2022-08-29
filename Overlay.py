@@ -51,6 +51,7 @@ class Overlay:
         self.clock = clock
         self.display_surface = pygame.display.get_surface()
         self.overlay_group = pygame.sprite.Group()
+        self.overlay_bars_group = pygame.sprite.Group()
         
         self.overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
         self.overlay_surface.set_colorkey((0, 0, 0))
@@ -96,26 +97,27 @@ class Overlay:
         self.player_UI(player)
     
     def fade_out_screen(self):
-        if self.dim_screen_counter < SCREEN_WIDTH:
-            self.dim_screen_counter += 60
+        if self.dim_screen_counter <= SCREEN_WIDTH:
+            self.dim_screen_counter += SCREEN_WIDTH / 20
         else:
+            self.dim_screen_counter = SCREEN_WIDTH - 60
             pygame.time.delay(2000)
             self.trigger_fade_in = True
             self.dim_screen_bool = False
-            
+                        
         for i in range(0, 6, 2):
-            pygame.draw.rect(self.display_surface, (0, 0, 0), (0, i * 100, self.dim_screen_counter, 100))
-            pygame.draw.rect(self.display_surface, (0, 0, 0), (SCREEN_WIDTH - self.dim_screen_counter, (i + 1) * 100, SCREEN_WIDTH, SCREEN_HEIGHT / 2)) 
+            pygame.draw.rect(self.display_surface, (51, 50, 61), (0, i * 100, self.dim_screen_counter, SCREEN_HEIGHT))
         
     def fade_in_screen(self):
-        if self.dim_screen_counter >= 0:
-            self.dim_screen_counter -= 60
+        if self.dim_screen_counter > 0:
+            self.dim_screen_counter -= SCREEN_WIDTH / 20
         else:
             self.dim_screen_counter = 0
+            self.trigger_fade_in = False
+            self.dim_screen_bool = False      
         
         for i in range(6, -1, -2):
-            pygame.draw.rect(self.display_surface, (0, 0, 0), (0, i * 100, self.dim_screen_counter, 100))
-            pygame.draw.rect(self.display_surface, (0, 0, 0), (SCREEN_WIDTH - self.dim_screen_counter, (i + 1) * 100, SCREEN_WIDTH, SCREEN_HEIGHT / 2)) 
+            pygame.draw.rect(self.display_surface, (51, 50, 61), (0, i * 100, self.dim_screen_counter, SCREEN_HEIGHT))
           
     def draw_text(self, text, posx, posy):
         self.floating_text = self.set_font(24).render(text, False, (255, 255, 255))
@@ -159,7 +161,7 @@ class Overlay:
 
     def player_UI(self, player):
         self.player_name = GUI_ITEM(10, 15, None, self.set_font(20), player.player_name)
-        self.fps = GUI_ITEM(500, 15, None, self.set_font(20), self.clock.get_fps())
+        self.fps = GUI_ITEM(SCREEN_WIDTH / 2, 15, None, self.set_font(20), self.clock.get_fps())
         self.maps_text = GUI_ITEM(10, self.player_name.rect.top + 30, None, self.set_font(20), "Maps ")
         self.maps_holded = GUI_ITEM(self.maps_text.rect.right, self.player_name.rect.top + 30, None, self.set_font(20), "x" + str(player.collected_maps))
         
@@ -175,12 +177,15 @@ class Overlay:
             
             heath_bar_pos.x += image_rect.width
 
-        self.heath_bar_inner_pos = pygame.math.Vector2(45, SCREEN_HEIGHT - 66)
+        self.heath_bar_inner_pos = (45, SCREEN_HEIGHT - 66)
         self.inner_bar_red = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, self.health_bar_inner)).convert_alpha()
+        self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (32 * 4.8, 4))
+        self.inner_bar_red_rect = self.inner_bar_red.get_rect(topleft=self.heath_bar_inner_pos)
         
-        self.increase_health_bar(player)
-        inner_bar_red = GUI_ITEM(self.inner_bar_red_rect.x, self.inner_bar_red_rect.y, self.inner_bar_red)
-        self.overlay_group.add(inner_bar_red)
+        
+        # self.increase_health_bar(player)
+        inner_bar_red = GUI_ITEM_BAR(self.inner_bar_red_rect.x, self.inner_bar_red_rect.y, self.inner_bar_red, "Health", player)
+        self.overlay_bars_group.add(inner_bar_red)
         
         mana_bar_pos = pygame.math.Vector2(12.5, SCREEN_HEIGHT - 40)
         for i in range(len(self.mana_bar_files)-1):
@@ -191,46 +196,19 @@ class Overlay:
             image_rect.x, image_rect.y = mana_bar_pos.x, mana_bar_pos.y
             image_sprite = GUI_ITEM(mana_bar_pos.x, mana_bar_pos.y, image)
             self.overlay_group.add(image_sprite)
-            
             mana_bar_pos.x += image_rect.width
 
-        self.mana_bar_inner_pos = pygame.math.Vector2(40, SCREEN_HEIGHT - 26)
+        self.mana_bar_inner_pos = (40, SCREEN_HEIGHT - 26)
         self.inner_bar_blue = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, self.mana_bar_inner)).convert_alpha()
-        
-        self.increase_mana_bar(player)
-        inner_bar_blue = GUI_ITEM(self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y, self.inner_bar_blue)
-        self.overlay_group.add(inner_bar_blue)
+        self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (32 * 3.24, 4))
+        self.inner_bar_blue_rect = self.inner_bar_blue.get_rect(topleft=self.mana_bar_inner_pos)
+        inner_bar_blue = GUI_ITEM_BAR(self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y, self.inner_bar_blue, "Mana", player)
+        self.overlay_bars_group.add(inner_bar_blue)
         
         self.overlay_group.add(self.player_name)
         self.overlay_group.add(self.maps_text)
         self.overlay_group.add(self.maps_holded)
         self.overlay_group.add(self.fps)
-        
-    def increase_health_bar(self, player):
-        if player.health <= player.max_health:
-            self.inner_bar_red_rect = self.inner_bar_red.get_rect()
-            current_health = (player.health * (self.inner_bar_red_rect.w * 4.8)) / player.max_health
-            self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (current_health, 4))
-            player.health += 0.08
-        else:
-            current_health = 32 * 4.8
-            self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (current_health, 4))
-
-        self.inner_bar_red_rect = self.inner_bar_red.get_rect()
-        self.inner_bar_red_rect.x, self.inner_bar_red_rect.y = self.heath_bar_inner_pos.x, self.heath_bar_inner_pos.y
-
-    def increase_mana_bar(self, player):
-        if player.mana <= player.max_mana:
-            self.inner_bar_blue_rect = self.inner_bar_blue.get_rect()
-            current_mana = (player.mana * (self.inner_bar_blue_rect.w * 3.2)) / player.max_mana
-            self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (current_mana, 4))
-            player.mana += 0.25
-        else:
-            current_mana = 32 * 3.2
-            self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (current_mana, 4))
-
-        self.inner_bar_blue_rect = self.inner_bar_blue.get_rect()
-        self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y = self.mana_bar_inner_pos.x, self.mana_bar_inner_pos.y
 
     def bottom_inventory_bar(self):
         self.slots_content = ["Red_Potion\\01.png", "Blue_Potion\\01.png", "Chest_Key\\1.png"]
@@ -264,18 +242,6 @@ class Overlay:
 
     def draw(self, player):
         return
-        # for slot in self.bottom_bar_items:
-        #     slot.update()
-        #     slot.draw(self.overlay_surface)
-            
-        # self.player_data(player)
-        # self.display_surface.blit(self.overlay_surface, (0, 0))
-        
-        # if self.dim_screen_bool: 
-        #     self.fade_out_screen()
-        
-        # if self.trigger_fade_in:
-        #     self.fade_in_screen()
         
     def update(self, player):
         # pygame.draw.line(self.display_surface, (255, 255, 255), ((SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), 0), ((SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), SCREEN_HEIGHT), 1)
@@ -284,6 +250,16 @@ class Overlay:
         if not self.dim_screen_bool and not self.trigger_fade_in:
             self.overlay_surface.fill((0, 0, 0))
         
-        self.overlay_group.update(0, 0)
-        self.overlay_group.draw(self.display_surface)
+        self.overlay_group.update(0, 0, player)
+        self.overlay_group.draw(self.overlay_surface)
+        
+        self.overlay_bars_group.update()
+        self.overlay_bars_group.draw(self.overlay_surface)
         self.display_surface.blit(self.overlay_surface, (0, 0))
+        
+        if self.dim_screen_bool: 
+            self.fade_out_screen()
+        
+        if self.trigger_fade_in:
+            self.fade_in_screen()
+        

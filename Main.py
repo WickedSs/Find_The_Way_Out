@@ -1,5 +1,6 @@
 import os, sys, pickle, pygame
 from Core.Characters import Characters
+from Entities.Camera import Camera
 from Overlay import Overlay
 from Settings import *
 from Core.Level import *
@@ -16,6 +17,8 @@ class Game:
         self.flags = FULLSCREEN | DOUBLEBUF
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
+        self.camera = Camera()
+        print("Camera: ", self.camera.rect)
         self.overlay = Overlay(self.clock)
         self.character = Characters()
         self.level = Level(self.overlay)
@@ -60,9 +63,12 @@ class Game:
         if self.joined_players:
             _ = self.joined_players[0]
             # print(_.playerID.split("-")[0], _.selected_animation, self.player.playerID.split("-")[0], self.player.selected_animation, "---", self.network_player.selected_animation)
-            print("Me: ", self.player.playerID.split("-")[0], self.player.direction[0], " - You: ", _.playerID.split("-")[0], _.direction[0])
+            # print("Me: ", self.player.playerID.split("-")[0], self.player.direction[0], " - You: ", _.playerID.split("-")[0], _.direction[0])
             # print("[*]", _.selected_folder, _.selected_animation, _.direction)
-                    
+    
+    def player_respawn(self):
+        self.player = Player(self.character.characters[0], self.overlay, self.level, 6.5 * SCALE_SIZE, 7 * SCALE_SIZE)
+               
     def run(self):
         self.overlay.initialize_overlay(self.player)
         while True:
@@ -70,16 +76,26 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
             
             self.screen.fill((51, 50, 61))
             self.level.run(self.player)
             
-            
-            self.player.draw(self.screen)
-            self.player.update(self.tiles_group)
+            if self.player.killed:
+                self.player = None
+                self.overlay.dim_screen_counter = 0
+                self.overlay.dim_screen_bool = True
+                self.player_respawn()
+            else:
+                self.player.draw(self.screen)
+                self.player.update(self.tiles_group)
             
             # self.overlay.draw(self.player)
-            self.overlay.update(self.player)            
+            self.overlay.update(self.player)
+            self.camera.draw(self.screen)        
             
             # Draw Overlay
             # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
