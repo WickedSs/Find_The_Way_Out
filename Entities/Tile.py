@@ -12,7 +12,8 @@ class Tile(pygame.sprite.Sprite):
         self.x, self.y, self.position = x, y, position
         self.collision = collision 
         self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = (self.x * SCALE_SIZE) + self.position[0], (self.y * SCALE_SIZE) + self.position[1]
+        self.rect.x = ((self.x + ROOM_OFFSET_X) * SCALE_SIZE) + self.position[0]
+        self.rect.y = ((self.y + ROOM_OFFSET_Y) * SCALE_SIZE) + self.position[1]
 
     def set_colision(self, collision):
         self.collision = collision

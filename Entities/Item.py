@@ -14,7 +14,7 @@ class Item(pygame.sprite.Sprite):
         self.side = side
         self.scalex, self.scaley = scalex, scaley
         self.disappear, self.hide_image = False, False
-        self.x, self.y, self.width, self.height = x, y, width, height
+        self.x, self.y, self.width, self.height = x + (ROOM_OFFSET_X * SCALE_SIZE), y + (ROOM_OFFSET_Y * SCALE_SIZE), width, height
         if self.side:
             self.x = self.x + (( - 1 if self.side == "Right" else 1) * (SCALE_SIZE - self.width))
         self.rect = pygame.Rect(self.x, self.y + (SCALE_SIZE - self.height), self.width, self.height)
@@ -67,3 +67,25 @@ class Item(pygame.sprite.Sprite):
 
     def delete(self, items):
         items.remove(self)
+        
+
+
+class GUI_ITEM(pygame.sprite.Sprite):
+    def __init__(self, x, y, image, font=None, text=None):
+        super().__init__()
+        self.x, self.y = x, y
+        self.font = font
+        self.image = image
+        self.text = text
+        if font:
+            self.image = self.font.render(str(text), False, (255, 255, 255))
+        
+        self.rect = self.image.get_rect()
+        self.rect.x, self.rect.y = self.x, self.y
+    
+    def set_text(self, text):
+        self.image = self.font.render(str(text), False, (255, 255, 255))
+    
+    def update(self, offset_x, offset_y):
+        self.x += offset_x
+        self.x += offset_y

@@ -1,5 +1,6 @@
-import os, sys, pygame
+import os, sys, pygame, random
 from Settings import *
+from Entities.Item import *
 
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 FONT_FILE = "Assets\Font\m6x11.ttf"
@@ -12,7 +13,7 @@ ITEMS_IDENTIFIERS = {
 }
 
 
-class BOTTOM_BAR_SLOT:
+class BOTTOM_BAR_SLOT(pygame.sprite.Sprite):
     def __init__(self, x, y, background, item, text_render):
         self.item_identifier = 0
         self.x, self.y = x, y
@@ -45,44 +46,28 @@ class BOTTOM_BAR_SLOT:
         screen.blit(self.amount_text, self.amount_rect)
 
 
-class GUI_ITEM(pygame.sprite.Sprite):
-    def __init__(self, x, y, image, font=None, amount=None):
-        self.x, self.y = x, y
-        self.font = font
-        self.image = image
-        if font:
-            self.image = self.font.render(str(amount), False, (255, 255, 255))
-        
-        self.rect = self.image.get_rect()
-        
-    def update(self):
-        return
-        
-    def draw(self, screen):
-        return
-
-
 class Overlay:
-    def __init__(self):
+    def __init__(self, clock):
+        self.clock = clock
         self.display_surface = pygame.display.get_surface()
         self.overlay_group = pygame.sprite.Group()
-        
         
         self.overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
         self.overlay_surface.set_colorkey((0, 0, 0))
         self.overlay_surface.fill((0, 0, 0))
         
-        self.text_renderer_16 = pygame.font.Font(os.path.join(ROOT, FONT_FILE), 16)
-        self.text_renderer_20 = pygame.font.Font(os.path.join(ROOT, FONT_FILE), 20)
-        self.text_renderer_24 = pygame.font.Font(os.path.join(ROOT, FONT_FILE), 24)
-        
         # Bottom_bar
-        self.bottom_bar_path = os.path.join(ROOT, GUI_FOLDER, "Prefabs", "7.png")
-        self.player_frame = os.path.join(ROOT, GUI_FOLDER, "Prefabs", "13.png")
-        self.health_bar_files = ["1.png", "3.png", "4.png"]
-        self.health_bar_inner = "1.png"
-        self.mana_bar_files = ["1.png", "4.png", "5.png"]
-        self.mana_bar_inner = "2.png"
+        self.slots = 3
+        self.bottom_bar_width, self.bottom_bar_height = 124 + (48 * (self.slots - 2)), 90
+        
+        self.bottom_bar_path = ["Inventory", "10.png", "11.png", "12.png"]
+        self.slide_text_background = ["Yellow_Paper", "10.png", "11.png", "12.png"]
+        
+        self.health_bar_files = ["Life_Bars\\Big_Bars", "1.png", "3.png", "4.png"]
+        self.health_bar_inner = "Life_Bars\\Colors\\1.png"
+        
+        self.mana_bar_files = ["Life_Bars\\Medium_Bars", "1.png", "4.png", "5.png"]
+        self.mana_bar_inner = "Life_Bars\\Colors\\2.png"
 
         # Sliding text
         self.slide_text_surface = None
@@ -101,15 +86,14 @@ class Overlay:
         self.floating_text_distance_max = 5
         self.floating_text_distance = 0
         self.floating_add_number = 0.25
-        
-        # Bottom Bar
-        self.slots = 3
-        self.bottom_bar_width, self.bottom_bar_height = (64 * self.slots) + (15 * 6), 70
-        self.bottom_bar_items = []
-        self.inventory_bar()
+                
     
-    def initialize_overlay(self):
-        return
+    def set_font(self, size):
+        return pygame.font.Font(os.path.join(ROOT, FONT_FILE), size)
+    
+    def initialize_overlay(self, player):
+        self.bottom_inventory_bar()
+        self.player_UI(player)
     
     def fade_out_screen(self):
         if self.dim_screen_counter < SCREEN_WIDTH:
@@ -132,10 +116,9 @@ class Overlay:
         for i in range(6, -1, -2):
             pygame.draw.rect(self.display_surface, (0, 0, 0), (0, i * 100, self.dim_screen_counter, 100))
             pygame.draw.rect(self.display_surface, (0, 0, 0), (SCREEN_WIDTH - self.dim_screen_counter, (i + 1) * 100, SCREEN_WIDTH, SCREEN_HEIGHT / 2)) 
-        
-        
+          
     def draw_text(self, text, posx, posy):
-        self.floating_text = self.text_renderer_24.render(text, False, (255, 255, 255))
+        self.floating_text = self.set_font(24).render(text, False, (255, 255, 255))
         self.floating_text_rect = self.floating_text.get_rect()
         self.floating_text_rect.x, self.floating_text_rect.y = posx, posy
         
@@ -174,72 +157,55 @@ class Overlay:
                 self.start_tickes = -1
                 self.slide_text_surface = None
 
-    def player_data(self, player):
-        self.player_frame_image = pygame.image.load(self.player_frame)
-        self.player_frame_rect = self.player_frame_image.get_rect()
-        self.player_frame_rect.x, self.player_frame_rect.y = 10, 10
+    def player_UI(self, player):
+        self.player_name = GUI_ITEM(10, 15, None, self.set_font(20), player.player_name)
+        self.fps = GUI_ITEM(500, 15, None, self.set_font(20), self.clock.get_fps())
+        self.maps_text = GUI_ITEM(10, self.player_name.rect.top + 30, None, self.set_font(20), "Maps ")
+        self.maps_holded = GUI_ITEM(self.maps_text.rect.right, self.player_name.rect.top + 30, None, self.set_font(20), "x" + str(player.collected_maps))
         
-        self.player_portrait_rect = player.player_portrait.get_rect()
-        self.player_portrait_rect.x, self.player_portrait_rect.y = 22.5, 20
-        
-        self.player_name = self.text_renderer_20.render(player.player_name, False, (255, 255, 255))
-        self.player_name_rect = self.player_name.get_rect()
-        self.player_name_rect.x, self.player_name_rect.y = self.player_frame_rect.right + 5, 15
-        
-        self.maps_text = self.text_renderer_20.render("Maps ", False, (255, 255, 255))
-        self.maps_text_rect = self.maps_text.get_rect()
-        self.maps_text_rect.x, self.maps_text_rect.y = self.player_frame_rect.right + 5, self.player_frame_rect.top + 30 
-        
-        self.maps_holded = self.text_renderer_20.render("x" + str(player.collected_maps), False, (0, 255, 0))
-        self.maps_holded_rect = self.maps_holded.get_rect()
-        self.maps_holded_rect.x, self.maps_holded_rect.y = self.maps_text_rect.right, self.player_frame_rect.top + 30
-        
-        heath_bar_pos = pygame.math.Vector2(12.5, SCREEN_HEIGHT - 100)
-        for pic in self.health_bar_files:
-            image = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, "Life_Bars\Big_Bars", pic)).convert_alpha()
+        heath_bar_pos = pygame.math.Vector2(12.5, SCREEN_HEIGHT - 80)
+        for i in range(len(self.health_bar_files)-1):
+            image = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, self.health_bar_files[0], self.health_bar_files[i+1])).convert_alpha()
             image_rect = image.get_rect()
             image = pygame.transform.scale(image, (image_rect.w * 2, image_rect.height * 2))
             image_rect = image.get_rect()
             image_rect.x, image_rect.y = heath_bar_pos.x, heath_bar_pos.y
-            self.overlay_surface.blit(image, image_rect)
+            image_sprite = GUI_ITEM(heath_bar_pos.x, heath_bar_pos.y, image)
+            self.overlay_group.add(image_sprite)
+            
             heath_bar_pos.x += image_rect.width
 
-        self.heath_bar_inner_pos = pygame.math.Vector2(45, SCREEN_HEIGHT - 86)
-        self.inner_bar_red = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, "Life_Bars\Colors", self.health_bar_inner)).convert_alpha()
-        # current_health = (player * (self.inner_bar_red_rect.x * 4.8)) / 100
-        # self.inner_bar_red = pygame.transform.scale(self.inner_bar_red, (current_health, 4))
-        # self.inner_bar_red_rect = image.get_rect()
-        # self.inner_bar_red_rect.x, self.inner_bar_red_rect.y = heath_bar_inner_pos.x, heath_bar_inner_pos.y
+        self.heath_bar_inner_pos = pygame.math.Vector2(45, SCREEN_HEIGHT - 66)
+        self.inner_bar_red = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, self.health_bar_inner)).convert_alpha()
+        
         self.increase_health_bar(player)
-        self.overlay_surface.blit(self.inner_bar_red, self.inner_bar_red_rect)
-
+        inner_bar_red = GUI_ITEM(self.inner_bar_red_rect.x, self.inner_bar_red_rect.y, self.inner_bar_red)
+        self.overlay_group.add(inner_bar_red)
         
-        heath_bar_pos = pygame.math.Vector2(12.5, SCREEN_HEIGHT - 60)
-        for pic in self.mana_bar_files:
-            image = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, "Life_Bars\Medium_Bars", pic)).convert_alpha()
+        mana_bar_pos = pygame.math.Vector2(12.5, SCREEN_HEIGHT - 40)
+        for i in range(len(self.mana_bar_files)-1):
+            image = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, self.mana_bar_files[0], self.mana_bar_files[i+1])).convert_alpha()
             image_rect = image.get_rect()
             image = pygame.transform.scale(image, (image_rect.w * 2, image_rect.height * 2))
             image_rect = image.get_rect()
-            image_rect.x, image_rect.y = heath_bar_pos.x, heath_bar_pos.y
-            self.overlay_surface.blit(image, image_rect)
-            heath_bar_pos.x += image_rect.width
+            image_rect.x, image_rect.y = mana_bar_pos.x, mana_bar_pos.y
+            image_sprite = GUI_ITEM(mana_bar_pos.x, mana_bar_pos.y, image)
+            self.overlay_group.add(image_sprite)
+            
+            mana_bar_pos.x += image_rect.width
 
-        self.mana_bar_inner_pos = pygame.math.Vector2(40, SCREEN_HEIGHT - 46)
-        self.inner_bar_blue = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, "Life_Bars\Colors", self.mana_bar_inner)).convert_alpha()
-        # self.inner_bar_blue_rect = self.inner_bar_blue.get_rect()
-        # self.inner_bar_blue = pygame.transform.scale(self.inner_bar_blue, (self.inner_bar_blue_rect.w, 4))
-        # self.inner_bar_blue_rect = image.get_rect()
-        # self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y = self.mana_bar_inner_pos.x, self.mana_bar_inner_pos.y
+        self.mana_bar_inner_pos = pygame.math.Vector2(40, SCREEN_HEIGHT - 26)
+        self.inner_bar_blue = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, self.mana_bar_inner)).convert_alpha()
+        
         self.increase_mana_bar(player)
-        self.overlay_surface.blit(self.inner_bar_blue, self.inner_bar_blue_rect)
-                
-        self.overlay_surface.blit(self.player_frame_image, self.player_frame_rect)
-        self.overlay_surface.blit(self.player_name, self.player_name_rect)
-        self.overlay_surface.blit(self.maps_text, self.maps_text_rect)
-        self.overlay_surface.blit(self.maps_holded, self.maps_holded_rect)
-        self.overlay_surface.blit(player.player_portrait, self.player_portrait_rect)
-        # pygame.draw.rect(self.overlay_surface, (255, 255, 255), self.player_portrait_rect, 1)
-    
+        inner_bar_blue = GUI_ITEM(self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y, self.inner_bar_blue)
+        self.overlay_group.add(inner_bar_blue)
+        
+        self.overlay_group.add(self.player_name)
+        self.overlay_group.add(self.maps_text)
+        self.overlay_group.add(self.maps_holded)
+        self.overlay_group.add(self.fps)
+        
     def increase_health_bar(self, player):
         if player.health <= player.max_health:
             self.inner_bar_red_rect = self.inner_bar_red.get_rect()
@@ -266,15 +232,29 @@ class Overlay:
         self.inner_bar_blue_rect = self.inner_bar_blue.get_rect()
         self.inner_bar_blue_rect.x, self.inner_bar_blue_rect.y = self.mana_bar_inner_pos.x, self.mana_bar_inner_pos.y
 
-    def inventory_bar(self):
+    def bottom_inventory_bar(self):
         self.slots_content = ["Red_Potion\\01.png", "Blue_Potion\\01.png", "Chest_Key\\1.png"]
-        current_slot_x, current_slot_y = (SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), SCREEN_HEIGHT - 85
+        self.slots_offset = [0.1, 0.5, 0.8]
+        current_slot_x, current_slot_y = (SCREEN_WIDTH - self.bottom_bar_width) / 2, SCREEN_HEIGHT - self.bottom_bar_height
         for i in range(self.slots):
-            slot_background_image = pygame.image.load(self.bottom_bar_path)
+            slot_background_image = pygame.image.load(os.path.join(ROOT, GUI_FOLDER, self.bottom_bar_path[0], self.bottom_bar_path[i+1]))
             slot_content = pygame.image.load(os.path.join(ROOT, ITEMS_FOLDER, self.slots_content[i]))
-            slot = BOTTOM_BAR_SLOT(current_slot_x, current_slot_y, slot_background_image, slot_content, self.text_renderer_24)
-            current_slot_x += slot.rect_background.width + 10
-            self.bottom_bar_items.append(slot)
+            slot_background_rect, slot_content_rect = slot_background_image.get_rect(), slot_content.get_rect()
+            
+            slot_background_image = pygame.transform.scale(slot_background_image, (slot_background_rect.w * 2, slot_background_rect.h * 2))
+            slot_content = pygame.transform.scale(slot_content, (slot_content_rect.w * 2, slot_content_rect.h * 2))
+            slot_background_rect, slot_content_rect = slot_background_image.get_rect(), slot_content.get_rect()
+           
+            current_slot_content_x = (current_slot_x + (slot_background_rect.width / 2)) -  (slot_content_rect.width * self.slots_offset[i]) 
+            current_slot_content_y = (current_slot_y + (slot_background_rect.height / 2)) - (slot_content_rect.height / 2)
+            
+            slot_sprite = GUI_ITEM(current_slot_x, current_slot_y, slot_background_image)
+            slot_content_sprite = GUI_ITEM(current_slot_content_x, current_slot_content_y, slot_content)
+
+            print("Slot:", slot_sprite.rect, "Slot_Content:", slot_content_sprite.rect, "Current_x_y:", current_slot_content_x, current_slot_content_y)
+            current_slot_x += slot_background_rect.width
+            self.overlay_group.add(slot_sprite)
+            self.overlay_group.add(slot_content_sprite)
             
     def set_text_to_slide(self, text):
         self.text_to_slide = text
@@ -283,24 +263,27 @@ class Overlay:
         self.slinding_text_rect.x, self.slinding_text_rect.y = -100, 100
 
     def draw(self, player):
-        for slot in self.bottom_bar_items:
-            slot.update()
-            slot.draw(self.overlay_surface)
+        return
+        # for slot in self.bottom_bar_items:
+        #     slot.update()
+        #     slot.draw(self.overlay_surface)
             
-        self.player_data(player)
+        # self.player_data(player)
+        # self.display_surface.blit(self.overlay_surface, (0, 0))
+        
+        # if self.dim_screen_bool: 
+        #     self.fade_out_screen()
+        
+        # if self.trigger_fade_in:
+        #     self.fade_in_screen()
+        
+    def update(self, player):
+        # pygame.draw.line(self.display_surface, (255, 255, 255), ((SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), 0), ((SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), SCREEN_HEIGHT), 1)
+        # pygame.draw.line(self.display_surface, (255, 255, 255), ((SCREEN_WIDTH / 2) + (self.bottom_bar_width / 2), 0), ((SCREEN_WIDTH / 2) + (self.bottom_bar_width / 2), SCREEN_HEIGHT), 1)
+        self.fps.set_text(int(self.clock.get_fps()))
+        if not self.dim_screen_bool and not self.trigger_fade_in:
+            self.overlay_surface.fill((0, 0, 0))
+        
+        self.overlay_group.update(0, 0)
+        self.overlay_group.draw(self.display_surface)
         self.display_surface.blit(self.overlay_surface, (0, 0))
-        
-        if self.dim_screen_bool: 
-            self.fade_out_screen()
-        
-        if self.trigger_fade_in:
-            self.fade_in_screen()
-        
-    def update(self):
-        
-        # clear surface
-        # if not self.dim_screen_bool and not self.trigger_fade_in:
-        #     self.overlay_surface.set_colorkey((0, 0, 0))
-        #     self.overlay_surface.set_alpha(255)
-        self.overlay_surface.fill((0, 0, 0))
-        self.sliding_text()

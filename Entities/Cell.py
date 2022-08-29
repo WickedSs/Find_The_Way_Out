@@ -75,7 +75,6 @@ class Room:
                     self.single_list.add(self.door)
                     positions.remove(random_position)
             
-    
     def generate_items(self):
         self.items_names = list(ITEMS_TRACK.keys())
         for name in ITEMS_TRACK:
@@ -93,12 +92,7 @@ class Room:
         self.trigger_draw()
         for single in self.single_list:
             filtered = list(filter(lambda decor: decor.asset_name == single.asset_name and single.id != decor.id, self.single_list))
-            # print("FL: ", [filt.rect for filt in filtered], [filt.rect for filt in self.single_list])
             single.set_destination(filtered) 
-        # for y in range(ROOM_HEIGHT_TILES):
-            # print("Row: ", y, [tile.collision for tile in self.room_tiles[y]])
-        # self.single_list.append(self.door)
-        # self.single_list.append(self.chest)
 
     def trigger_draw(self):
         for x in range(len(self.level.collide_layer)):
@@ -107,7 +101,7 @@ class Room:
             if (tile_index <= 174 or tile_index in [420, 421, 422, 423, 455, 456, 457, 458]) and tile_index != 36:
                 tile.set_colision(True)
                 self.tiles_collision.add(tile)
-            self.all_tiles.add(tile); 
+            self.all_tiles.add(tile)
             self.room_tiles[self.currentY][self.currentX] = tile
             self.currentX += 1
             if self.currentX >= self.level.room_width:

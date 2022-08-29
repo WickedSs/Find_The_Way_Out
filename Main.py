@@ -16,10 +16,10 @@ class Game:
         self.flags = FULLSCREEN | DOUBLEBUF
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
-        self.overlay = Overlay()
+        self.overlay = Overlay(self.clock)
         self.character = Characters()
         self.level = Level(self.overlay)
-        self.player = Player(self.character.characters[0], self.overlay, self.level, 7.5 * SCALE_SIZE, 4 * SCALE_SIZE)
+        self.player = Player(self.character.characters[0], self.overlay, self.level, 10.5 * SCALE_SIZE, 7 * SCALE_SIZE)
         # self.network = Network()
         # self.network_player = self.network.player
         # self.setup_player()
@@ -64,21 +64,22 @@ class Game:
             # print("[*]", _.selected_folder, _.selected_animation, _.direction)
                     
     def run(self):
+        self.overlay.initialize_overlay(self.player)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
             
-            self.screen.fill("black")
+            self.screen.fill((51, 50, 61))
             self.level.run(self.player)
             
             
             self.player.draw(self.screen)
             self.player.update(self.tiles_group)
             
-            self.overlay.draw(self.player)
-            self.overlay.update()
+            # self.overlay.draw(self.player)
+            self.overlay.update(self.player)            
             
             # Draw Overlay
             # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)
@@ -91,10 +92,8 @@ class Game:
             #     player.update(self.tiles_group)
 
             # print("Rects: ", self.player.rect, [player.rect for player in self.joined_players])
-
             pygame.display.update()
             self.clock.tick(FPS)
-            print(self.clock.get_fps())
 
 if __name__ == '__main__':
     game = Game()
