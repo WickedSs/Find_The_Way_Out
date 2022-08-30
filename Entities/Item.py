@@ -76,8 +76,8 @@ class Item(pygame.sprite.Sprite):
         # pygame.draw.rect(self.display_surface, (255, 255, 255), self.rect, 1)
 
     def update(self, world_shift_x, world_shift_y):
-        self.rect.x += world_shift_x
-        self.rect.y += world_shift_y
+        self.rect.x = world_shift_x
+        self.rect.y = world_shift_y
         
     def set_position(self, x, y):
         self.rect.x, self.rect.y = x, y

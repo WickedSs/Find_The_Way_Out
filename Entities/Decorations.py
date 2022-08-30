@@ -63,10 +63,10 @@ class Door(Item):
             if status:
                 # player.overlay.dim_screen_counter = 0
                 # player.overlay.dim_screen_bool = status
+                player.hide_player = True
                 self.open = self.action = player.E_Action = False
                 self.played = 1
                 self.delay = pygame.time.get_ticks()
-                player.hide_player = True
                 if self.destination:
                     self.next_destination = random.choice(self.destination)
                     self.destination_room = self.next_destination.room_coords
@@ -80,12 +80,12 @@ class Door(Item):
                         self.offset_x = self.destination_room[0]
                         self.offset_y = self.destination_room[1]
                     
-                    sign_x = -self.offset_x / -self.offset_x if self.offset_x != 0 else 0
-                    sign_y = 0
-                    # player.level.camera.shift_to = (128.1, 0)
-                    # player.level.camera.set_increment((sign_x, sign_y))
-                    # player.level.camera.is_shifting = True
-                    player.level.camera.shift_to_place((-64*25, 0))
+                    sign_x = self.offset_x / -self.offset_x if self.offset_x != 0 else 0
+                    sign_y = self.offset_y / -self.offset_y if self.offset_y != 0 else 0
+                    player.level.camera.shift_to = self.destination_room
+                    player.level.camera.set_increment((sign_x, sign_y))
+                    player.level.camera.is_shifting = True
+                    self.open = False
                     
         
         if self.delay:
