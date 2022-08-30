@@ -91,8 +91,9 @@ class Room:
         self.room_type = room_type
         self.position = ((i * self.width), (j * self.height))
         for exit in self.level.exits:
-            exit_Rect = EXIT_RECT(exit[0], exit[1], exit[2], exit[3])
+            exit_Rect = EXIT_RECT(exit[0] + self.position[0], exit[1] + self.position[1], exit[2], exit[3])
             self.exit_group.add(exit_Rect)
+        
         self.trigger_draw()
         for single in self.single_list:
             filtered = list(filter(lambda decor: decor.asset_name == single.asset_name and single.id != decor.id, self.single_list))

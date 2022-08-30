@@ -3,7 +3,10 @@ from multiprocessing import current_process
 from tkinter import Grid
 from pygame.math import Vector2
 import sys, os, pygame, numpy, random, time, string, operator
+from Entities.Camera import Camera
 from Entities.Cell import Room
+from Entities.Item import EXIT_RECT
+from Entities.Player import Player
 from Entities.Tile import *
 from Settings import *
 import xml.etree.ElementTree as ET
@@ -49,6 +52,8 @@ class Level:
         self.scroll_offset = [0, 0]
         self.DIM = 2
         self.infinite_list, self.single_list = [], []
+        self.player = Player(self.overlay, self, 10.5 * SCALE_SIZE, 7 * SCALE_SIZE)
+        self.camera = Camera(self)
         self.initialize()
 
     def initialize(self):
@@ -57,6 +62,7 @@ class Level:
         self.infinite_group = pygame.sprite.Group()
         self.single_group = pygame.sprite.Group()
         self.exit_group = pygame.sprite.Group()
+        self.overlay.initialize_overlay(self.player)
         self.initialize_grid()
         self.load_json_levels()
         self.initialize_sprite()
@@ -114,32 +120,40 @@ class Level:
             self.picked_level = random.choice(self.levels)
             self.grid[0].set_level(self.picked_level, self.levels.index(self.picked_level), 0, 0)
     
-    def run(self, player):
-        # self.sprites_group.update(self.world_shift, 0)
+    def run(self):
+        self.sprites_group.update(self.world_shift, 0)
         self.sprites_group.draw(self.display_surface)
         
-        # print("Lengths: ", len(self.single_group.sprites()), len(self.infinite_group.sprites()))
         
         for item in self.infinite_group.sprites():
             pygame.draw.rect(self.display_surface, (0, 255, 0), item.rect, 1)
-            item.on_pickup(player)
+            item.on_pickup(self.player)
             item.draw()
             if item.disappear:
                 self.overlay.set_text_to_slide("Part of the map was found!")
                 self.overlay.trigger_sliding_text = True
-                item.player_effect(player)
+                item.player_effect(self.player)
                 self.items.remove(item)
         
         for decoration in self.single_group.sprites():
-            # pygame.draw.rect(self.display_surface, (0, 255, 0), decoration.rect, 1)
-            decoration.on_collision(player, self.single_list, self)
+            decoration.on_collision(self.player, self.single_list, self)
             decoration.draw()
             
         for exit in self.exit_group.sprites():
             pygame.draw.rect(self.display_surface, (0, 255, 0), exit.rect, 1)
-            exit.update(player)
+            exit.update(self.player)
             exit.draw(self.display_surface)
-        
-        
-        # self.scroll_X(player)
+
+        if self.player.killed:
+            self.player = None
+            self.overlay.dim_screen_counter = 0
+            self.overlay.dim_screen_bool = True
+            self.player_respawn()
+        else:
+            self.player.draw(self.display_surface)
+            self.player.update(self.collision_group)
+            
+        self.overlay.update(self.player)
+        self.camera.update()
+        self.camera.draw(self.display_surface)
     

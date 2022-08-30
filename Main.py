@@ -17,11 +17,8 @@ class Game:
         self.flags = FULLSCREEN | DOUBLEBUF
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), self.flags if FULL_SCREEN else 0)
         self.clock = pygame.time.Clock()
-        self.camera = Camera()
         self.overlay = Overlay(self.clock)
-        self.character = Characters()
         self.level = Level(self.overlay)
-        self.player = Player(self.character.characters[0], self.overlay, self.level, 10.5 * SCALE_SIZE, 7 * SCALE_SIZE)
         # self.network = Network()
         # self.network_player = self.network.player
         # self.setup_player()
@@ -69,7 +66,6 @@ class Game:
         self.player = Player(self.character.characters[0], self.overlay, self.level, 6.5 * SCALE_SIZE, 7 * SCALE_SIZE)
                
     def run(self):
-        self.overlay.initialize_overlay(self.player)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -81,20 +77,7 @@ class Game:
                         sys.exit()
             
             self.screen.fill((51, 50, 61))
-            self.level.run(self.player)
-            
-            if self.player.killed:
-                self.player = None
-                self.overlay.dim_screen_counter = 0
-                self.overlay.dim_screen_bool = True
-                self.player_respawn()
-            else:
-                self.player.draw(self.screen)
-                self.player.update(self.tiles_group)
-            
-            # self.overlay.draw(self.player)
-            self.overlay.update(self.player)
-            self.camera.draw(self.screen)        
+            self.level.run()  
             
             # Draw Overlay
             # pygame.draw.rect(self.screen, (255, 255, 255), self.player.rect, 1)

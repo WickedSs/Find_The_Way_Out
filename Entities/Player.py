@@ -1,4 +1,5 @@
 
+from Core.Characters import Characters
 from Settings import *
 import os, sys, pygame, random
 from PIL import Image
@@ -22,8 +23,9 @@ class NetworkPlayer:
         self.player_id = player_id        
 
 class Player:
-    def __init__(self, character, overlay, level, x, y):
+    def __init__(self, overlay, level, x, y):
         self.display_surface = pygame.display.get_surface()
+        self.characters = Characters()
         self.x, self.y = x, y
         self.overlay = overlay
         self.level = level
@@ -31,7 +33,7 @@ class Player:
         self.player_name = "Gwynbleidd"
 
         # Objects
-        self.character = character
+        self.character = self.characters.characters[0]
         self.particle = Particles(self.character.character_name)
         
         # paramaters

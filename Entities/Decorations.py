@@ -34,7 +34,8 @@ class Door(Item):
         self.delay = None
         self.destinations = None
         self.next_destination, self.destination_door, self.destination_room = None, None, None
-        self.open, self.action, self.played = False, False, 0
+        self.shift_distance_x, self.shift_distance_y = 0, 0
+        self.open, self.action, self.played, self.shift = False, False, 0, False
         self.path = os.path.join(DECORATIONS_FOLDER, self.asset_name)
         self.multiple_animations()
         self.working_animation = self.animations[self.status]
@@ -60,8 +61,8 @@ class Door(Item):
             status = self.play_animation_once()
             player.disable_movement = True
             if status:
-                player.overlay.dim_screen_counter = 0
-                player.overlay.dim_screen_bool = status
+                # player.overlay.dim_screen_counter = 0
+                # player.overlay.dim_screen_bool = status
                 self.open = self.action = player.E_Action = False
                 self.played = 1
                 self.delay = pygame.time.get_ticks()
@@ -70,19 +71,19 @@ class Door(Item):
                     self.next_destination = random.choice(self.destination)
                     self.destination_room = self.next_destination.room_coords
                     self.destination_door = self.next_destination.door_coords
+                    print("Old_position:", player.rect)
                     player.rect.x, player.rect.y = (self.destination_door[0] + ROOM_OFFSET_X) * SCALE_SIZE, (self.destination_door[1] + ROOM_OFFSET_Y) * SCALE_SIZE
-                    offset_x, offset_y = 0, 0
                     if self.next_destination.rect.x - self.rect.x > 0:
-                        offset_x = -self.destination_room[0]
-                        offset_y = -self.destination_room[1]
+                        self.offset_x = -self.destination_room[0]
+                        self.offset_y = -self.destination_room[1]
                     else:
-                        offset_x = self.destination_room[0]
-                        offset_y = self.destination_room[1]
+                        self.offset_x = self.destination_room[0]
+                        self.offset_y = self.destination_room[1]
                     
-                    print("Offsets:", offset_x, offset_y, self.destination_room, self.destination_door, self.next_destination.rect)
-                    level.sprites_group.update(offset_x, offset_y)
-                    level.infinite_group.update(offset_x, offset_y)
-                    level.single_group.update(offset_x, offset_y)
+                    player.level.camera.shift_to = (self.offset_x, self.offset_y)
+                    player.level.camera.set_increment()
+                    player.level.camera.is_shifting = True
+                    
         
         if self.delay:
             if (pygame.time.get_ticks() - self.delay) / 1000 >= 2:
@@ -96,10 +97,19 @@ class Door(Item):
                     print("New_position:", player.rect)
                     self.delay = None
                     self.played = 0
-                    
-        if self.destination_door:
-            pygame.draw.rect(self.display_surface, (0, 255, 0), ((self.destination_door[0] + ROOM_OFFSET_X) * 64, (self.destination_door[1] + ROOM_OFFSET_Y) * 64, 64, 64), 1)
-            pygame.draw.rect(self.display_surface, (0, 0, 255), player.rect, 1)
+        
+        if self.shift:
+            if self.shift_distance_x != self.offset_x and self.shift_distance_y != self.offset_y:
+                self.shift_distance_x += self.offset_x / 10 * 0.01
+                self.shift_distance_y += self.offset_y / 10 * 0.01
+            else:
+                self.shift_distance_x = 0
+                self.shift_distance_y = 0
+            
+                      
+        # if self.destination_door:
+        #     pygame.draw.rect(self.display_surface, (0, 255, 0), ((self.destination_door[0] + ROOM_OFFSET_X) * 64, (self.destination_door[1] + ROOM_OFFSET_Y) * 64, 64, 64), 1)
+        #     pygame.draw.rect(self.display_surface, (0, 0, 255), player.rect, 1)
         
                 
     def play_animation_once(self):

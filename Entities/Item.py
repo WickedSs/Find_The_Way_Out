@@ -11,7 +11,8 @@ class EXIT_RECT(pygame.sprite.Sprite):
         self.image.set_colorkey((0, 0, 0))
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         self.action = False
-        
+        self.enabled = False
+    
     def update(self, player):
         if self.rect.colliderect(player.rect) and not self.action:
             self.action = player.trigger_floating_text("[NEXT ROOM]", self.rect.x + self.rect.w / 3, self.rect.y)
