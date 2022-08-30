@@ -22,7 +22,7 @@ class Tile(pygame.sprite.Sprite):
         self.rect.x += x_shift
         self.rect.y += y_shift
 
-    def shift(self, x_shift, y_shift):
-        self.rect.x += x_shift
-        self.rect.y += y_shift
+    def set_position(self, x_pos, y_pos):
+        self.rect.x += x_pos
+        self.rect.y += y_pos
     

@@ -1,4 +1,4 @@
-import os, sys, pygame, random, uuid
+import os, sys, pygame, random, uuid, operator
 from Entities.Item import Item
 from Settings import *
 
@@ -80,9 +80,12 @@ class Door(Item):
                         self.offset_x = self.destination_room[0]
                         self.offset_y = self.destination_room[1]
                     
-                    player.level.camera.shift_to = (self.offset_x, self.offset_y)
-                    player.level.camera.set_increment()
-                    player.level.camera.is_shifting = True
+                    sign_x = -self.offset_x / -self.offset_x if self.offset_x != 0 else 0
+                    sign_y = 0
+                    # player.level.camera.shift_to = (128.1, 0)
+                    # player.level.camera.set_increment((sign_x, sign_y))
+                    # player.level.camera.is_shifting = True
+                    player.level.camera.shift_to_place((-64*25, 0))
                     
         
         if self.delay:
