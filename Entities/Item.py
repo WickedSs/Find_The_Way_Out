@@ -2,6 +2,26 @@
 from Settings import *
 import os, sys, pygame
 
+
+class EXIT_RECT(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height):
+        super().__init__()
+        self.x, self.y, self.width, self.height = x, y, width, height
+        self.image = pygame.Surface((self.width, self.height)).convert_alpha()
+        self.image.set_colorkey((0, 0, 0))
+        self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
+        self.action = False
+        
+    def update(self, player):
+        if self.rect.colliderect(player.rect) and not self.action:
+            self.action = player.trigger_floating_text("[NEXT ROOM]", self.rect.x + self.rect.w / 3, self.rect.y)
+            if self.action:
+                print("Passing through")
+                self.action = False
+                
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
 class Item(pygame.sprite.Sprite):
     def __init__(self, width, height, animate, scale, side=None, x=0, y=0, scalex=2, scaley=2):
         super().__init__()
@@ -40,7 +60,6 @@ class Item(pygame.sprite.Sprite):
             self.image = pygame.transform.scale(self.image, (self.rect.w * self.scalex, self.rect.h * self.scaley))
             self.rect = pygame.Rect(self.old_rect.x, self.old_rect.y, self.image.get_rect().w, self.image.get_rect().h)
         
-    
     def play_animation(self):
         if self.animate:
             self.animation_index += 0.12
@@ -72,8 +91,6 @@ class Item(pygame.sprite.Sprite):
     def delete(self, items):
         items.remove(self)
         
-
-
 class GUI_ITEM(pygame.sprite.Sprite):
     def __init__(self, x, y, image, font=None, text=None):
         super().__init__()
@@ -94,7 +111,6 @@ class GUI_ITEM(pygame.sprite.Sprite):
         self.x += offset_x
         self.x += offset_y
         
-
 class GUI_ITEM_BAR(pygame.sprite.Sprite):
     def __init__(self, x, y, image, bar_type, player):
         super().__init__()
@@ -121,7 +137,4 @@ class GUI_ITEM_BAR(pygame.sprite.Sprite):
             if self.bar_type == "Mana": 
                 self.player.mana = self.max
             else:
-                self.player.health = self.max
-            
-        # print(self.bar_type, self.bar_current, self.max, self.rect, "Increasing" if self.bar_current < self.max else "")
-        
+                self.player.health = self.max        

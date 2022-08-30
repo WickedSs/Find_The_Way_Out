@@ -6,7 +6,7 @@ import random, operator
 
 
 class Room:
-    def __init__(self, index, infinite_list, single_list, SPRITES, all_tiles, collsion_tiles, level=None):
+    def __init__(self, index, infinite_list, single_list, SPRITES, all_tiles, collsion_tiles, exit_group, level=None):
         self.index = index
         self.width, self.height = SCREEN_WIDTH, SCREEN_HEIGHT
         self.level = level
@@ -15,7 +15,7 @@ class Room:
         self.room_type = None
         self.currentX, self.currentY = 0, 0
         self.infinte_list, self.single_list = infinite_list, single_list
-        self.all_tiles, self.tiles_collision = all_tiles, collsion_tiles
+        self.all_tiles, self.tiles_collision, self.exit_group = all_tiles, collsion_tiles, exit_group
         self.room_tiles = [[None for j in range(ROOM_WIDTH_TILES)] for i in range(ROOM_HEIGHT_TILES)]
         self.items_in_room, self.decorations_in_room = [], []
         # self.chest = Chest(64, 64, False, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
@@ -68,10 +68,11 @@ class Room:
                 random_position = random.choice(positions)
                 side = random_position[2]
                 random_offset = tuple(map(operator.sub, random_position, current_decoration["offset"]))
-                if spawn in [1, 3, 5]:
+                if spawn in [0, 1, 2, 3, 4, 5]:
                     door_x, door_y = (random_offset[0] * SCALE_SIZE) + self.position[0], (random_offset[1] * SCALE_SIZE) + self.position[1]
                     self.door = Door(41, 64, False, True, side, door_x, door_y)
-                    print("Spawned: ", spawn, random_position, side, random_offset, self.position, door_x, door_y, self.door.id)
+                    self.door.set_room_coords(self.position, random_offset)
+                    print("Spawned: ", door_x, door_y, self.door.id)
                     self.single_list.add(self.door)
                     positions.remove(random_position)
             
@@ -89,6 +90,9 @@ class Room:
         self.collapsed = True
         self.room_type = room_type
         self.position = ((i * self.width), (j * self.height))
+        for exit in self.level.exits:
+            exit_Rect = EXIT_RECT(exit[0], exit[1], exit[2], exit[3])
+            self.exit_group.add(exit_Rect)
         self.trigger_draw()
         for single in self.single_list:
             filtered = list(filter(lambda decor: decor.asset_name == single.asset_name and single.id != decor.id, self.single_list))

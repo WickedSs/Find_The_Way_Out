@@ -31,7 +31,8 @@ class Level_CONFIG:
         self.background_layer = self.data["layers"][1]["data"]
         self.tile_width, self.tile_height = self.data["tilewidth"], self.data["tileheight"]
         self.room_width, self.room_height = self.data["width"], self.data["height"]
-    
+        self.exits = self.data["exit_position"]
+            
 
 class Level:
     spritesheet_filename = os.path.join(ROOT, "Assets/Spritesheet.png")
@@ -55,6 +56,7 @@ class Level:
         self.collision_group = pygame.sprite.Group()
         self.infinite_group = pygame.sprite.Group()
         self.single_group = pygame.sprite.Group()
+        self.exit_group = pygame.sprite.Group()
         self.initialize_grid()
         self.load_json_levels()
         self.initialize_sprite()
@@ -98,7 +100,7 @@ class Level:
     def initialize_grid(self):
         self.grid = []
         for i in range(DIM * DIM):
-            self.grid.append(Room(i, self.infinite_group, self.single_group, SPRITES, self.sprites_group, self.collision_group))
+            self.grid.append(Room(i, self.infinite_group, self.single_group, SPRITES, self.sprites_group, self.collision_group, self.exit_group))
             
     def generate_map(self):
         if DIM > 1:
@@ -132,6 +134,11 @@ class Level:
             # pygame.draw.rect(self.display_surface, (0, 255, 0), decoration.rect, 1)
             decoration.on_collision(player, self.single_list, self)
             decoration.draw()
+            
+        for exit in self.exit_group.sprites():
+            pygame.draw.rect(self.display_surface, (0, 255, 0), exit.rect, 1)
+            exit.update(player)
+            exit.draw(self.display_surface)
         
         
         # self.scroll_X(player)

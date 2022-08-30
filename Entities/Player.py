@@ -150,6 +150,14 @@ class Player:
                 self.flipped = False
             else:
                 self.direction.x = 0
+                
+                
+            # if keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_z]:
+            #     self.direction.y = -1
+            # elif keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]:
+            #     self.direction.y = 1
+            # else:
+            #     self.direction.y = 0
 
             if keys_pressed[pygame.K_SPACE]:
                 # if not self.jumped and not self.falling:
@@ -193,6 +201,7 @@ class Player:
   
     def horizontal_collision(self, collision_sprites):
         self.rect.x += self.direction.x * self.speed
+        # self.rect.y += self.direction.y * self.speed
         if self.previous_block_position != -1 and self.rect.x != self.previous_block_position:
             self.blocked = False
             self.previous_block_position = -1

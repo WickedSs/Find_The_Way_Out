@@ -2,6 +2,7 @@
   "compressionlevel": -1,
   "height": 9,
   "infinite": false,
+  "exit_position": [[1024, 448, 64, 128]],
   "layers": [
     {
       "data": [
