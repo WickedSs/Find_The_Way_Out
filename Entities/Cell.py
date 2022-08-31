@@ -113,4 +113,4 @@ class Room:
                 self.currentY += 1
                 self.currentX = 0
                 
-        self.generate_decorations()     
+        # self.generate_decorations()

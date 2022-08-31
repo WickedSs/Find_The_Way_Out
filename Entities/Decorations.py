@@ -86,39 +86,47 @@ class Door(Item):
                 self.status = "Closing"
                 self.play_animation_once()
                 self.next_phases[0] = True
+                self.slight_delay = -1
                     
                         
         
-            # if self.next_phases[0]:
-            #     self.next_destination.status = "Opening"
-            #     self.next_phases[1] = self.next_destination.play_animation_once()
-            #     self.next_phases[0] = False
-            #     self.next_destination.animation_index = 0
-            
-            # if self.next_phases[1] and player.level.camera.is_shifting:
-            #     self.next_destination.status = "Closing"
-            #     self.next_phases[2] = self.next_destination.play_animation_once()
-            #     self.next_phases[1] = False
-            #     print("Reached second cycle", self.next_phases, self.next_destination.status)
-            
-            # if self.next_phases[2]:
-            #     player.rect.x, player.rect.y = (self.destination_door[0] + ROOM_OFFSET_X) * SCALE_SIZE, (self.destination_door[1] + ROOM_OFFSET_Y + 1) * SCALE_SIZE
-            #     player.hide_player = False
-            #     player.disable_movement = False
-            #     self.played = 0
-            #     self.next_phases = [False, False, False]
-            #     self.slight_delay = -1
-            #     self.get_frame()        
+        if self.next_phases[0]:
+            self.next_destination.status = "Opening"
+            status = self.next_destination.play_animation_once()
+            if status:
+                self.next_phases[0] = False
+                self.next_phases[1] = True
+                self.next_destination.animation_index = 0
+                print("Broke of first!")
+        
+        if self.next_phases[1]:
+            self.next_destination.status = "Closing"
+            status = self.next_destination.play_animation_once()
+            if status:
+                self.next_phases[1] = False
+                self.next_phases[2] = True
+                print("Broke of second")
+        
+        if self.next_phases[2]:
+            player.rect.x, player.rect.y = (self.destination_door[0] + ROOM_OFFSET_X) * SCALE_SIZE, (self.destination_door[1] + ROOM_OFFSET_Y + 1) * SCALE_SIZE
+            player.hide_player = False
+            player.disable_movement = False
+            self.played = 0
+            self.next_phases = [False, False, False]
+            self.slight_delay = -1
+            self.get_frame()        
+            self.next_phases = [False, False, False]
+            print("Broke of third")
                     
     def play_animation_once(self):
         self.animation_index += 0.12
         if self.animation_index >= len(self.working_animation):
-            self.animation_index = len(self.working_animation)
+            self.animation_index = 0
             return True
-        
-        self.get_frame()
-        self.display_surface.blit(self.image, self.rect)
-        return False
+        else:
+            self.get_frame()
+            self.display_surface.blit(self.image, self.rect)
+            return False
 
 class Window:
     def __init__(self):

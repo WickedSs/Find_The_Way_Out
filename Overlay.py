@@ -262,6 +262,6 @@ class Overlay:
             self.fade_out_screen()
         
         if self.trigger_fade_in and self.delay_dim != None:
-            if (pygame.time.get_ticks() - self.delay_dim) / 1000 >= 3:
+            if (pygame.time.get_ticks() - self.delay_dim) / 1000 >= 2:
                 self.fade_in_screen()
         
