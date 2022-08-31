@@ -18,10 +18,10 @@ class Camera:
     def set_increment(self, sign):
         self.increment = tuple(map(operator.mul, self.increment_values, sign))
         self.shift_to = tuple(map(operator.mul, self.shift_to, sign))
-        self.horizontal = True
+        self.horizontal = True if self.shift_to[0] != 0 else False
+        self.vertical = True if self.shift_to[1] != 0 else False
 
     def shift_world(self):
-        print("Shift Status:", self.horizontal, self.vertical, self.current_position_x, self.current_position_y, self.shift_to, self.increment)
         if self.horizontal and self.shift_to[0] != 0:
             if self.current_position_x != self.shift_to[0]:
                 self.current_position_x += self.increment[0]
@@ -38,14 +38,11 @@ class Camera:
             else:
                 self.vertical = self.horizontal = False
         
+        print("Shift Status:", self.horizontal, self.vertical, self.current_position_x, self.current_position_y, self.shift_to, self.increment)
         if not self.horizontal and not self.vertical:
             self.is_shifting = False
             self.shift_to = None
             self.increment = (0, 0)
-        
-    def shift_to_place(self, pos):
-        for sprite in self.level.sprites_group.sprites():
-            sprite.set_position(pos[0], pos[1])
 
     def update(self):
         if self.is_shifting:
@@ -54,6 +51,6 @@ class Camera:
             self.level.sprites_group.update(self.values[0], self.values[1])
             self.level.infinite_group.update(self.values[0], self.values[1])
             self.level.single_group.update(self.values[0], self.values[1])
-    
+            
     def draw(self, screen):
         pygame.draw.rect(screen, (0, 255, 0), self.rect, 1)

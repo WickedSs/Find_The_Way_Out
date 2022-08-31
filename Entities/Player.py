@@ -316,8 +316,9 @@ class Player:
 
     def update(self, collision_sprites):
         self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]
-        self.horizontal_collision(collision_sprites)
-        self.vertical_collision(collision_sprites)
+        if not self.hide_player:
+            self.horizontal_collision(collision_sprites)
+            self.vertical_collision(collision_sprites)
         self.input()
         self.get_animation()
         self.animate()

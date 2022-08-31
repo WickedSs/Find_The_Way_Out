@@ -82,6 +82,7 @@ class Overlay:
         self.dim_screen_counter = 0
         self.dim_screen_bool = False
         self.trigger_fade_in = False
+        self.delay_dim = None
         
         # floating text
         self.floating_text_distance_max = 5
@@ -95,29 +96,29 @@ class Overlay:
     def initialize_overlay(self, player):
         self.bottom_inventory_bar()
         self.player_UI(player)
+        self.fade_surface()
+        
+    def fade_surface(self):
+        self.fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
+        self.fade.fill((0, 0, 0))
+        self.fade.set_alpha(255)
+        self.fade_rect = pygame.Rect(-SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
     
     def fade_out_screen(self):
-        if self.dim_screen_counter <= SCREEN_WIDTH:
-            self.dim_screen_counter += SCREEN_WIDTH / 10
+        if self.fade_rect.x < 0:
+            self.fade_rect.x += 64
         else:
-            self.dim_screen_counter = SCREEN_WIDTH - 60
-            pygame.time.delay(2000)
             self.trigger_fade_in = True
             self.dim_screen_bool = False
-                        
-        for i in range(0, 6, 2):
-            pygame.draw.rect(self.display_surface, (51, 50, 61), (0, i * 100, self.dim_screen_counter, SCREEN_HEIGHT))
+            self.delay_dim = pygame.time.get_ticks() 
         
     def fade_in_screen(self):
-        if self.dim_screen_counter > 0:
-            self.dim_screen_counter -= SCREEN_WIDTH / 10
+        if self.fade_rect.x >= -SCREEN_WIDTH:
+            self.fade_rect.x -= 64
         else:
             self.dim_screen_counter = 0
             self.trigger_fade_in = False
-            self.dim_screen_bool = False      
-        
-        for i in range(6, -1, -2):
-            pygame.draw.rect(self.display_surface, (51, 50, 61), (0, i * 100, self.dim_screen_counter, SCREEN_HEIGHT))
+            self.dim_screen_bool = False     
           
     def draw_text(self, text, posx, posy):
         self.floating_text = self.set_font(24).render(text, False, (255, 255, 255))
@@ -255,10 +256,12 @@ class Overlay:
         self.overlay_bars_group.update()
         self.overlay_bars_group.draw(self.overlay_surface)
         self.display_surface.blit(self.overlay_surface, (0, 0))
+        self.display_surface.blit(self.fade, self.fade_rect)
         
         if self.dim_screen_bool: 
             self.fade_out_screen()
         
-        if self.trigger_fade_in:
-            self.fade_in_screen()
+        if self.trigger_fade_in and self.delay_dim != None:
+            if (pygame.time.get_ticks() - self.delay_dim) / 1000 >= 3:
+                self.fade_in_screen()
         

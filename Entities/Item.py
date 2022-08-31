@@ -24,6 +24,9 @@ class EXIT_RECT(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 class Item(pygame.sprite.Sprite):
+    
+    """ All Items must be imported, scaled and stored on initialization """
+    
     def __init__(self, width, height, animate, scale, side=None, x=0, y=0, scalex=2, scaley=2):
         super().__init__()
         self.display_surface = pygame.display.get_surface()
@@ -33,6 +36,7 @@ class Item(pygame.sprite.Sprite):
         self.animate = animate
         self.scale = scale
         self.side = side
+        self.collision_disabled = False
         self.scalex, self.scaley = scalex, scaley
         self.disappear, self.hide_image = False, False
         self.x, self.y, self.width, self.height = x + (ROOM_OFFSET_X * SCALE_SIZE), y + (ROOM_OFFSET_Y * SCALE_SIZE), width, height
@@ -52,6 +56,7 @@ class Item(pygame.sprite.Sprite):
             self.animations["frame"].append(frame)
 
     def get_frame(self):
+        self.working_animation = self.animations[self.status]
         self.status_path = os.path.join(self.path, self.status)
         self.old_rect = self.rect.copy()
         working_path = os.path.join(self.status_path, self.working_animation[int(self.animation_index)])
@@ -76,8 +81,8 @@ class Item(pygame.sprite.Sprite):
         # pygame.draw.rect(self.display_surface, (255, 255, 255), self.rect, 1)
 
     def update(self, world_shift_x, world_shift_y):
-        self.rect.x = world_shift_x
-        self.rect.y = world_shift_y
+        self.rect.x += world_shift_x
+        self.rect.y += world_shift_y
         
     def set_position(self, x, y):
         self.rect.x, self.rect.y = x, y
