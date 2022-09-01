@@ -16,10 +16,11 @@ class Camera:
         self.increment_values, self.increment = (64, 64), (0, 0)
         self.horizontal, self.vertical = False, False
     
-    def set_increment(self, sign):
+    def set_increment(self, sign, shift_to):
         self.sign = (-1, -1) if sign == (0, 0) else sign
         self.increment = tuple(map(operator.mul, self.increment_values, sign))
-        self.shift_to = tuple(map(operator.mul, self.shift_to, sign))
+        self.shift_to = tuple(map(operator.add, (self.current_position_x, self.current_position_y), shift_to))
+        
         if self.current_position_x != self.shift_to[0] and self.shift_to[0] != 0:
             self.horizontal = True
             self.vertical = False
@@ -62,7 +63,9 @@ class Camera:
                 self.level.sprites_group.update(self.values[0], self.values[1])
                 self.level.infinite_group.update(self.values[0], self.values[1])
                 self.level.single_group.update(self.values[0], self.values[1])
+                self.level.exit_group.update(self.values[0], self.values[1])
             
             
     def draw(self, screen):
-        pygame.draw.rect(screen, (0, 255, 0), self.rect, 1)
+        # pygame.draw.rect(screen, (0, 255, 0), self.rect, 1)
+        return

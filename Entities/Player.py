@@ -170,7 +170,7 @@ class Player:
                 if self.player_fov <= 80 * 2:
                     self.player_fov += 5
                     
-            if keys_pressed[pygame.K_e] and self.floating_text:
+            if keys_pressed[pygame.K_e]:
                 self.E_Action = True
                 
             if keys_pressed[pygame.K_LSHIFT]:
@@ -310,6 +310,7 @@ class Player:
         self.overlay.draw_text(text, posx, posy)
         if self.E_Action:
             self.floating_text = False
+            self.E_Action = False
             return True
         
         return False

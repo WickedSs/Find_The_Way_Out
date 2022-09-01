@@ -91,7 +91,7 @@ class Room:
         self.room_type = room_type
         self.position = ((i * self.width), (j * self.height))
         for exit in self.level.exits:
-            exit_Rect = EXIT_RECT(exit[0] + self.position[0], exit[1] + self.position[1], exit[2], exit[3])
+            exit_Rect = EXIT_RECT(exit[0] + self.position[0], exit[1] + self.position[1], exit[2], exit[3], exit[4])
             self.exit_group.add(exit_Rect)
         
         self.trigger_draw()
@@ -112,5 +112,3 @@ class Room:
             if self.currentX >= self.level.room_width:
                 self.currentY += 1
                 self.currentX = 0
-                
-        # self.generate_decorations()

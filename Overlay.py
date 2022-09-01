@@ -92,11 +92,6 @@ class Overlay:
     
     def set_font(self, size):
         return pygame.font.Font(os.path.join(ROOT, FONT_FILE), size)
-    
-    def initialize_overlay(self, player):
-        self.bottom_inventory_bar()
-        self.player_UI(player)
-        self.fade_surface()
         
     def fade_surface(self):
         self.fade = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha()
@@ -119,7 +114,16 @@ class Overlay:
             self.dim_screen_counter = 0
             self.trigger_fade_in = False
             self.dim_screen_bool = False     
-          
+    
+    def outlines_overlay(self):
+        outlines_rects = [(0, 0, SCREEN_WIDTH, 64), (0, 64, 64, SCREEN_HEIGHT - 64), (0, SCREEN_HEIGHT - 64, SCREEN_WIDTH, 64), (SCREEN_WIDTH - 64, 64, 64, SCREEN_HEIGHT - 64)]
+        for outline in outlines_rects:
+            outl = pygame.sprite.Sprite()
+            outl.image = pygame.Surface((outline[2], outline[3])).convert_alpha()
+            outl.image.fill((50, 51, 61))
+            outl.rect = pygame.Rect(outline)
+            self.overlay_group.add(outl)
+        
     def draw_text(self, text, posx, posy):
         self.floating_text = self.set_font(24).render(text, False, (255, 255, 255))
         self.floating_text_rect = self.floating_text.get_rect()
@@ -240,6 +244,12 @@ class Overlay:
         self.slinding_text_rect = self.slide_text_surface.get_rect()
         self.slinding_text_rect.x, self.slinding_text_rect.y = -100, 100
 
+    def initialize_overlay(self, player):
+        self.outlines_overlay()
+        self.bottom_inventory_bar()
+        self.player_UI(player)
+        self.fade_surface()
+
     def draw(self, player):
         return
         
@@ -264,4 +274,4 @@ class Overlay:
         if self.trigger_fade_in and self.delay_dim != None:
             if (pygame.time.get_ticks() - self.delay_dim) / 1000 >= 2:
                 self.fade_in_screen()
-        
+                        

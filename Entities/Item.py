@@ -4,22 +4,35 @@ import os, sys, pygame
 
 
 class EXIT_RECT(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height):
+    def __init__(self, x, y, width, height, direction):
         super().__init__()
         self.x, self.y, self.width, self.height = x, y, width, height
         self.image = pygame.Surface((self.width, self.height)).convert_alpha()
         self.image.set_colorkey((0, 0, 0))
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
-        self.action = False
+        self.action, self.shift = False, False
         self.enabled = False
+        self.direction = direction
     
-    def update(self, player):
-        if self.rect.colliderect(player.rect) and not self.action:
-            self.action = player.trigger_floating_text("[NEXT ROOM]", self.rect.x + self.rect.w / 3, self.rect.y)
-            if self.action:
-                print("Passing through")
-                self.action = False
-                
+    def on_collision(self, player):
+        if self.rect.colliderect(player.rect) and not self.shift:
+            action = player.trigger_floating_text("[NEXT ROOM]", self.rect.x + self.rect.w / 3, self.rect.y)
+            if action:
+                self.shift = True
+                player.hide_player = True
+        
+        if self.shift:
+            shif_to = (1600, 0) if self.direction == "left" else (-1600, 0)
+            sign = (1, 1) if self.direction == "left" else (-1, -1)
+            player.level.camera.set_increment(sign, shif_to)
+            player.level.camera.is_shifting = True
+            self.shift = False
+            player.hide_player = True           
+    
+    def update(self, shift_x, shift_y):
+        self.rect.x += shift_x
+        self.rect.y += shift_y
+                                  
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
