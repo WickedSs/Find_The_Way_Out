@@ -298,11 +298,10 @@ class Player:
 
     def draw(self, screen):
         # self.field_of_view(screen)
-        if not self.killed:
-            if not self.hide_player:
-                screen.blit(self.image, self.rect)
-            if not self.jumped and not self.falling and self.direction.x != 0:
-                self.draw_run_particles()
+        if not self.hide_player:
+            screen.blit(self.image, self.rect)
+        if not self.jumped and not self.falling and self.direction.x != 0:
+            self.draw_run_particles()
         # self.dim_screen(screen)
         
     def trigger_floating_text(self, text, posx, posy):
@@ -316,25 +315,25 @@ class Player:
         return False
 
     def update(self, collision_sprites):
-        self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]
         if not self.hide_player:
+            self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]
             self.horizontal_collision(collision_sprites)
             self.vertical_collision(collision_sprites)
-        self.input()
-        self.get_animation()
-        self.animate()
-        
-        if self.health <= 0:
-            self.killed = False
-        
-        if self.dash_bool:
-            self.dash()
-            self.speed = PLAYER_SPEED
-            self.dash_minus = pygame.time.get_ticks()
+            self.input()
+            self.get_animation()
+            self.animate()
             
-        if self.time_between_dahses > 0:
-            self.time_between_dahses -= (pygame.time.get_ticks() - self.dash_minus) / 1000
-            if self.time_between_dahses < 0:
-                self.time_between_dahses = 0
+            if self.health <= 0:
+                self.killed = False
+            
+            if self.dash_bool:
+                self.dash()
+                self.speed = PLAYER_SPEED
+                self.dash_minus = pygame.time.get_ticks()
+                
+            if self.time_between_dahses > 0:
+                self.time_between_dahses -= (pygame.time.get_ticks() - self.dash_minus) / 1000
+                if self.time_between_dahses < 0:
+                    self.time_between_dahses = 0
 
 

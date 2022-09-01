@@ -98,13 +98,15 @@ class Level:
             self.grid.append(Room(i, self.infinite_group, self.single_group, SPRITES, self.sprites_group, self.collision_group, self.exit_group))
             
     def generate_map(self):
-        picked = 0
+        picked = 1
         if DIM > 1:
             for j in range(self.DIM):
                 for i in range(self.DIM):
                     index = i + j * self.DIM
-                    self.picked_level = random.choice(self.levels)
+                    self.picked_level = self.levels[picked]  #random.choice(self.levels)
                     self.grid[index].set_level(self.picked_level, self.levels.index(self.picked_level), i, j)
+                    picked = 0 if picked == 1 else 0
+                    
 
         else:
             self.picked_level = self.levels[picked] #random.choice(self.levels)

@@ -13,21 +13,31 @@ class EXIT_RECT(pygame.sprite.Sprite):
         self.action, self.shift = False, False
         self.enabled = False
         self.direction = direction
+        self.player_disable = False
     
     def on_collision(self, player):
-        if self.rect.colliderect(player.rect) and not self.shift:
-            action = player.trigger_floating_text("[NEXT ROOM]", self.rect.x + self.rect.w / 3, self.rect.y)
-            if action:
-                self.shift = True
-                player.hide_player = True
+        if self.rect.colliderect(player.rect) and not player.level.camera.is_shifting:
+            self.shift = True
+            player.hide_player = True
         
         if self.shift:
-            shif_to = (1600, 0) if self.direction == "left" else (-1600, 0)
-            sign = (1, 1) if self.direction == "left" else (-1, -1)
-            player.level.camera.set_increment(sign, shif_to)
+            print("Player: ", player.rect)
+            player.level.camera.get_increment_direction(self.direction)
+            player.level.camera.shift_world()
             player.level.camera.is_shifting = True
             self.shift = False
-            player.hide_player = True           
+            print("Player: ", player.rect)
+            self.player_disable = True
+            
+        if self.player_disable:
+            if self.direction in ["right", "left"]:
+                player.rect.x = 64 if self.direction == "right" else -64
+            else:
+                player.rect.y = 64 if self.direction == "up" else -64
+            player.hide_player = False
+            self.player_disable = False
+                
+        # print("Player: ", player.rect)
     
     def update(self, shift_x, shift_y):
         self.rect.x += shift_x
@@ -37,9 +47,7 @@ class EXIT_RECT(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 class Item(pygame.sprite.Sprite):
-    
     """ All Items must be imported, scaled and stored on initialization """
-    
     def __init__(self, width, height, animate, scale, side=None, x=0, y=0, scalex=2, scaley=2):
         super().__init__()
         self.display_surface = pygame.display.get_surface()

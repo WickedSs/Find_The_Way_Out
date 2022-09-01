@@ -3,8 +3,8 @@
   "height": 12,
   "infinite": false,
   "exit_position": [
-    [64, 192, 64, 128, "left"],
-    [1472, 576, 64, 128, "right"]
+    [64, 192, 32, 128, "left"],
+    [1504, 576, 32, 128, "right"]
   ],
   "layers": [
     {
