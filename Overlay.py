@@ -1,4 +1,4 @@
-import os, sys, pygame, random
+import os, sys, pygame, random, string
 from Settings import *
 from Entities.Item import *
 
@@ -12,6 +12,7 @@ ITEMS_IDENTIFIERS = {
     
 }
 
+print(string.ascii_uppercase + string.digits)
 
 class BOTTOM_BAR_SLOT(pygame.sprite.Sprite):
     def __init__(self, x, y, background, item, text_render):
@@ -88,8 +89,7 @@ class Overlay:
         self.floating_text_distance_max = 5
         self.floating_text_distance = 0
         self.floating_add_number = 0.25
-                
-    
+        
     def set_font(self, size):
         return pygame.font.Font(os.path.join(ROOT, FONT_FILE), size)
         
@@ -233,10 +233,12 @@ class Overlay:
             
             slot_sprite = GUI_ITEM(current_slot_x, current_slot_y, slot_background_image)
             slot_content_sprite = GUI_ITEM(current_slot_content_x, current_slot_content_y, slot_content)
+            # slot_content_amount = GUI_ITEM(current_slot_x + 25, current_slot_y + 10, None, self.set_font(16), "0")
 
             current_slot_x += slot_background_rect.width
             self.overlay_group.add(slot_sprite)
             self.overlay_group.add(slot_content_sprite)
+            # self.overlay_group.add(slot_content_amount)
             
     def set_text_to_slide(self, text):
         self.text_to_slide = text

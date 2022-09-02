@@ -68,7 +68,7 @@ class Room:
                 random_position = random.choice(positions)
                 side = random_position[2]
                 random_offset = tuple(map(operator.sub, random_position, current_decoration["offset"]))
-                if spawn in [0, 1, 2, 3, 4, 5]:
+                if spawn in [1, 3, 5]:
                     door_x, door_y = (random_offset[0] * SCALE_SIZE) + self.position[0], (random_offset[1] * SCALE_SIZE) + self.position[1]
                     self.door = Door(41, 64, False, True, side, door_x, door_y)
                     self.door.set_room_coords(self.position, random_offset)
@@ -80,10 +80,18 @@ class Room:
         self.items_names = list(ITEMS_TRACK.keys())
         for name in ITEMS_TRACK:
             current_item = ITEMS_TRACK[name]
-            spawn = random.randrange(0, 6)
-            if spawn in [1, 3]:
-                return
-        return
+            requirements = current_item["requirements"]
+            iterations = current_item["per_room"]
+            positions = self.get_position(requirements)
+            for iteration in range(iterations):
+                spawn = random.randrange(0, 6)
+                random_position = random.choice(positions)
+                if spawn in [1, 3, 5]:
+                    item_x, item_y = (random_position[0] * SCALE_SIZE) + self.position[0], (random_position[1] * SCALE_SIZE) + self.position[1]
+                    self.item = Chest(64, 64, False, True, item_x, item_y)
+                    print("Spawned: ", item_x, item_y)
+                    self.single_list.add(self.item)
+                    positions.remove(random_position)
 
     def set_level(self, level, room_type, i, j):
         self.level = level
@@ -96,8 +104,10 @@ class Room:
         
         self.trigger_draw()
         for single in self.single_list:
-            filtered = list(filter(lambda decor: decor.asset_name == single.asset_name and single.id != decor.id, self.single_list))
-            single.set_destination(filtered) 
+            print(single.rect)
+            if single.asset_name == "Door":
+                filtered = list(filter(lambda decor: single.id != decor.id, self.single_list))
+                single.set_destination(filtered) 
 
     def trigger_draw(self):
         for x in range(len(self.level.collide_layer)):
@@ -112,3 +122,7 @@ class Room:
             if self.currentX >= self.level.room_width:
                 self.currentY += 1
                 self.currentX = 0
+                
+        self.single_list.add(Chest(64, 64, False, True, 64, 640))
+        self.generate_items()
+        # self.generate_decorations()

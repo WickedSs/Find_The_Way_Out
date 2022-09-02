@@ -45,7 +45,6 @@ class Big_Map(Item):
         player.collected_maps += 1
         return
 
-
 class Chest(Item):
     def __init__(self, width, height, animate, scale, x, y):
         super().__init__(width, height, animate, scale, x, y)
@@ -60,7 +59,7 @@ class Chest(Item):
         self.possible_loot = [Big_Map(30, 31, True, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)]
         self.get_frame()
         
-    def on_collision(self, player, items_list):
+    def on_collision(self, player, items_list, Level):
         if player.rect.colliderect(self.rect) and not self.open_chest:
             action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 3, self.rect.y - (self.rect.h / 4))
             if action:

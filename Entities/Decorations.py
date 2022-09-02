@@ -22,6 +22,7 @@ class Chains:
     def __init__(self, x, y):
         pass
 
+
 class Door(Item):
     def __init__(self, width, height, animate, scale, side, x, y):
         super().__init__(width, height, animate, scale, side, x, y)
@@ -128,11 +129,12 @@ class Door(Item):
             self.display_surface.blit(self.image, self.rect)
             return False
 
+
 class Window:
     def __init__(self):
         pass
 
-    
+
 class Barrel_UP:
     def __init__(self):
         pass
