@@ -52,7 +52,6 @@ class Level:
         self.world_shift = 0
         self.scroll_offset = [0, 0]
         self.DIM = 2
-        self.infinite_list, self.single_list = [], []
         self.player = Player(self.overlay, self, 10.5 * SCALE_SIZE, 7 * SCALE_SIZE)
         self.camera = Camera(self)
         self.initialize()
@@ -143,9 +142,9 @@ class Level:
             #     item.player_effect(self.player)
             #     self.items.remove(item)
         
-        for decoration in self.single_group.sprites():
-            decoration.on_collision(self.player, self.single_list, self)
-            decoration.draw()
+        for item in self.single_group.sprites():
+            item.on_collision(self.player, self.single_group.sprites(), self)
+            item.draw()
             
         for exit in self.exit_group.sprites():
             pygame.draw.rect(self.display_surface, (0, 255, 0), exit.rect, 1)

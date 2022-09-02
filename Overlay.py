@@ -46,7 +46,6 @@ class BOTTOM_BAR_SLOT(pygame.sprite.Sprite):
         screen.blit(self.item, self.rect_item)
         screen.blit(self.amount_text, self.amount_rect)
 
-
 class Overlay:
     def __init__(self, clock):
         self.clock = clock
@@ -258,6 +257,7 @@ class Overlay:
     def update(self, player):
         # pygame.draw.line(self.display_surface, (255, 255, 255), ((SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), 0), ((SCREEN_WIDTH / 2) - (self.bottom_bar_width / 2), SCREEN_HEIGHT), 1)
         # pygame.draw.line(self.display_surface, (255, 255, 255), ((SCREEN_WIDTH / 2) + (self.bottom_bar_width / 2), 0), ((SCREEN_WIDTH / 2) + (self.bottom_bar_width / 2), SCREEN_HEIGHT), 1)
+        self.maps_holded.set_text(player.collected_maps)
         self.fps.set_text(int(self.clock.get_fps()))
         if not self.dim_screen_bool and not self.trigger_fade_in:
             self.overlay_surface.fill((0, 0, 0))

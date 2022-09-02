@@ -140,7 +140,6 @@ class Player:
             self.particles_index = 0
         self.repetitive_bullshit_particle()
 
-
     def input(self):
         if not self.disable_movement:
             keys_pressed = pygame.key.get_pressed()
@@ -186,7 +185,6 @@ class Player:
                 
                 self.take_damage(damage_taken)
                 
-
     def animate(self):
         self.animation_index += 0.12
         if self.animation_index >= len(self.character.animations[self.selected_folder]["frames"]):
@@ -200,7 +198,6 @@ class Player:
         else:
             self.image = self.normal_image
 
-  
     def horizontal_collision(self, collision_sprites):
         self.rect.x += self.direction.x * self.speed
         # self.rect.y += self.direction.y * self.speed

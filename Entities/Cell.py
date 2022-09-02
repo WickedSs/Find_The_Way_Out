@@ -89,7 +89,7 @@ class Room:
                 if spawn in [1, 3, 5]:
                     item_x, item_y = (random_position[0] * SCALE_SIZE) + self.position[0], (random_position[1] * SCALE_SIZE) + self.position[1]
                     self.item = Chest(64, 64, False, True, item_x, item_y)
-                    print("Spawned: ", item_x, item_y)
+                    print("[*]Spawned: ", item_x, item_y)
                     self.single_list.add(self.item)
                     positions.remove(random_position)
 
@@ -104,7 +104,6 @@ class Room:
         
         self.trigger_draw()
         for single in self.single_list:
-            print(single.rect)
             if single.asset_name == "Door":
                 filtered = list(filter(lambda decor: single.id != decor.id, self.single_list))
                 single.set_destination(filtered) 

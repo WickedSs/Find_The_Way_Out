@@ -7,6 +7,9 @@ ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 DECORATIONS_FOLDER = "Assets\Decorations"
 
 
+class Ball(Item):
+    def __init__(self, width, height, animate, scale, side=None, x=0, y=0, scalex=2, scaley=2):
+        super().__init__(width, height, animate, scale, side, x, y, scalex, scaley)
 
 class Cannon:
     def __init__(self):

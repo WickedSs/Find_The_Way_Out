@@ -10,7 +10,7 @@ ITEMS_FOLDER = "Assets\Items"
 
 class Big_Map(Item):
     def __init__(self, width, height, animate, scale, x, y):
-        super().__init__(width, height, animate, scale, x, y, 1, 1)
+        super().__init__(width, height, animate, scale, None, x, y, 1, 1)
         self.display_surface = pygame.display.get_surface()
         self.asset_name = "Big_Map"
         self.animation_type = "Multiple"
@@ -34,7 +34,6 @@ class Big_Map(Item):
         self.animation_index += 0.12
         if self.animation_index >= len(self.working_animation):
             self.animation_index = 0
-            self.player_effect(player)
             return True
         
         self.get_frame()
@@ -67,11 +66,11 @@ class Chest(Item):
                 self.working_animation = self.animations[self.status]
                 self.open_chest = True
         
-        # print(self.item, self.open)
         if self.open_chest and not self.item_chest:
             player.disable_movement = True
-            self.item_chest = self.play_animation_once()
-            self.open_chest = False
+            action = self.play_animation_once()
+            if action:
+                self.item_chest = True
         
         if self.item_chest:
             self.pick_item(player, items_list)
@@ -97,12 +96,9 @@ class Chest(Item):
         if self.particle:
             status = self.random_item.play_animation_once(player)
             if status:
-                self.player_effect(player)
-                self.open = player.E_Action = self.particle = self.item_chest = player.disable_movement = False
-                items_list.remove(self)
-    
-    def player_effect(self, player):
-        return
+                self.random_item.player_effect(player)
+                self.open = player.E_Action = self.particle = self.item_chest = player.disable_movement = self.open_chest = False
+                self.kill()
 
 class Blue_Diamond(Item):
     def __init__(self):
@@ -113,42 +109,34 @@ class Blue_Diamond(Item):
         self.path = os.path.join(ITEMS_FOLDER, self.asset_name)
         self.single_animations()
         self.working_animation = self.animations["frame"]
-        
-        
+              
 class Blue_Potion(Item):
     def __init__(self):
         pass
-
 
 class Gold_Coin(Item):
     def __init__(self):
         pass
 
-
 class Silver_Coin(Item):
     def __init__(self):
         pass
-
-    
+ 
 class Golden_Skull(Item):
     def __init__(self):
         pass
-
 
 class Green_Bottle(Item):
     def __init__(self):
         pass
 
-
 class Green_Diamond(Item):
     def __init__(self):
         pass
 
-
 class Red_Diamond(Item):
     def __init__(self):
         pass
-    
 
 class Red_Postion(Item):
     def __init__(self):
