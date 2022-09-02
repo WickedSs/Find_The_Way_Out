@@ -44,6 +44,7 @@ class Item(pygame.sprite.Sprite):
         self.animate = animate
         self.scale = scale
         self.side = side
+        self.debug = False
         self.collision_disabled = False
         self.scalex, self.scaley = scalex, scaley
         self.disappear, self.hide_image = False, False
@@ -87,6 +88,7 @@ class Item(pygame.sprite.Sprite):
         if not self.hide_image:
             self.display_surface.blit(self.image, self.rect)
         # pygame.draw.rect(self.display_surface, (255, 255, 255), self.rect, 1)
+
 
     def update(self, world_shift_x, world_shift_y):
         self.rect.x += world_shift_x

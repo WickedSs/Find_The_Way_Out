@@ -1,4 +1,5 @@
-import os, sys, pygame, random, uuid, operator
+import os, sys, pygame, random, uuid, operator, math, numpy
+from tkinter import HORIZONTAL
 from Entities.Item import Item
 from Settings import *
 
@@ -10,11 +11,81 @@ DECORATIONS_FOLDER = "Assets\Decorations"
 class Ball(Item):
     def __init__(self, width, height, animate, scale, side=None, x=0, y=0, scalex=2, scaley=2):
         super().__init__(width, height, animate, scale, side, x, y, scalex, scaley)
+        self.asset_name = "Ball"
+        self.animation_type = "Single"
+        self.status = "Idle"
+        self.shoot_speed = 10.5
+        self.path = os.path.join(DECORATIONS_FOLDER, self.asset_name)
+        self.multiple_animations()
+        self.get_frame()
+        self.exploision = None
 
-class Cannon:
-    def __init__(self):
-        pass
+    def launch(self, collision, player):
+        self.rect.x -= self.shoot_speed
+        if self.rect.colliderect(player.rect):
+            self.kill()
+        
+        for sprite in collision.sprites():
+            if self.rect.colliderect(sprite.rect):
+                self.kill()
 
+
+class Cannon(Item):
+    def __init__(self, width, height, animate, scale, side, x, y):
+        super().__init__(width, height, animate, scale, side, x, y)
+        self.display_surface = pygame.display.get_surface()
+        self.asset_name = "Cannon"
+        self.animation_type = "Multiple"
+        self.status = "Idle"
+        self.path = os.path.join(DECORATIONS_FOLDER, self.asset_name)
+        self.multiple_animations()
+        self.get_frame()
+        self.debug, self.balls_group = False, pygame.sprite.Group()
+        self.circle_pos, self.circle_radius = ((self.rect.x + self.rect.width/2), (self.rect.y + self.rect.height / 2)), 400
+        self.delay = pygame.time.get_ticks()
+        self.trigger_ball = False
+
+
+    def points_in_circle_np(self, radius, x0=0, y0=0):
+        top_half = y0 >= self.circle_pos[1] - radius and y0 <= self.circle_pos[1]
+        left_half = (x0 >= self.circle_pos[0] - radius and x0 <= self.circle_pos[0]) 
+        right_half = x0 >= self.circle_pos[0] and x0 <= self.circle_pos[0] + self.circle_radius
+        if (left_half or right_half) and top_half:
+            return True
+        
+        return False
+
+    def on_collision(self, player, item_list, Level, collision_sprites):
+        if self.points_in_circle_np(self.circle_radius, player.rect.x, player.rect.y):
+            self.status = "Fire"
+            self.working_animation = self.animations[self.status]
+            self.shoot()
+
+        for sprite in self.balls_group.sprites():
+            sprite.launch(collision_sprites, player)
+            sprite.draw()
+            print("Rect:", sprite.rect)
+            pygame.draw.rect(self.display_surface, (255, 255, 255), sprite.rect, 1)
+
+    def debug_draw(self):
+        pygame.draw.circle(self.display_surface, (0, 255, 0), self.circle_pos, self.circle_radius, 2)
+        # pygame.draw.arc(self.display_surface, (0, 255, 0), [(self.rect.x + self.rect.width/2), (self.rect.y + self.rect.height / 2), 50, 50], 0, math.pi, 2)
+
+    def shoot(self):
+        if (pygame.time.get_ticks() - self.delay) / 1000 >= 3:
+            self.animation_index += 0.12
+            if self.animation_index > 4.00 and self.animation_index < 4.15:
+                self.trigger_ball = True
+
+            if self.animation_index >= len(self.working_animation):
+                self.delay = pygame.time.get_ticks()
+                self.animation_index = 0
+            
+            self.get_frame()
+        
+        if self.trigger_ball:
+            self.balls_group.add(Ball(15, 15, False, True, None, self.rect.x - 58, self.rect.y - 105))
+            self.trigger_ball = False
 
 class Candle:
     def __init__(self):
@@ -52,7 +123,7 @@ class Door(Item):
         self.destination = destination
         # print("Door: ", self.id, [filt.id for filt in self.destination])
 
-    def on_collision(self, player, items_list, level):
+    def on_collision(self, player, items_list, level, collision_sprites):
         if player.rect.colliderect(self.rect) and not self.open and not self.action:
             self.action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 3, self.rect.y)
             if self.action:

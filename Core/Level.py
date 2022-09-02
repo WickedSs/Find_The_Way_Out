@@ -143,8 +143,11 @@ class Level:
             #     self.items.remove(item)
         
         for item in self.single_group.sprites():
-            item.on_collision(self.player, self.single_group.sprites(), self)
+            item.on_collision(self.player, self.single_group.sprites(), self, self.collision_group)
             item.draw()
+            # pygame.draw.rect(self.display_surface, (255, 0, 255), item.rect, 1)
+            if item.debug:
+                item.debug_draw()
             
         for exit in self.exit_group.sprites():
             pygame.draw.rect(self.display_surface, (0, 255, 0), exit.rect, 1)

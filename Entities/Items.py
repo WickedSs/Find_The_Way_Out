@@ -58,7 +58,7 @@ class Chest(Item):
         self.possible_loot = [Big_Map(30, 31, True, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)]
         self.get_frame()
         
-    def on_collision(self, player, items_list, Level):
+    def on_collision(self, player, items_list, Level, collision_sprites):
         if player.rect.colliderect(self.rect) and not self.open_chest:
             action = player.trigger_floating_text("[E]", self.rect.x + self.rect.w / 3, self.rect.y - (self.rect.h / 4))
             if action:
