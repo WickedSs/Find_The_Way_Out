@@ -1,6 +1,7 @@
 import os, sys, pygame, random, uuid, operator, math, numpy
 from tkinter import HORIZONTAL
 from Entities.Item import Item
+from Entities.Particles import Ball_Explosion
 from Settings import *
 
 
@@ -18,17 +19,36 @@ class Ball(Item):
         self.path = os.path.join(DECORATIONS_FOLDER, self.asset_name)
         self.multiple_animations()
         self.get_frame()
-        self.exploision = None
+        self.exploision = Ball_Explosion("default", 53, 60)
+        self.collided, self.effect_taken = False, False
 
     def launch(self, collision, player):
         self.rect.x -= self.shoot_speed
         if self.rect.colliderect(player.rect):
-            self.kill()
+            self.shoot_speed, self.hide_image = 0, True
+            self.player_effect(player)
+            self.collided = True
+            self.exploision.rect.x, self.exploision.rect.y = player.rect.left - ROOM_OFFSET_X * 64, player.rect.bottom - ROOM_OFFSET_Y * 160
         
         for sprite in collision.sprites():
             if self.rect.colliderect(sprite.rect):
+                self.shoot_speed, self.hide_image = 0, True
+                self.collided = True
+                self.player_effect(player)
+                self.exploision.rect.x, self.exploision.rect.y = sprite.rect.x + sprite.rect.w / 2 - 58, sprite.rect.y + sprite.rect.h / 2 - 105
+                
+        if self.collided:
+            finished = self.exploision.play_animation_once()
+            if finished:
                 self.kill()
-
+                
+    def player_effect(self, player):
+        if player.health > 0 and not self.effect_taken:
+            if player.health >= 50:
+                player.health -= 50
+            else:
+                player.health = 0
+            self.effect_taken = True
 
 class Cannon(Item):
     def __init__(self, width, height, animate, scale, side, x, y):
@@ -53,6 +73,7 @@ class Cannon(Item):
         if (left_half or right_half) and top_half:
             return True
         
+        self.animation_index = 0
         return False
 
     def on_collision(self, player, item_list, Level, collision_sprites):
@@ -64,15 +85,13 @@ class Cannon(Item):
         for sprite in self.balls_group.sprites():
             sprite.launch(collision_sprites, player)
             sprite.draw()
-            print("Rect:", sprite.rect)
-            pygame.draw.rect(self.display_surface, (255, 255, 255), sprite.rect, 1)
 
     def debug_draw(self):
         pygame.draw.circle(self.display_surface, (0, 255, 0), self.circle_pos, self.circle_radius, 2)
         # pygame.draw.arc(self.display_surface, (0, 255, 0), [(self.rect.x + self.rect.width/2), (self.rect.y + self.rect.height / 2), 50, 50], 0, math.pi, 2)
 
     def shoot(self):
-        if (pygame.time.get_ticks() - self.delay) / 1000 >= 3:
+        if (pygame.time.get_ticks() - self.delay) / 1000 >= 0.5:
             self.animation_index += 0.12
             if self.animation_index > 4.00 and self.animation_index < 4.15:
                 self.trigger_ball = True

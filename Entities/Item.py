@@ -137,11 +137,11 @@ class GUI_ITEM_BAR(pygame.sprite.Sprite):
     
     def update(self):
         self.bar_current = self.player.mana if self.bar_type == "Mana" else self.player.health
-        if self.bar_current < self.max:
+        if self.bar_current < self.max or self.bar_current == 0:
             if self.bar_type == "Mana": 
                 self.player.mana += 0.25
             else:
-                self.player.health += 0.8
+                self.player.health += 0.15
             new_width = (self.bar_current * (32 * self.bar_max)) / self.max
             self.image = pygame.transform.scale(self.image, (new_width, 4))
             self.rect = self.image.get_rect(topleft=(self.x, self.y))

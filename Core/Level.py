@@ -128,24 +128,13 @@ class Level:
         self.sprites_group.update(self.world_shift, 0)
         self.sprites_group.draw(self.display_surface)
         
-        # for sprite in self.collision_group.sprites():
-        #     pygame.draw.rect(self.display_surface, (0, 0, 255), sprite.rect, 1)
-        
-        
         for item in self.infinite_group.sprites():
-            pygame.draw.rect(self.display_surface, (0, 255, 0), item.rect, 1)
             item.on_pickup(self.player)
             item.draw()
-            # if item.disappear:
-            #     self.overlay.set_text_to_slide("Part of the map was found!")
-            #     self.overlay.trigger_sliding_text = True
-            #     item.player_effect(self.player)
-            #     self.items.remove(item)
         
         for item in self.single_group.sprites():
             item.on_collision(self.player, self.single_group.sprites(), self, self.collision_group)
             item.draw()
-            # pygame.draw.rect(self.display_surface, (255, 0, 255), item.rect, 1)
             if item.debug:
                 item.debug_draw()
             
