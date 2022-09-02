@@ -162,6 +162,6 @@ class Level:
             self.player.update(self.collision_group)
             
         self.overlay.update(self.player)
-        self.camera.update()
+        self.camera.update(self.player)
         self.camera.draw(self.display_surface)
     

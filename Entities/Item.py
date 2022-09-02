@@ -13,31 +13,18 @@ class EXIT_RECT(pygame.sprite.Sprite):
         self.action, self.shift = False, False
         self.enabled = False
         self.direction = direction
-        self.player_disable = False
+        self.enable_collision = True
     
     def on_collision(self, player):
-        if self.rect.colliderect(player.rect) and not player.level.camera.is_shifting:
+        if self.rect.colliderect(player.rect) and not player.hide_player:
             self.shift = True
             player.hide_player = True
+            self.enable_collision = False
         
-        if self.shift:
-            print("Player: ", player.rect)
+        if self.shift and not player.level.camera.is_shifting:
             player.level.camera.get_increment_direction(self.direction)
-            player.level.camera.shift_world()
-            player.level.camera.is_shifting = True
             self.shift = False
-            print("Player: ", player.rect)
-            self.player_disable = True
-            
-        if self.player_disable:
-            if self.direction in ["right", "left"]:
-                player.rect.x = 64 if self.direction == "right" else -64
-            else:
-                player.rect.y = 64 if self.direction == "up" else -64
-            player.hide_player = False
-            self.player_disable = False
                 
-        # print("Player: ", player.rect)
     
     def update(self, shift_x, shift_y):
         self.rect.x += shift_x
