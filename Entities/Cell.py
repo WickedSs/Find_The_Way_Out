@@ -123,6 +123,6 @@ class Room:
                 self.currentY += 1
                 self.currentX = 0
                 
-        self.single_list.add(Chest(64, 64, False, True, 64, 640))
+        # self.single_list.add(Chest(64, 64, False, True, 64, 640))
         self.generate_items()
         # self.generate_decorations()

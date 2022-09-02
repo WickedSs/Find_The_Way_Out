@@ -47,7 +47,7 @@ class Big_Map(Item):
 
 class Chest(Item):
     def __init__(self, width, height, animate, scale, x, y):
-        super().__init__(width, height, animate, scale, x, y)
+        super().__init__(width, height, animate, scale, None, x, y)
         self.asset_name = "Chest"
         self.animation_type = "Multiple"
         self.status = "Idle"
