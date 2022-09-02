@@ -54,6 +54,7 @@ class Level:
         self.DIM = 2
         self.player = Player(self.overlay, self, 10.5 * SCALE_SIZE, 7 * SCALE_SIZE)
         self.camera = Camera(self)
+        self.particle_layer = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)).convert_alpha().set_colorkey((0, 0, 0))
         self.initialize()
     
     def scroll_X(self, player):

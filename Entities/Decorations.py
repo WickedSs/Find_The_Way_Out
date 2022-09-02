@@ -15,12 +15,12 @@ class Ball(Item):
         self.asset_name = "Ball"
         self.animation_type = "Single"
         self.status = "Idle"
-        self.shoot_speed = 10.5
+        self.shoot_speed = 20
         self.path = os.path.join(DECORATIONS_FOLDER, self.asset_name)
         self.multiple_animations()
         self.get_frame()
         self.exploision = Ball_Explosion("default", 53, 60)
-        self.collided, self.effect_taken = False, False
+        self.collided, self.effect_taken, self.got_hit = False, False, False
 
     def launch(self, collision, player):
         self.rect.x -= self.shoot_speed
@@ -37,9 +37,17 @@ class Ball(Item):
                 self.player_effect(player)
                 self.exploision.rect.x, self.exploision.rect.y = sprite.rect.x + sprite.rect.w / 2 - 58, sprite.rect.y + sprite.rect.h / 2 - 105
                 
-        if self.collided:
+        if self.collided and not self.got_hit:
+            if abs(player.rect.right - self.rect.left) <= 10:
+                player.hit_blow = tuple(map(operator.mul, player.hit_blow, (-1, 1)))
+                player.hit_blow_inc = tuple(map(operator.mul, player.hit_blow_inc, (-1, 1)))
+                player.hit, self.got_hit = True, True
+        
+        if self.got_hit:
             finished = self.exploision.play_animation_once()
+            print("Effect:", finished, self.exploision.animation_index)
             if finished:
+                self.got_hit = False
                 self.kill()
                 
     def player_effect(self, player):
@@ -105,6 +113,7 @@ class Cannon(Item):
         if self.trigger_ball:
             self.balls_group.add(Ball(15, 15, False, True, None, self.rect.x - 58, self.rect.y - 105))
             self.trigger_ball = False
+            print("New Ball Group:", self.balls_group)
 
 class Candle:
     def __init__(self):

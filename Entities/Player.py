@@ -1,7 +1,7 @@
 
 from Core.Characters import Characters
 from Settings import *
-import os, sys, pygame, random
+import os, sys, pygame, random, operator
 from PIL import Image
 import numpy as np
 from Entities.Particles import Particles
@@ -49,6 +49,7 @@ class Player:
         self.animation_index, self.particles_index = 0, 0
         self.player_fov, self.player_hiddenarea = 80, 1000
         self.previous_block_position = -1
+        self.hit_blow, self.current_hit_blow, self.hit_blow_inc, self.hit = (100, -50), (0, 0), (5, -5), False
         
         # dash paramaters
         self.dash_speed = 150
@@ -217,7 +218,8 @@ class Player:
                     self.previous_block_position = self.rect.x
               
     def vertical_collision(self, collision_sprites):
-        self.apply_gravity()
+        if not self.hit:
+            self.apply_gravity()
         for sprite in collision_sprites:
             if sprite.rect.colliderect(self.rect):
                 if self.direction.y > 0:
@@ -279,6 +281,16 @@ class Player:
         self.selected_folder = self.animations_names[self.selected_animation]
         self.current_animation = self.character.animations[self.selected_folder]["frames"]
     
+    def player_hit_effect(self):
+        new_x = (self.current_hit_blow[0] + self.hit_blow_inc[0]) if self.current_hit_blow[0] != self.hit_blow[0] else self.current_hit_blow[0]
+        new_y = (self.current_hit_blow[1] + self.hit_blow_inc[1]) if self.current_hit_blow[1] != self.hit_blow[1] else self.current_hit_blow[1]
+        self.current_hit_blow = (new_x, new_y)
+        if self.current_hit_blow == self.hit_blow:
+            self.hit = False
+        else:
+            self.rect.x += self.hit_blow_inc[0]
+            self.rect.y += self.hit_blow_inc[1]
+
     def field_of_view(self, screen):
         self.fov_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA).convert_alpha()
         self.fill_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA).convert_alpha()
@@ -332,5 +344,8 @@ class Player:
                 self.time_between_dahses -= (pygame.time.get_ticks() - self.dash_minus) / 1000
                 if self.time_between_dahses < 0:
                     self.time_between_dahses = 0
+
+        if self.hit:
+            self.player_hit_effect()
 
 

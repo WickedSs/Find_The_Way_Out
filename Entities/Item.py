@@ -128,6 +128,7 @@ class GUI_ITEM_BAR(pygame.sprite.Sprite):
         super().__init__()
         self.x, self.y = x, y
         self.image = image
+        self.image_copy = self.image
         self.player = player
         self.bar_type = bar_type
         self.bar_max = 3.24 if bar_type == "Mana" else 4.8
@@ -143,7 +144,7 @@ class GUI_ITEM_BAR(pygame.sprite.Sprite):
             else:
                 self.player.health += 0.15
             new_width = (self.bar_current * (32 * self.bar_max)) / self.max
-            self.image = pygame.transform.scale(self.image, (new_width, 4))
+            self.image = pygame.transform.scale(self.image_copy, (new_width, 4))
             self.rect = self.image.get_rect(topleft=(self.x, self.y))
         else:
             if self.bar_type == "Mana": 
