@@ -38,13 +38,12 @@ class Ball(Item):
                 self.player_effect(player)
                 
         if self.collided and not self.got_hit:
-            if abs(player.rect.right - self.rect.left) <= 10:
-                player.hit_blow = tuple(map(operator.mul, player.hit_blow, (-1, 1)))
-                player.hit_blow_inc = tuple(map(operator.mul, player.hit_blow_inc, (-1, 1)))
-                player.hit, self.got_hit = True, True
-                explotion = effects.sprites()[0]
-                explotion.rect.x, explotion.rect.y = self.rect.x + self.rect.w / 2 - 58, self.rect.y + self.rect.h / 2 - 105
-                explotion.play = True
+            player.hit_blow = tuple(map(operator.mul, player.hit_blow, (-1, 1)))
+            player.hit_blow_inc = tuple(map(operator.mul, player.hit_blow_inc, (-1, 1)))
+            player.hit, self.got_hit = True, True
+            explotion = effects.sprites()[0]
+            explotion.rect.x, explotion.rect.y = self.rect.x + self.rect.w / 2 - 58, self.rect.y + self.rect.h / 2 - 105
+            explotion.play = True
 
                 
     def player_effect(self, player):
@@ -92,16 +91,17 @@ class Cannon(Item):
             sprite.launch(collision_sprites, player, self.explotion_effects)
             sprite.draw()
 
+        # print("Effects:", [explosion.id for explosion in self.explotion_effects.sprites()])
         for explotion in self.explotion_effects.sprites():
-            print(explotion.rect)
-            explotion.play_animation_once()
+            if explotion.play:
+                explotion.play_animation_once()
 
     def debug_draw(self):
         pygame.draw.circle(self.display_surface, (0, 255, 0), self.circle_pos, self.circle_radius, 2)
         # pygame.draw.arc(self.display_surface, (0, 255, 0), [(self.rect.x + self.rect.width/2), (self.rect.y + self.rect.height / 2), 50, 50], 0, math.pi, 2)
 
     def shoot(self):
-        if (pygame.time.get_ticks() - self.delay) / 1000 >= 5.5:
+        if (pygame.time.get_ticks() - self.delay) / 1000 >= 0.5:
             self.animation_index += 0.12
             if self.animation_index > 4.00 and self.animation_index < 4.15:
                 self.trigger_ball = True

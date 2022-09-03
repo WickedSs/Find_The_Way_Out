@@ -55,12 +55,10 @@ class Ball_Explosion(Item):
             if self.animation_index >= len(self.working_animation):
                 self.animation_index = 0
                 self.kill()
-                return True
             
             self.get_frame()
             self.update(0, 0)
             self.draw()
-            return False
 
 class Particles:
     def __init__(self, character):

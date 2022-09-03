@@ -49,7 +49,7 @@ class Player:
         self.animation_index, self.particles_index = 0, 0
         self.player_fov, self.player_hiddenarea = 80, 1000
         self.previous_block_position = -1
-        self.hit_blow, self.current_hit_blow, self.hit_blow_inc, self.hit = (100, -50), (0, 0), (5, -5), False
+        self.hit_blow, self.current_hit_blow, self.hit_blow_inc, self.hit = (200, -50), (0, 0), (20, -5), False
         
         # dash paramaters
         self.dash_speed = 150
@@ -218,8 +218,7 @@ class Player:
                     self.previous_block_position = self.rect.x
               
     def vertical_collision(self, collision_sprites):
-        if not self.hit:
-            self.apply_gravity()
+        self.apply_gravity()
         for sprite in collision_sprites:
             if sprite.rect.colliderect(self.rect):
                 if self.direction.y > 0:
@@ -283,13 +282,12 @@ class Player:
     
     def player_hit_effect(self):
         new_x = (self.current_hit_blow[0] + self.hit_blow_inc[0]) if self.current_hit_blow[0] != self.hit_blow[0] else self.current_hit_blow[0]
-        new_y = (self.current_hit_blow[1] + self.hit_blow_inc[1]) if self.current_hit_blow[1] != self.hit_blow[1] else self.current_hit_blow[1]
-        self.current_hit_blow = (new_x, new_y)
+        # new_y -= (self.current_hit_blow[1] + self.hit_blow_inc[1]) if self.current_hit_blow[1] != self.hit_blow[1] else self.current_hit_blow[1]
+        self.current_hit_blow = (new_x, -50)
         if self.current_hit_blow == self.hit_blow:
             self.hit = False
         else:
             self.rect.x += self.hit_blow_inc[0]
-            self.rect.y += self.hit_blow_inc[1]
 
     def field_of_view(self, screen):
         self.fov_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA).convert_alpha()

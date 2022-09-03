@@ -1,4 +1,6 @@
 
+from uuid import uuid4
+import uuid
 from Settings import *
 import os, sys, pygame
 
@@ -37,6 +39,7 @@ class Item(pygame.sprite.Sprite):
     """ All Items must be imported, scaled and stored on initialization """
     def __init__(self, width, height, animate, scale, side=None, x=0, y=0, scalex=2, scaley=2):
         super().__init__()
+        self.id = str(uuid.uuid4()).split("-")[0]
         self.display_surface = pygame.display.get_surface()
         self.animations = {}
         self.animation_names = []
