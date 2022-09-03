@@ -46,18 +46,21 @@ class Ball_Explosion(Item):
         self.path = os.path.join(PARTICLES_FOLDER, self.asset_name)
         self.status_path = os.path.join(self.path, self.status)
         self.multiple_animations()
+        self.play = False
         self.working_animation = self.animations[status]
         
     def play_animation_once(self):
-        self.animation_index += 0.12
-        if self.animation_index >= len(self.working_animation):
-            self.animation_index = 0
-            return True
-        
-        self.get_frame()
-        self.update(0, 0)
-        self.draw()
-        return False
+        if self.play:
+            self.animation_index += 0.12
+            if self.animation_index >= len(self.working_animation):
+                self.animation_index = 0
+                self.kill()
+                return True
+            
+            self.get_frame()
+            self.update(0, 0)
+            self.draw()
+            return False
 
 class Particles:
     def __init__(self, character):
