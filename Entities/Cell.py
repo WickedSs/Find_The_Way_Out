@@ -6,7 +6,7 @@ import random, operator
 
 
 class Room:
-    def __init__(self, index, infinite_list, single_list, SPRITES, all_tiles, collsion_tiles, exit_group, level=None):
+    def __init__(self, index, infinite_list, single_list, SPRITES, all_tiles, collsion_tiles, exit_group, particles_group, level=None):
         self.index = index
         self.width, self.height = SCREEN_WIDTH, SCREEN_HEIGHT
         self.level = level
@@ -15,7 +15,7 @@ class Room:
         self.room_type = None
         self.currentX, self.currentY = 0, 0
         self.infinte_list, self.single_list = infinite_list, single_list
-        self.all_tiles, self.tiles_collision, self.exit_group = all_tiles, collsion_tiles, exit_group
+        self.all_tiles, self.tiles_collision, self.exit_group, self.particles_group = all_tiles, collsion_tiles, exit_group, particles_group
         self.room_tiles = [[None for j in range(ROOM_WIDTH_TILES)] for i in range(ROOM_HEIGHT_TILES)]
         self.items_in_room, self.decorations_in_room = [], []
         # self.chest = Chest(64, 64, False, True, 1 * SCALE_SIZE, 4 * SCALE_SIZE)
@@ -122,6 +122,6 @@ class Room:
                 self.currentY += 1
                 self.currentX = 0
                 
-        self.single_list.add(Cannon(30, 23, False, True, None, 1256, 618))
+        self.single_list.add(Cannon(30, 23, False, True, self.particles_group, None, 1256, 618))
         self.generate_items()
         # self.generate_decorations()

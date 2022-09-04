@@ -55,6 +55,7 @@ class Ball_Explosion(Item):
             if self.animation_index >= len(self.working_animation):
                 self.animation_index = 0
                 self.kill()
+                return
             
             self.get_frame()
             self.update(0, 0)

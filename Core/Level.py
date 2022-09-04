@@ -18,9 +18,7 @@ LEVELS_FOLDER = "Assets/Levels"
 SPRITES = []
 
 
-PARTICLE_EFFECTS = {
-
-}
+PARTICLE_EFFECTS = ["Ball_Explosion"]
 
 
 
@@ -94,7 +92,7 @@ class Level:
     def initialize_grid(self):
         self.grid = []
         for i in range(DIM * DIM):
-            self.grid.append(Room(i, self.infinite_group, self.single_group, SPRITES, self.sprites_group, self.collision_group, self.exit_group))
+            self.grid.append(Room(i, self.infinite_group, self.single_group, SPRITES, self.sprites_group, self.collision_group, self.exit_group, self.particles_group))
             
     def generate_map(self):
         picked = 1
@@ -118,6 +116,7 @@ class Level:
         self.infinite_group = pygame.sprite.Group()
         self.single_group = pygame.sprite.Group()
         self.exit_group = pygame.sprite.Group()
+        self.particles_group = pygame.sprite.Group()
         self.overlay.initialize_overlay(self.player)
         self.initialize_grid()
         self.load_json_levels()
@@ -152,6 +151,11 @@ class Level:
             self.player.draw(self.display_surface)
             self.player.update(self.collision_group)
             
+        for particle in self.particles_group.sprites():
+            if particle.play:
+                particle.play_animation_once()
+        
+                    
         self.overlay.update(self.player)
         self.camera.update(self.player)
         self.camera.draw(self.display_surface)
