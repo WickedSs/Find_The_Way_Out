@@ -1,2 +1,2 @@
-# Random-Level-Generator
-A pygame project for generating random 2D levels using the wave function algorithm 
+# Find The Way out ( In Progress )
+A platformer game being written in python ( pygame ) where player have to compete against each other to find the way out of a maze.
