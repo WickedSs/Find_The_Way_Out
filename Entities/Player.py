@@ -139,7 +139,7 @@ class Player:
     
     
     """
-        _summary_
+        Logic start
         Trying to implement a player controller logic based on Tardov's code 
         https://github.com/Matthew-J-Spencer/Ultimate-2D-Controller/blob/main/Scripts/PlayerController.cs
     
@@ -185,7 +185,8 @@ class Player:
             if self._currentHorizontalSpeed > 0:
                 self._currentHorizontalSpeed -= self._deAcceleration
     
-    """ _summary_ End """
+    
+    """ Logic End """
 
 
 
