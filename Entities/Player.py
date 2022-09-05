@@ -1,15 +1,40 @@
 
+import math
 from Core.Characters import Characters
 from Settings import *
 import os, sys, pygame, random, operator
+from pygame.math import *
 from PIL import Image
 import numpy as np
 from Entities.Particles import Particles
+from dataclasses import dataclass
 
 
 ROOT = os.path.dirname(sys.modules['__main__'].__file__)
 CHARACTER_FOLDER = "Assets\Characters"
 PARTICLES_FOLDER = "Assets\Particles"
+
+@dataclass
+class FrameInput:
+    X : float;
+    JumpDown : bool;
+    JumpUp : bool;
+
+@dataclass
+class playerInterface:
+    Velocity : Vector3()
+    RawMovement : Vector3()
+    Input : FrameInput(0, False, False) 
+    JumpingThisFrame : bool
+    LandingThisFrame : bool
+    Grounded : bool
+    
+
+class RayRange:
+    def __init__(self, x1: float, y1: float, x2: float, y2: float, dir: Vector2()):
+        self.Start = Vector2(x1, y1);
+        self.End = Vector2(x2, y2);
+        self.Dir = dir;
 
 
 class NetworkPlayer:
@@ -21,6 +46,7 @@ class NetworkPlayer:
         self.flipped = flipped
         self.width, self.height, = width, height
         self.player_id = player_id        
+
 
 class Player:
     def __init__(self, overlay, level, x, y):
@@ -44,7 +70,7 @@ class Player:
         self.dash_distance = 50
         self.gravity = 0.8
         self.collision_tolorance = 2
-        self.direction = pygame.math.Vector2(0, 0)
+        self.direction = Vector2(0, 0)
         self.selected_animation, self.selected_particle = 0, 0
         self.animation_index, self.particles_index = 0, 0
         self.player_fov, self.player_hiddenarea = 80, 1000
@@ -93,16 +119,79 @@ class Player:
         self.rect = self.image.get_rect()
         self.rect.x, self.rect.y = self.x, self.y
         self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]
+        
+        
+        # Tardov"s logic parameters
+        self.playerInterface = playerInterface(None, None, None, False, False, False)
+        self._lastPosition = pygame.math.Vector3();
+        self._currentHorizontalSpeed, self._currentVerticalSpeed = 0, 0
+        self._raysUp, self._raysRight, self._raysDown, self._raysLeft = [RayRange(0, 0, 0, 0, Vector2()) for i in range(4)]
+        self._colUp, self._colRight, self._colDown, self._colLeft, self.groundCheck = [False for i in range(5)]
+        self._timeLeftGrounded = False
+        self._detectorCount = 3;
+        self._timeLeftGrounded, self._lastJumpPressed = None, None
+        self._coyoteUsable = False
+        
+        self._acceleration = 90;
+        self._moveClamp = 13;
+        self._deAcceleration = 60;
+        self._apexBonus = 2;
+    
+    
+    """
+        _summary_
+        Trying to implement a player controller logic based on Tardov's code 
+        https://github.com/Matthew-J-Spencer/Ultimate-2D-Controller/blob/main/Scripts/PlayerController.cs
+    
+    """
+    
+    def gatherInputs(self):
+        keys_pressed = pygame.key.get_pressed()
+        self.playerInterface.Input = FrameInput(
+            JumpDown = keys_pressed[pygame.K_SPACE] == True,
+            JumpUp = keys_pressed[pygame.K_SPACE] == False,
+            X = -1 if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_q] else 1 if keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d] else 0
+        )
+        if self.playerInterface.Input.JumpDown:
+            self._lastJumpPressed = pygame.time.get_ticks() / 1000
+
+
+    def runCollisionChecks(self, collision_sprites):
+        self.horizontal_collision(collision_sprites)
+        self.vertical_collision(collision_sprites)
+        self.playerInterface.LandingThisFrame = False
+        if not self._colDown and not self.groundCheck:
+            self._timeLeftGrounded = pygame.time.get_ticks() / 1000
+        elif not self._colDown and self.groundCheck:
+            self._coyoteUsable = True
+            self.playerInterface.LandingThisFrame = True
+        
+        self._colDown = not self.jumped
+        self.playerInterface.Grounded = self._colDown
+        # print("Interface:", self.playerInterface, self._coyoteUsable)
+        # print("Cols:", self._colLeft, self._colRight, self._colDown, self._colUp)
+            
+        
+    def CalculateWalking(self):
+        if self.playerInterface.Input.X != 0:
+            self._currentHorizontalSpeed += self.playerInterfaceInput.X * self._acceleration
+            self._currentHorizontalSpeed = max(-self._moveClamp, min(self._currentHorizontalSpeed, self._moveClamp))
+            
+            apexBonus = math.Sign(self.playerInterface.Input.X) * self._apexBonus * self._apexPoint;
+            self._currentHorizontalSpeed += apexBonus
+        
+        else:
+            # Slow the character down on key release
+            if self._currentHorizontalSpeed > 0:
+                self._currentHorizontalSpeed -= self._deAcceleration
+    
+    """ _summary_ End """
+
+
+
 
     def set_playerID(self, playerID):
         self.playerID = playerID
-
-    def isInside(self, circle, rad, x, y):
-        if ((x - circle[0]) * (x - circle[0]) +
-            (y - circle[1]) * (y - circle[1]) <= rad * rad):
-            return True;
-        else:
-            return False;
 
     def player_update(self, network_player):
         network_player.x, network_player.y = self.rect.x, self.rect.y
@@ -207,12 +296,15 @@ class Player:
             self.previous_block_position = -1
 
         for sprite in collision_sprites:
+            self._colRight, self._colLeft = False, False
             if sprite.rect.colliderect(self.rect):
                 if self.direction.x < 0:
                     self.rect.left = sprite.rect.right
+                    self._colLeft = True
                     self.blocked = True
                     self.previous_block_position = self.rect.x
                 elif self.direction.x > 0:
+                    self._colRight = True
                     self.rect.right = sprite.rect.left
                     self.blocked = True
                     self.previous_block_position = self.rect.x
@@ -224,13 +316,16 @@ class Player:
                 if self.direction.y > 0:
                     self.rect.bottom = sprite.rect.top
                     self.direction.y = 0
-                    self.on_ground = True
-                    self.jumped = False
-                    self.falling = False
+                    self.on_ground, self.jumped, self.falling, self._colDown, self.groundCheck = True, False, False, True, True
+                    
                 elif self.direction.y < 0:
                     self.rect.top = sprite.rect.bottom
                     self.direction.y = 0
                     self.falling = False
+                    self._colup = True
+            # else:
+            #     self.groundCheck, self._colDown, self._colUp = False, False, False
+                
 
     def take_damage(self, amount):
         self.health -= amount
@@ -273,7 +368,7 @@ class Player:
             self.selected_animation = 3
         else:
             if self.direction.x != 0:
-                self.selected_animation = 1
+                self.selected_animation = 1                
             else:
                 self.selected_animation = 0
         
@@ -323,9 +418,11 @@ class Player:
 
     def update(self, collision_sprites):
         if not self.hide_player:
+            self.gatherInputs()
+            self.runCollisionChecks(collision_sprites)
             self.center_circle = [self.rect.x + self.rect.w / 2, self.rect.y + self.rect.h / 2]
-            self.horizontal_collision(collision_sprites)
-            self.vertical_collision(collision_sprites)
+            # self.horizontal_collision(collision_sprites)
+            # self.vertical_collision(collision_sprites)
             self.input()
             self.get_animation()
             self.animate()

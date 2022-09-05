@@ -37,7 +37,6 @@ class Ball(Item):
             if self.rect.colliderect(sprite.rect):
                 self.shoot_speed, self.hide_image = 0, True
                 self.collided = True
-                self.player_effect(player)
                 
         if self.collided and not self.got_hit:
             if self.collided_with == "Player":
